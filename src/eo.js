@@ -697,23 +697,15 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					} else {
 						const videoContainer = createElements('div', { class: video.id, 'data-id': video.id });
 
-						const createHiddenInput = (name, value) => {
-							return createElements('input', {
-								type: 'hidden',
-								name: `videos[${video.id}]${name}`,
-								value: value
-							});
-						};
-
-						videoContainer.appendChild(createHiddenInput('[id]', video.id));
-						videoContainer.appendChild(createHiddenInput('[thumbnail][default]', video.thumbnail.default));
-						videoContainer.appendChild(createHiddenInput('[thumbnail][hq]', video.thumbnail.hq));
-						videoContainer.appendChild(createHiddenInput('[thumbnail][mq]', video.thumbnail.mq));
-						videoContainer.appendChild(createHiddenInput('[thumbnail][sd]', video.thumbnail.sd));
-						videoContainer.appendChild(createHiddenInput('[thumbnail][maxres]', video.thumbnail.maxres));
-						videoContainer.appendChild(createHiddenInput('[url]', video.url));
-						videoContainer.appendChild(createHiddenInput('[embed]', video.embed));
-						videoContainer.appendChild(createHiddenInput('[created_at]', Date.now()));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][id]', video.id));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][default]', video.thumbnail.default));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][hq]', video.thumbnail.hq));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][mq]', video.thumbnail.mq));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][sd]', video.thumbnail.sd));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][maxres]', video.thumbnail.maxres));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][url]', video.url));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][embed]', video.embed));
+						videoContainer.appendChild(createHiddenInput('videos[${video.id}][created_at]', Date.now()));
 
 						const btnDeleteContainer = createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
 							createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': video.id }, [
