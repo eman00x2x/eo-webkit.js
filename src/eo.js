@@ -1350,10 +1350,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				class: `${image.id} image_${image.id} me-2 mb-3 flex-grow-1`
 			}, [
 				createHiddenInput(`upload[${image.id}][image_id]`, image.id),
-     createHiddenInput(`upload[${image.id}][height]` image.height),
-     createHiddenInput(`upload[${image.id}][width]`, image.width),
-     createHiddenInput(`upload[${image.id}][filename]`, image.filename),
-     createHiddenInput(`upload[${image.id}][url]`, image.final_url),
+				createHiddenInput(`upload[${image.id}][height]`, image.height),
+				createHiddenInput(`upload[${image.id}][width]`, image.width),
+				createHiddenInput(`upload[${image.id}][filename]`, image.filename),
+				createHiddenInput(`upload[${image.id}][url]`, image.final_url),
 				createElements('div', {}, [
 					createElements('span', {
 						class: 'avatar avatar-xxxl',
@@ -1410,7 +1410,6 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				console.error(`Element with selector '${uploadedContainerSelector}' not found.`);
 				return;
 			}
-
 
 			if (image.status == 1) {
 				previewElement.style.backgroundImage = `url(${image.temp_url})`;
