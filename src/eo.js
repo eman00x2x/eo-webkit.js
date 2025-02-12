@@ -744,7 +744,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					const btn = event.target.closest('.btn-playback');
 					const embed = btn.dataset.embed;
 					const id = btn.dataset.id;
-					
+
 					_modal.create({
 						id: id,
 						size: 'fullscreen',
@@ -1121,7 +1121,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						alert.message("");
 						callback(serializeFormData(formData), responseData);
 
-						if (isInDevelopment() == 1) { 
+						if (isInDevelopment() == 1) {
 							console.log(e);
 						}
 					}
@@ -1657,7 +1657,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 							}
 						},
 						onError: (args) => {
-							if (error) { 
+							if (error) {
 								return error(args);
 							}
 						}
