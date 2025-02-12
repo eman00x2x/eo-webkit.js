@@ -4,7 +4,6 @@
 /* global module */ // For CommonJS
 /* global exports */ // For CommonJS
 
-
 import tinyMCE from 'tinymce';
 import 'tinymce/themes/silver/theme'; // And plugins
 import google from 'google-charts'; // Google Charts usually attaches to the window object
@@ -15,7 +14,6 @@ import 'tom-select/dist/css/tom-select.css'; // Import Tom Select CSS
 import wNumb from 'wnumb';
 import validate from 'validate.js';
 import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML or imported via CSS import
-
 
 ; (function (factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === "function" && define.amd) { // Check for AMD (Asynchronous Module Definition)
@@ -31,22 +29,21 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 	let DOMAIN;
 	let CDN;
-	let API_KEY = {};
 
-	const settings = ({ domain, cdn, apiKey = {} } = {}) => {
+	const settings = ({ domain, cdn } = {}) => {
 		DOMAIN = domain;
 		CDN = cdn;
-		API_KEY = apiKey;
 	};
 
-	const eoSettings = () => {
-		return {
-			domain: DOMAIN,
-			cdn: CDN,
-			apiKey: API_KEY
-		}
-	};
-
+	/**
+	 * Checks if the application is in development mode by examining a meta tag.
+	 *
+	 * This function looks for a meta tag with the name "inDevelopment" in the document.
+	 * If the content of this meta tag is "1", the function returns true, indicating
+	 * that the application is in development mode. Otherwise, it returns false.
+	 *
+	 * @returns {boolean} True if the application is in development mode, false otherwise.
+	 */
 	const isInDevelopment = () => {
 		const inDevelopmentMetaTag = document.querySelector('meta[name="inDevelopment"]');
 		if (inDevelopmentMetaTag.content == 1) {
@@ -2071,7 +2068,6 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		},
 
-		eoSettings,
 		epochToTimeString,
 		trim,
 		formatFileSize,
