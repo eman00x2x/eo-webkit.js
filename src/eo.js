@@ -63,6 +63,11 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		return metaTagToken.content
 	}();
 
+	/**
+	 * Redirects the browser to a given URL.
+	 *
+	 * @param {string} url - The URL to redirect to
+	 */
 	const redirect = (url) => {
 		window.location = url;
 	};
@@ -924,7 +929,6 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	}();
 
 	const alert = function () {
-
 		const _display = (message, element) => {
 			const messageContainer = document.querySelector(element);
 
