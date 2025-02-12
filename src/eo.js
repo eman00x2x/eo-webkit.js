@@ -1,24 +1,50 @@
 // eo.js
-; (function (factory) {
-	if (typeof define === "function" && define.amd) {
-		define([], factory);
-	} else if (typeof exports === "object") {
-		module.exports = factory();
-	} else {
-		window.eo = factory();
+
+/* global define */ // For AMD
+/* global module */ // For CommonJS
+/* global exports */ // For CommonJS
+
+
+import tinyMCE from 'tinymce';
+import 'tinymce/themes/silver/theme'; // And plugins
+import google from 'google-charts'; // Google Charts usually attaches to the window object
+import noUiSlider from 'nouislider';
+import 'nouislider/dist/nouislider.css'; // Import noUiSlider CSS
+import TomSelect from 'tom-select';
+import 'tom-select/dist/css/tom-select.css'; // Import Tom Select CSS
+import wNumb from 'wnumb';
+import validate from 'validate.js';
+import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML or imported via CSS import
+
+
+; (function (factory) { // The IIFE (Immediately Invoked Function Expression)
+	if (typeof define === "function" && define.amd) { // Check for AMD (Asynchronous Module Definition)
+		define([], factory); // Use AMD define
+	} else if (typeof exports === "object") { // Check for CommonJS
+		module.exports = factory(); // Use CommonJS module.exports
+	} else { // Otherwise, assume global scope (browser)
+		window.eo = factory(); // Attach the module to the window object
 	}
 })(function () {
 
 	"use strict";
 
-	const DOMAIN = "";
-	const CDN = "";
-	const API_KEY = {};
+	let DOMAIN;
+	let CDN;
+	let API_KEY = {};
 
 	const settings = ({ domain, cdn, apiKey = {} } = {}) => {
-		eo.DOMAIN = domain;
-		eo.CDN = cdn;
-		eo.API_KEY = apiKey;
+		DOMAIN = domain;
+		CDN = cdn;
+		API_KEY = apiKey;
+	};
+
+	const eoSettings = () => {
+		return {
+			domain: DOMAIN,
+			cdn: CDN,
+			apiKey: API_KEY
+		}
 	};
 
 	const isInDevelopment = () => {
@@ -111,7 +137,7 @@
 		);
 	};
 
-	
+
 	/**
 	 * Generates a random hexadecimal string of the specified length.
 	 *
@@ -202,7 +228,7 @@
 	 * @returns {object} The parsed YouTube video object, or an object with a status of 2 and an error message if the given URL is invalid
 	 */
 	const getYoutubeVideoData = (url) => {
-		const urlRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+		const urlRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 		const match = url.match(urlRegex);
 		const id = match && match[7].length === 11 ? match[7] : null;
 
@@ -228,21 +254,67 @@
 	};
 
 	/**
-	 * Send a POST request to the given URL with the given data.
+	 * Creates an HTML element with the given tag name and attributes, and appends the given children to it.
 	 *
-	 * This function returns a promise object that resolves to the response from the server.
+	 * @param {string} tag - The HTML tag name of the element to create
+	 * @param {object} [attributes] - An object containing key-value pairs of attributes to set on the element
+	 * @param {array} [children] - An array of elements to append to the created element
+	 * @returns {HTMLElement} The created element
+	 */
+	const createElements = (tag, attributes = {}, children = []) => {
+		const element = document.createElement(tag);
+		for (const [key, value] of Object.entries(attributes)) {
+			element.setAttribute(key, value);
+		}
+		children.forEach(child => element.appendChild(child));
+		return element;
+	};
+
+	/**
+	 * Moves the HTML from the first element matching the fromElementSelector to the first element matching the toElementSelector.
+	 * If either element is not found, the function does nothing.
+	 * @param {string} fromElementSelector - CSS selector for the element to move the HTML from
+	 * @param {string} toElementSelector - CSS selector for the element to move the HTML to
+	 */
+	const moveHtmlElement = function (fromElementSelector, toElementSelector) {
+		const fromElements = document.querySelectorAll(fromElementSelector);
+		const toElement = document.querySelector(toElementSelector);
+
+		if (fromElements.length === 0 || toElement === null) {
+			if (isInDevelopment() == 1) {
+				console.log("Element not found");
+			}
+			return;
+		}
+
+		// Get the FIRST element from the NodeList (if it exists)
+		const fromElement = fromElements[0]; // Access the first element
+
+		toElement.innerHTML = fromElement.innerHTML;
+		fromElement.innerHTML = '';
+	};
+
+	/**
+	 * Makes a POST request to the given URL with the given data.
+	 * This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
+	 * The beforeSend callback is called before the request is sent.
 	 *
-	 * The function takes an optional object with the following properties as its last argument:
+	 * If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
+	 * If the request returns an HTML or text response, the onSuccess callback is called with the response text.
 	 *
-	 * - `beforeSend`: a function called before the request is sent.
-	 * - `onSuccess`: a function called when the request is successful.
-	 * - `onError`: a function called when the request fails.
-	 * - `onComplete`: a function called when the request is complete.
+	 * If the request fails, the onError callback is called with the error message and the actual error object.
 	 *
-	 * @param {string} url - The URL to send the request to
-	 * @param {object} data - The data to send with the request
-	 * @param {object} [options] - The options object
-	 * @returns {Promise} The promise object
+	 * The onComplete callback is called after the request has completed, regardless of success or failure.
+	 *
+	 * @param {string} url - The URL to make the request to
+	 * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
+	 * @param {object} [options] - Options for the request
+	 * @param {function} [options.beforeSend] - Called before the request is sent
+	 * @param {function} [options.onSuccess] - Called when the request returns a JSON response
+	 * @param {function} [options.onError] - Called when the request fails
+	 * @param {function} [options.onComplete] - Called after the request has completed
+	 * @param {boolean} [options.processData=true] - Whether to process the data before sending it
+	 * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
 	 */
 	const post = (url, data, {
 		beforeSend,
@@ -256,7 +328,9 @@
 		if (beforeSend) beforeSend();
 
 		let body;
-		let headers = {};
+		let headers = {
+			'X-Requested-With': 'XMLHttpRequest'
+		};
 
 		if (Array.isArray(data) && data.every(item => 'name' in item && 'value' in item)) {
 			body = new URLSearchParams();
@@ -286,39 +360,48 @@
 		} else {
 			body = data;
 		}
-		
+
 		fetch(url, {
 			method: 'POST',
 			headers,
 			body
 		})
-			.then(async response => {
-				const responseData = await response.json();
+			.then(response => {
+				if (!response.ok) {
+					return response.text().then(errorMessage => {
+						throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+					});
+				}
 
-				if (response.ok) {
-					onSuccess?.(responseData);
+				return response.text().then(text => {
+					try {
+						const jsonData = JSON.parse(text);
+						return { data: jsonData, type: 'json' };
+					} catch (jsonError) {
+						/* If JSON parsing fails, assume it's HTML or text */
+						if (isInDevelopment() == 1) {
+							console.log("JSON Parse Error:", jsonError);
+						}
+						return { data: text, type: 'html' };
+					}
+				});
+			})
+			.then(result => {
+				if (result.type === 'json') {
+					onSuccess?.(result.data);
 					if (isInDevelopment() == 1) {
-						console.log(responseData);
+						console.log("JSON Response:", result.data);
 					}
-				} else {
-					const error = new Error(response.statusText);
-					onError?.(response, response.statusText, error);
-					if (response.statusText === "error") {
-						alert.error(error);
-						button.enable();
-					}
-
+				} else if (result.type === 'html') {
+					onSuccess?.(result.data);
 					if (isInDevelopment() == 1) {
-						button.enable();
-						throw { response, textStatus: response.statusText, errorThrown: error };
+						console.log("HTML/Text Response:", result.data);
 					}
-
-					console.log(response, response.statusText, error);
 				}
 			})
 			.catch(error => {
-				onError?.(null, error.message, error);
-				console.log(error);
+				onError?.(null, error.message, error); // Pass the actual error object
+				console.error("Fetch or Parse Error:", error); // Log the error object
 			})
 			.finally(() => {
 				onComplete?.();
@@ -487,7 +570,6 @@
 			rangeContainer.classList.add('range');
 			document.querySelector(rangeContainerSelector).appendChild(rangeContainer);
 
-
 			if (rangeContainer === null) {
 				return;
 			}
@@ -499,7 +581,6 @@
 			sliderValueDisplay.classList.add('slider-non-linear-step-value');
 			rangeContainer.parentNode.insertBefore(sliderValueDisplay, rangeContainer.nextSibling);
 
-
 			_createSliderInputElement(rangeContainerSelector, rangeContainer);
 		};
 
@@ -507,24 +588,27 @@
 			let inputFromId = document.querySelector(sliderElement).dataset.inputFromId || inputFromElementId;
 			let inputToId = document.querySelector(sliderElement).dataset.inputToId || inputToElementId;
 
-			const inputFrom = document.createElement('input');
-			inputFrom.type = 'hidden';
-			inputFrom.name = inputFromId;
-			inputFrom.id = inputFromId;
-			inputFrom.value = '';
+			const inputFrom = createElements('input', {
+				type: 'hidden',
+				name: inputFromId,
+				id: inputFromId,
+				value: ''
+			});
+
+			const inputTo = createElements('input', {
+				type: 'hidden',
+				name: inputToId,
+				id: inputToId,
+				value: ''
+			});
+
 			document.querySelector(sliderElement).prepend(inputFrom);
-
-			const inputTo = document.createElement('input');
-			inputTo.type = 'hidden';
-			inputTo.name = inputToId;
-			inputTo.id = inputToId;
-			inputTo.value = '';
 			document.querySelector(sliderElement).prepend(inputTo);
-
 
 			rangeContainer.noUiSlider.on('update', (values) => {
 				const sliderValueDisplay = document.querySelector('.slider-non-linear-step-value');
 				sliderValueDisplay.innerHTML = `<span class="text-muted">Range:</span> P${convertCurrency(values[0])} - P${convertCurrency(values[1])}`;
+
 				document.getElementById(inputFromId).value = values[0];
 				document.getElementById(inputToId).value = values[1];
 			});
@@ -586,7 +670,7 @@
 					const _invalidResponse = (error) => {
 						input.classList.add('is-invalid');
 						_resetForm();
-						alert.error(error); 
+						alert.error(error);
 						return false;
 					};
 
@@ -601,16 +685,14 @@
 					} else if (document.querySelector(`.${CSS.escape(video.id)}`)) {
 						return _invalidResponse("Video already added!");
 					} else {
-						const videoContainer = document.createElement('div');
-						videoContainer.classList.add(video.id);
-						videoContainer.dataset.id = video.id;
+						const videoContainer = createElements('div', { class: video.id, 'data-id': video.id });
 
 						const createHiddenInput = (name, value) => {
-							const input = document.createElement('input');
-							input.type = 'hidden';
-							input.name = `videos[${video.id}]${name}`;
-							input.value = value;
-							return input;
+							return createElements('input', {
+								type: 'hidden',
+								name: `videos[${video.id}]${name}`,
+								value: value
+							});
 						};
 
 						videoContainer.appendChild(createHiddenInput('[id]', video.id));
@@ -623,29 +705,24 @@
 						videoContainer.appendChild(createHiddenInput('[embed]', video.embed));
 						videoContainer.appendChild(createHiddenInput('[created_at]', Date.now()));
 
-						const btnDeleteContainer = document.createElement('div');
-						btnDeleteContainer.classList.add('btn-delete-container', 'w-100', 'text-end', 'p-1');
+						const btnDeleteContainer = createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
+							createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': video.id }, [
+								createElements('i', { class: 'ti ti-trash' })
+							])
+						]);
 
-						const btnRemoveVideo = document.createElement('span');
-						btnRemoveVideo.classList.add('btn', 'btn-danger', 'btn-remove-video');
-						btnRemoveVideo.dataset.id = video.id;
-
-						const deleteIcon = document.createElement('i');
-						deleteIcon.classList.add('ti', 'ti-trash');
-						btnRemoveVideo.appendChild(deleteIcon);
-						btnDeleteContainer.appendChild(btnRemoveVideo);
 						videoContainer.appendChild(btnDeleteContainer);
 
-						const btnPlayback = document.createElement('div');
-						btnPlayback.classList.add('avatar', 'avatar-xxxl', 'p-2', 'btn-playback', 'cursor-pointer', 'text-white');
-						btnPlayback.dataset.id = video.id;
-						btnPlayback.dataset.url = video.url;
-						btnPlayback.dataset.embed = video.embed;
-						btnPlayback.style.backgroundImage = `url(${video.thumbnail.sd})`;
-						btnPlayback.style.height = '120px';
-						const playIcon = document.createElement('i');
-						playIcon.classList.add('ti', 'ti-brand-youtube', 'fs-32');
-						btnPlayback.appendChild(playIcon);
+						const btnPlayback = createElements('div', {
+							class: 'avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white',
+							'data-id': video.id,
+							'data-url': video.url,
+							'data-embed': video.embed,
+							style: `background-image: url(${video.thumbnail.sd}); height: 120px;`
+						}, [
+							createElements('i', { class: 'ti ti-brand-youtube fs-32' })
+						]);
+
 						videoContainer.appendChild(btnPlayback);
 
 						const videoListContainer = document.querySelector('.video-list-container');
@@ -664,22 +741,32 @@
 				if (event.target.closest('.btn-playback')) {
 					const btn = event.target.closest('.btn-playback');
 					const embed = btn.dataset.embed;
-					const url = btn.dataset.url;
 					const id = btn.dataset.id;
-					let html = ``;
+					
 					_modal.create({
 						id: id,
 						size: 'fullscreen',
 						callback: function () {
-							html += `<div class='row justify-content-center'>`;
-							html += `<div class='col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12'>`;
-							html += `<iframe class='w-100' height='560' src='${embed}' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe>`;
-							html += `<div class='text-center'>`;
-							html += `<span class='btn mt-3' data-bs-dismiss='modal'><i class='ti ti-x me-1'></i> Close</span>`;
-							html += `</div>`;
-							html += `</div>`;
-							html += `</div>`;
-							return html;
+							return createElements('div', { class: 'row justify-content-center' }, [
+								createElements('div', { class: 'col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12' }, [
+									createElements('iframe', {
+										class: 'w-100',
+										height: '560',
+										src: embed,
+										title: 'YouTube video player',
+										frameborder: '0',
+										allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;',
+										referrerpolicy: 'strict-origin-when-cross-origin',
+										allowfullscreen: ''
+									}),
+									createElements('div', { class: 'text-center' }, [
+										createElements('span', { class: 'btn mt-3', 'data-bs-dismiss': 'modal' }, [
+											createElements('i', { class: 'ti ti-x me-1' }),
+											document.createTextNode(' Close')
+										])
+									])
+								])
+							]);
 						},
 						status: "info",
 						destroyable: true
@@ -709,15 +796,6 @@
 			if (!container) {
 				return false;
 			}
-
-			const createElements = (tag, attributes = {}, children = []) => {
-				const element = document.createElement(tag);
-				for (const [key, value] of Object.entries(attributes)) {
-					element.setAttribute(key, value);
-				}
-				children.forEach(child => element.appendChild(child));
-				return element;
-			};
 
 			const formGroup = createElements('div', { class: 'd-flex gap-1' }, [
 				createElements('div', { class: 'form-floating flex-fill' }, [
@@ -787,7 +865,7 @@
 					CDN + '/css/global.style.css'
 				]
 			}
-			
+
 			const mergedOptions = { ...defaultOptions, ...options };
 
 			tinyMCE.remove();
@@ -806,40 +884,39 @@
 				new TomSelect(document.querySelector(containerId), {
 					copyClassesToDropdown: false,
 					dropdownParent: 'body',
-					controlInput: '<input>', 
+					controlInput: '<input>',
 					render: {
 						item: function (data, escape) {
 							if (data.customProperties) {
-								const div = document.createElement('div');
-								const span = document.createElement('span');
-								span.classList.add('dropdown-item-indicator');
-								span.textContent = data.customProperties;
-								div.appendChild(span);
-								div.appendChild(document.createTextNode(escape(data.text)));
-								return div;
+								return createElements('div', {}, [
+									createElements('span', { class: 'dropdown-item-indicator' }, [
+										document.createTextNode(data.customProperties)
+									]),
+									document.createTextNode(escape(data.text))
+								]);
+							} else {
+								return createElements('div', {}, [
+									document.createTextNode(escape(data.text))
+								]);
 							}
-							const div = document.createElement('div');
-							div.textContent = escape(data.text);
-							return div;
-
 						},
 						option: function (data, escape) {
 							if (data.customProperties) {
-								const div = document.createElement('div');
-								const span = document.createElement('span');
-								span.classList.add('dropdown-item-indicator');
-								span.textContent = data.customProperties;
-								div.appendChild(span);
-								div.appendChild(document.createTextNode(escape(data.text)));
-								return div;
+								return createElements('div', {}, [
+									createElements('span', { class: 'dropdown-item-indicator' }, [
+										document.createTextNode(data.customProperties)
+									]),
+									document.createTextNode(escape(data.text))
+								]);
+							} else {
+								return createElements('div', {}, [
+									document.createTextNode(escape(data.text))
+								]);
 							}
-							const div = document.createElement('div');
-							div.textContent = escape(data.text);
-							return div;
 						},
 					},
 				});
-			} else { 
+			} else {
 				throw new Error(`TomSelect script is not inlcuded in head. ${CDN}/vendor/tom-select/tom-select.min.js`);
 			}
 		};
@@ -857,69 +934,53 @@
 			if (!messageContainer) {
 				const newDiv = document.createElement('div');
 				newDiv.classList.add('response');
-				document.body.prepend(newDiv); 
+				document.body.prepend(newDiv);
 			}
 
-			document.querySelector(element).innerHTML = message; 
+			document.querySelector(element).innerHTML = message;
 		};
 
-		const success = (message, element = '.response') => {
-			const alertDiv = document.createElement('div');
-			alertDiv.classList.add('message', 'alert', 'alert-success', 'alert-dismissible', 'show');
-			alertDiv.setAttribute('role', 'alert');
+		const _displayAlert = (message, type = 'success', element = '.response') => {  // Combined function
+			const alertClasses = `message alert alert-${type} alert-dismissible show`; // Dynamic class
+			const alertDiv = createElements('div', {
+				class: alertClasses,
+				role: 'alert'
+			}, [
+				createElements('span', {}, [document.createTextNode(message)]),
+				createElements('button', {
+					type: 'button',
+					class: 'btn-close',
+					'data-bs-dismiss': 'alert',
+					'aria-label': 'Close'
+				})
+			]);
 
-			const messageSpan = document.createElement('span');
-			messageSpan.textContent = message;
-			alertDiv.appendChild(messageSpan);
-
-			const closeButton = document.createElement('button');
-			closeButton.type = 'button';
-			closeButton.classList.add('btn-close');
-			closeButton.setAttribute('data-bs-dismiss', 'alert');
-			closeButton.setAttribute('aria-label', 'Close');
-			alertDiv.appendChild(closeButton);
-
-			_display(alertDiv.outerHTML, element); 
+			_display(alertDiv.outerHTML, element);
 		};
 
-		const error = (message, element = '.response') => {
-			const alertDiv = document.createElement('div');
-			alertDiv.classList.add('message', 'alert', 'alert-danger', 'alert-dismissible', 'show');
-			alertDiv.setAttribute('role', 'alert');
+		const success = (message, element = '.response') => _displayAlert(message, 'success', element);
 
-			const messageSpan = document.createElement('span');
-			messageSpan.textContent = message;
-			alertDiv.appendChild(messageSpan);
-
-			const closeButton = document.createElement('button');
-			closeButton.type = 'button';
-			closeButton.classList.add('btn-close');
-			closeButton.setAttribute('data-bs-dismiss', 'alert');
-			closeButton.setAttribute('aria-label', 'Close');
-			alertDiv.appendChild(closeButton);
-
-			_display(alertDiv.outerHTML, element); 
-		};
+		const error = (message, element = '.response') => _displayAlert(message, 'danger', element);
 
 		const loader = (message = "Processing, Please wait...", element = '.response') => {
-			const loaderDiv = document.createElement('div');
-			loaderDiv.classList.add('bg-white', 'p-3', 'mt-3', 'rounded', 'border');
+			const loaderDiv = createElements('div', {
+				class: 'bg-white p-3 mt-3 rounded border'
+			}, [
+				createElements('div', {
+					class: 'd-flex gap-3 align-items-center'
+				}, [
+					createElements('div', {
+						class: 'loader'
+					}),
+					createElements('p', {
+						class: 'mb-0'
+					}, [
+						document.createTextNode(message)
+					])
+				])
+			]);
 
-			const innerDiv = document.createElement('div');
-			innerDiv.classList.add('d-flex', 'gap-3', 'align-items-center');
-
-			const loaderSpinner = document.createElement('div');
-			loaderSpinner.classList.add('loader');
-			innerDiv.appendChild(loaderSpinner);
-
-			const messageParagraph = document.createElement('p');
-			messageParagraph.classList.add('mb-0');
-			messageParagraph.textContent = message;
-			innerDiv.appendChild(messageParagraph);
-
-			loaderDiv.appendChild(innerDiv);
-
-			_display(loaderDiv.outerHTML, element); 
+			_display(loaderDiv.outerHTML, element);
 		};
 
 		const message = (message, element = '.response') => {
@@ -939,24 +1000,24 @@
 		 * Disable all buttons on the page, visually and interactively
 		 */
 		const disable = (element = ".btn") => {
-			const elements = document.querySelectorAll(element); 
+			const elements = document.querySelectorAll(element);
 
 			elements.forEach(el => {
 				el.style.cursor = 'wait';
 				el.style.pointerEvents = 'none';
 				el.style.opacity = 0.5;
-				el.disabled = true; 
+				el.disabled = true;
 			});
 		};
 
 		const enable = (element = ".btn") => {
-			const elements = document.querySelectorAll(element); 
+			const elements = document.querySelectorAll(element);
 
 			elements.forEach(el => {
 				el.style.cursor = 'pointer';
 				el.style.pointerEvents = 'auto';
 				el.style.opacity = 1;
-				el.disabled = false; 
+				el.disabled = false;
 			});
 		};
 
@@ -979,9 +1040,9 @@
 	 */
 	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
 		formId = formId.replace('#', '');
-		
+
 		document.addEventListener('submit', function (event) {
-			consosle.log(event.target.id);
+			console.log(event.target.id);
 			if (event.target.id === formId) {
 				event.preventDefault();
 			}
@@ -1002,13 +1063,13 @@
 
 		const form = document.getElementById(formId);
 
-		if (!form) { 
+		if (!form) {
 			console.error(`Form with ID '${formId}' not found!`);
-			return; 
+			return;
 		}
 
 		const formData = Array.from(form.elements)
-			.filter(element => element.name) 
+			.filter(element => element.name)
 			.map(element => ({
 				name: element.name,
 				value: element.value
@@ -1020,7 +1081,7 @@
 			onBeforeSend(formData);
 		}
 
-		return post(form.action, formData, {
+		return post(form.getAttribute('action'), formData, {
 			beforeSend: () => {
 				alert.loader();
 
@@ -1058,6 +1119,10 @@
 					if (callback) {
 						alert.message("");
 						callback(serializeFormData(formData), responseData);
+
+						if (isInDevelopment() == 1) { 
+							console.log(e);
+						}
 					}
 
 					if (redirectUrl) {
@@ -1071,29 +1136,7 @@
 			onComplete: () => {
 				button.enable();
 			}
-		});	
-	};
-
-	/**
-	 * Moves an HTML element from one location to another within the DOM.
-	 * 
-	 * @param {string} fromElementId - The ID of the element to be moved.
-	 * @param {string} toElementId - The ID of the element where the `fromElement` will be appended.
-	 * 
-	 * The function selects the element specified by `fromElementId` and appends it 
-	 * to the element specified by `toElementId`. If either element is not found, 
-	 * the function returns without making any changes.
-	 */
-	const moveHtmlElement = function (fromElementId, toElementId) {
-		const fromElement = document.getElementById(fromElementId);
-		const toElement = document.getElementById(toElementId);
-
-		if (fromElement === null || toElement === null) {
-			return;
-		}
-
-		toElement.innerHTML = fromElement.innerHTML;
-		fromElement.innerHTML = '';
+		});
 	};
 
 	const _modal = function () {
@@ -1108,58 +1151,56 @@
 		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
 			const destroyableClass = destroyable ? "modal-destroyable" : "";
 
-			let html = document.createElement('div');
-			html.classList.add('modal', destroyableClass); 
-			html.id = id;
-			html.setAttribute('aria-labelledby', 'modal');
-			html.setAttribute('aria-hidden', 'true');
+			const modal = createElements('div', {
+				class: `modal ${destroyableClass}`,
+				id: id,
+				'aria-labelledby': 'modal',
+				'aria-hidden': 'true'
+			}, [
+				createElements('div', { class: `modal-dialog modal-${size}` }, [
+					createElements('div', { class: 'modal-content' }, [
+						...(status ? [createElements('div', { class: `modal-status bg-${status}` })] : []),
+						createElements('div', { class: 'modal-body' }, [
+							createElements('span', {
+								class: 'btn-close',
+								'data-bs-dismiss': 'modal',
+								'aria-label': 'Close'
+							}),
+							createElements('div', { class: 'response-modal' }, [
+								...(callback ? (() => {
+									const callbackContent = callback();
 
-			const modalDialog = document.createElement('div');
-			modalDialog.classList.add('modal-dialog', `modal-${size}`);
-			html.appendChild(modalDialog);
+									if (typeof callbackContent === 'string') {
+										// Treat as HTML and parse:
+										const tempDiv = document.createElement('div');
+										tempDiv.innerHTML = callbackContent; // Parse HTML string
+										const elements = Array.from(tempDiv.childNodes); // Get the parsed elements
 
-			const modalContent = document.createElement('div');
-			modalContent.classList.add('modal-content');
-			modalDialog.appendChild(modalContent);
+										// Check if there is only one element.
+										if (elements.length === 1) {
+											return [elements[0]];
+										} else {
+											return elements; // Return an array of parsed elements
+										}
 
-			if (status) {
-				const modalStatus = document.createElement('div');
-				modalStatus.classList.add('modal-status', `bg-${status}`);
-				modalContent.appendChild(modalStatus);
-			}
+									} else if (callbackContent instanceof Element) {
+										return [callbackContent]; // Return the Element directly
+									} else {
+										console.warn('Callback should return either a string or an Element');
+										return [];
+									}
+								})() : [])
+							])
+						])
+					])
+				])
+			]);
 
-			const modalBody = document.createElement('div');
-			modalBody.classList.add('modal-body');
-			modalContent.appendChild(modalBody);
-
-			const closeButton = document.createElement('span');
-			closeButton.classList.add('btn-close');
-			closeButton.setAttribute('data-bs-dismiss', 'modal');
-			closeButton.setAttribute('aria-label', 'Close');
-			modalBody.appendChild(closeButton);
-
-			const responseModal = document.createElement('div');
-			responseModal.classList.add('response-modal');
-			modalBody.appendChild(responseModal);
-
-			if (callback !== undefined) {
-				const callbackContent = callback(); 
-				if (typeof callbackContent === 'string') {
-					responseModal.innerHTML = callbackContent; 
-				} else if (callbackContent instanceof Element) {
-					responseModal.appendChild(callbackContent); 
-				} else {
-					console.warn('Callback function should return either a string or an Element')
-				}
-			}
-
-			const htmlString = html.outerHTML;
-
-			document.body.appendChild(html);
+			document.body.appendChild(modal);
 
 			new bootstrap.Modal(document.getElementById(id), {
 				keyboard: false
-			}).show(document.getElementById(id))
+			}).show(document.getElementById(id));
 		};
 
 		const _handleModalClose = () => {
@@ -1235,7 +1276,7 @@
 			if (uploadType == 'document') {
 				accept = 'application/pdf';
 				_initFileUploaderEvents();
-			} else { 
+			} else {
 				_initImageUploaderEvents();
 			}
 
@@ -1244,50 +1285,46 @@
 			_initUploaderEvents(containerSelector, input, onSuccessCallback, onErrorCallback);
 		};
 
-		const _createUploadContainer = (uploadContainerSelector ) => {
-			const container = document.querySelector(uploadContainerSelector);
+		const _createUploadContainer = (uploadContainerSelector) => {
+			let container = document.querySelector(uploadContainerSelector);
 
 			if (!container) {
-				const newDiv = document.createElement('div');
-				newDiv.classList.add('upload-container');
-				document.body.prepend(newDiv);
-				container = document.querySelector('.upload-container'); 
-				uploadContainerSelector = '.upload-container'; 
+				container = createElements('div', { class: 'upload-container' });
+				document.body.prepend(container);
+				uploadContainerSelector = '.upload-container';
 			}
 
-			const html = `<span class='btn btn-dark btn-browse'><i class='ti ti-upload me-2'></i> Upload</span>`;
-			container.innerHTML = html;
+			const uploadButton = createElements('span', { class: 'btn btn-dark btn-browse' }, [
+				createElements('i', { class: 'ti ti-upload me-2' }),
+				document.createTextNode(' Upload')
+			]);
+
+			container.innerHTML = '';
+			container.appendChild(uploadButton);
 		};
 
 		const _createUploadForm = (url, inputId, accept, multiple, containerSelector) => {
-			const containerDiv = document.createElement('div');
-			containerDiv.classList.add(containerSelector.replace(".", "")); 
-
-			const form = document.createElement('form');
-			form.id = 'uploadForm';
-			form.classList.add('d-none');
-			form.action = url;
-			form.method = 'POST';
-			form.enctype = 'multipart/form-data';
-
-			const center = document.createElement('center');
-
-			const input = document.createElement('input');
-			input.type = 'file';
-			input.id = inputId;
-			input.accept = accept;
-
-			if (multiple) {
-				input.name = `${inputId}[]`;
-				input.multiple = true;
-			} else {
-				input.name = inputId;
-				input.value = '';
-			}
-
-			center.appendChild(input);
-			form.appendChild(center);
-			containerDiv.appendChild(form);
+			const containerDiv = createElements('div', {
+				class: containerSelector.replace(".", "") // Remove the .
+			}, [
+				createElements('form', {
+					id: 'uploadForm',
+					class: 'd-none',
+					action: url,
+					method: 'POST',
+					enctype: 'multipart/form-data'
+				}, [
+					createElements('center', {}, [
+						createElements('input', {
+							type: 'file',
+							id: inputId,
+							accept: accept,
+							name: multiple ? `${inputId}[]` : inputId, // Conditional name
+							...(multiple ? { multiple: true } : { value: '' }) // Conditional multiple/value
+						})
+					])
+				])
+			]);
 
 			document.body.prepend(containerDiv);
 		};
@@ -1301,109 +1338,81 @@
 		 * @return {string} - The HTML elements as a string.
 		 */
 		const _setMultipleImageUploadContainer = (image, uploadedContainerSelector = 'images-container') => {
-			uploadedContainerSelector.replace(".", "");
 			const container = document.querySelector(uploadedContainerSelector);
 
 			if (!container) {
 				console.log(`Container with selector '${uploadedContainerSelector}' not found.`);
-				return; 
+				return;
 			}
 
-			let div = document.createElement('div');
-			div.classList.add(image.id, `image_${image.id}`, 'me-2', 'mb-3', 'flex-grow-1');
+			let div = createElements('div', {
+				class: `${image.id} image_${image.id} me-2 mb-3 flex-grow-1`
+			}, [
+				createElements('input', {
+					type: 'hidden',
+					name: `upload[${image.id}][image_id]`,
+					value: image.id
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `upload[${image.id}][height]`,
+					value: image.height
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `upload[${image.id}][width]`,
+					value: image.width
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `upload[${image.id}][filename]`,
+					value: image.filename
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `upload[${image.id}][url]`,
+					value: image.final_url
+				}),
+				createElements('div', {}, [
+					createElements('span', {
+						class: 'avatar avatar-xxxl',
+						style: `background-image: url('${image.temp_url}')`
+					})
+				]),
+				createElements('div', { class: 'btn-list mt-2 text-center' }, [
+					createElements('span', {
+						class: 'btn btn-md btn-outline-secondary btn-remove-image',
+						title: 'Remove image',
+						'data-container': image.id,
+						'data-filename': image.filename,
+						'data-url': `${DOMAIN}/properties/images/${image.id}/delete`
+					}, [
+						createElements('i', { class: 'ti ti-trash' })
+					]),
+					createElements('span', {
+						class: 'btn btn-md btn-outline-primary btn-set-thumbnail',
+						title: 'Set image as thumbnail',
+						'data-container': image.id,
+						'data-final-url': image.final_url
+					}, [
+						createElements('i', { class: 'ti ti-click me-2' }),
+						document.createTextNode(" Thumbnail")
+					])
+				]),
 
-			/* Create hidden inputs */
-			let inputImageId = document.createElement('input');
-			inputImageId.type = 'hidden';
-			inputImageId.name = `upload[${image.id}][image_id]`;
-			inputImageId.value = image.id;
-			div.appendChild(inputImageId);
+				...(image.status == 2 ? [
+					createElements('div', { class: 'alert alert-danger alert-dismissible' }, [
+						createElements('i', { class: 'ti ti-alert-triangle me-2', 'aria-hidden': 'true' }),
+						createElements('span', { class: 'p-0 m-0' }, [document.createTextNode(image.message)]),
+						createElements('button', {
+							type: 'button',
+							class: 'btn-close',
+							'data-bs-dismiss': 'alert'
+						})
+					])
+				] : [])
 
-			let inputHeight = document.createElement('input');
-			inputHeight.type = 'hidden';
-			inputHeight.name = `upload[${image.id}][height]`;
-			inputHeight.value = image.height;
-			div.appendChild(inputHeight);
-
-			let inputWidth = document.createElement('input');
-			inputWidth.type = 'hidden';
-			inputWidth.name = `upload[${image.id}][width]`;
-			inputWidth.value = image.width;
-			div.appendChild(inputWidth);
-
-			let inputFilename = document.createElement('input');
-			inputFilename.type = 'hidden';
-			inputFilename.name = `upload[${image.id}][filename]`;
-			inputFilename.value = image.filename;
-			div.appendChild(inputFilename);
-
-			let inputUrl = document.createElement('input');
-			inputUrl.type = 'hidden';
-			inputUrl.name = `upload[${image.id}][url]`;
-			inputUrl.value = image.final_url;
-			div.appendChild(inputUrl);
-
-			/* Create image element */
-			let imageDiv = document.createElement('div');
-			let imageSpan = document.createElement('span');
-			imageSpan.classList.add('avatar', 'avatar-xxxl');
-			imageSpan.style.backgroundImage = `url('${image.temp_url}')`;
-			imageDiv.appendChild(imageSpan);
-			div.appendChild(imageDiv);
-
-			/* Create button group */
-			let buttonDiv = document.createElement('div');
-			buttonDiv.classList.add('btn-list', 'mt-2', 'text-center');
-
-			let removeButton = document.createElement('span');
-			removeButton.classList.add('btn', 'btn-md', 'btn-outline-secondary', 'btn-remove-image');
-			removeButton.title = 'Remove image';
-			removeButton.dataset.container = image.id;
-			removeButton.dataset.filename = image.filename;
-			removeButton.dataset.url = `${DOMAIN}/properties/images/${image.id}/delete`;
-			
-			let removeIcon = document.createElement('i');
-			removeIcon.classList.add('ti', 'ti-trash');
-			removeButton.appendChild(removeIcon);
-			buttonDiv.appendChild(removeButton);
-
-			let thumbnailButton = document.createElement('span');
-			thumbnailButton.classList.add('btn', 'btn-md', 'btn-outline-primary', 'btn-set-thumbnail');
-			thumbnailButton.title = 'Set image as thumbnail';
-			thumbnailButton.dataset.container = image.id;
-			thumbnailButton.dataset.finalUrl = image.final_url;
-
-			let thumbnailIcon = document.createElement('i');
-			thumbnailIcon.classList.add('ti', 'ti-click', 'me-2');
-			thumbnailButton.appendChild(thumbnailIcon);
-			thumbnailButton.appendChild(document.createTextNode(" Thumbnail"));
-			buttonDiv.appendChild(thumbnailButton);
-
-			div.appendChild(buttonDiv);
-
-			/* Handle error state */
-			if (image.status == 2) {
-				let alertDiv = document.createElement('div');
-				alertDiv.classList.add('alert', 'alert-danger', 'alert-dismissible');
-
-				let alertIcon = document.createElement('i');
-				alertIcon.classList.add('ti', 'ti-alert-triangle', 'me-2');
-				alertIcon.setAttribute('aria-hidden', 'true');
-				alertDiv.appendChild(alertIcon);
-
-				let messageSpan = document.createElement('span');
-				messageSpan.classList.add('p-0', 'm-0');
-				messageSpan.textContent = image.message;
-				alertDiv.appendChild(messageSpan);
-
-				let closeButton = document.createElement('button');
-				closeButton.type = 'button';
-				closeButton.classList.add('btn-close');
-				closeButton.dataset.bsDismiss = 'alert';
-				alertDiv.appendChild(closeButton);
-
-				div = alertDiv; 
-			}
+			]);
 
 			if (container) {
 				container.prepend(div);
@@ -1413,16 +1422,17 @@
 		};
 
 		const _setSingleUploadContainer = (image, uploadedContainerSelector = '.photo-preview') => {
-			const previewElement = document.querySelector(uploadedContainerSelector);
+			const containerSelector = uploadedContainerSelector.replace(".", "");
+			const previewElement = document.querySelector(containerSelector);
 
 			if (!previewElement) {
 				console.error(`Element with selector '${uploadedContainerSelector}' not found.`);
-				return; 
+				return;
 			}
 
 
 			if (image.status == 1) {
-				previewElement.style.backgroundImage = `url(${image.temp_url})`; 
+				previewElement.style.backgroundImage = `url(${image.temp_url})`;
 				alert.message("");
 
 				const photoInput = document.getElementById('photo');
@@ -1445,118 +1455,78 @@
 		};
 
 		const _setMultipleFileUploadContainer = (file, uploadedContainerSelector = '.files-container') => {
-			const container = document.querySelector(uploadedContainerSelector);
+			const containerSelector = uploadedContainerSelector.replace(".", "");
+			const container = document.querySelector(containerSelector);
 			if (!container) {
 				console.error(`Container with selector '${uploadedContainerSelector}' not found.`);
 				return;
 			}
 
-			let html = "";
+			let fileElement = createElements('div', { class: 'flex-grow-1' }, [
+				createElements('input', {
+					type: 'hidden',
+					name: `documents[${file.id}][id]`,
+					value: file.id
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `documents[${file.id}][filename]`,
+					value: file.filename
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `documents[${file.id}][size]`,
+					value: file.size
+				}),
+				createElements('input', {
+					type: 'hidden',
+					name: `documents[${file.id}][finalUrl]`,
+					value: file.final_url
+				}),
+				createElements('div', { class: 'd-flex p-y align-items-center' }, [
+					createElements('span', { class: 'avatar me-2' }, [
+						createElements('i', { class: 'ti ti-pdf fs-18' })
+					]),
+					createElements('div', { class: 'flex-fill' }, [
+						createElements('div', { class: 'font-weight-medium' }, [
+							createElements('input', {
+								type: 'text',
+								name: `documents[${file.id}][alias]`,
+								value: file.alias,
+								class: 'border-0 w-100'
+							})
+						]),
+						createElements('div', { class: 'text-secondary small' }, [
+							document.createTextNode(file.size)
+						])
+					])
+				]),
+				createElements('div', { class: 'btn-list' }, [
+					createElements('span', {
+						class: 'btn-remove-document cursor-pointer p-2',
+						'data-id': file.id,
+						'data-filename': file.filename
+					}, [
+						createElements('i', { class: 'ti ti-trash me-1' }),
+						document.createTextNode(" Remove")
+					])
+				])
+			]);
 
-			/* Create the file element */
-			const fileElement = document.createElement('div');
-			fileElement.classList.add('flex-grow-1');
-
-			const inputId = document.createElement('input');
-			inputId.type = 'hidden';
-			inputId.name = `documents[${file.id}][id]`;
-			inputId.value = file.id;
-			fileElement.appendChild(inputId);
-
-			const inputFilename = document.createElement('input');
-			inputFilename.type = 'hidden';
-			inputFilename.name = `documents[${file.id}][filename]`;
-			inputFilename.value = file.filename;
-			fileElement.appendChild(inputFilename);
-
-			const inputSize = document.createElement('input');
-			inputSize.type = 'hidden';
-			inputSize.name = `documents[${file.id}][size]`;
-			inputSize.value = file.size;
-			fileElement.appendChild(inputSize);
-
-			const inputFinalUrl = document.createElement('input');
-			inputFinalUrl.type = 'hidden';
-			inputFinalUrl.name = `documents[${file.id}][finalUrl]`;
-			inputFinalUrl.value = file.final_url;
-			fileElement.appendChild(inputFinalUrl);
-
-			const fileInfoDiv = document.createElement('div');
-			fileInfoDiv.classList.add('d-flex', 'p-y', 'align-items-center');
-
-			const avatarSpan = document.createElement('span');
-			avatarSpan.classList.add('avatar', 'me-2');
-			const pdfIcon = document.createElement('i');
-			pdfIcon.classList.add('ti', 'ti-pdf', 'fs-18');
-			avatarSpan.appendChild(pdfIcon);
-			fileInfoDiv.appendChild(avatarSpan);
-
-			const fileDetailsDiv = document.createElement('div');
-			fileDetailsDiv.classList.add('flex-fill');
-
-			const aliasInputDiv = document.createElement('div');
-			aliasInputDiv.classList.add('font-weight-medium');
-			const aliasInput = document.createElement('input');
-			aliasInput.type = 'text';
-			aliasInput.name = `documents[${file.id}][alias]`;
-			aliasInput.value = file.alias;
-			aliasInput.classList.add('border-0', 'w-100');
-			aliasInputDiv.appendChild(aliasInput);
-			fileDetailsDiv.appendChild(aliasInputDiv);
-
-			const sizeDiv = document.createElement('div');
-			sizeDiv.classList.add('text-secondary', 'small');
-			sizeDiv.textContent = file.size;
-			fileDetailsDiv.appendChild(sizeDiv);
-			fileInfoDiv.appendChild(fileDetailsDiv);
-			fileElement.appendChild(fileInfoDiv);
-
-			/* Create the button */
-			const buttonDiv = document.createElement('div');
-			buttonDiv.classList.add('btn-list');
-
-			const removeButton = document.createElement('span');
-			removeButton.classList.add('btn-remove-document', 'cursor-pointer', 'p-2');
-			removeButton.dataset.id = file.id;
-			removeButton.dataset.filename = file.filename;
-			const removeIcon = document.createElement('i');
-			removeIcon.classList.add('ti', 'ti-trash', 'me-1');
-			removeButton.appendChild(removeIcon);
-			removeButton.appendChild(document.createTextNode(" Remove"));
-			buttonDiv.appendChild(removeButton);
-
-			/* Handle error or append the content */
+			let listItem;
 			if (file.status == 2) {
-				const alertDiv = document.createElement('div');
-				alertDiv.classList.add('alert', 'alert-danger', 'alert-dismissible');
-				alertDiv.id = file.id;
-
-				const alertIcon = document.createElement('i');
-				alertIcon.classList.add('ti', 'ti-alert-triangle', 'me-2');
-				alertIcon.setAttribute('aria-hidden', 'true');
-				alertDiv.appendChild(alertIcon);
-
-				const messageSpan = document.createElement('span');
-				messageSpan.classList.add('p-0', 'm-0');
-				messageSpan.textContent = file.message;
-				alertDiv.appendChild(messageSpan);
-
-				const closeButton = document.createElement('button');
-				closeButton.type = 'button';
-				closeButton.classList.add('btn-close');
-				closeButton.dataset.bsDismiss = 'alert';
-				alertDiv.appendChild(closeButton);
-
-				html = alertDiv.outerHTML; 
+				listItem = createElements('div', { class: 'alert alert-danger alert-dismissible', id: file.id }, [
+					createElements('i', { class: 'ti ti-alert-triangle me-2', 'aria-hidden': 'true' }),
+					createElements('span', { class: 'p-0 m-0' }, [document.createTextNode(file.message)]),
+					createElements('button', { type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert' })
+				]);
 			} else {
-				const listItem = document.createElement('li');
-				listItem.classList.add('list-group-item', 'd-flex', 'gap-3', 'justify-content-between', 'align-items-center', 'py-3', `file_${file.id}`);
-				listItem.appendChild(fileElement);
-				listItem.appendChild(buttonDiv);
-				html = listItem.outerHTML; 
+				listItem = createElements('li', {
+					class: `list-group-item d-flex gap-3 justify-content-between align-items-center py-3 file_${file.id}`
+				}, [fileElement]); // Append fileElement to the list item
 			}
 
-			container.prepend(html);
+			container.prepend(listItem);
 		};
 
 		const _initFileUploaderEvents = () => {
@@ -1612,7 +1582,7 @@
 					const container = btn.dataset.container;
 					const filename = btn.dataset.filename;
 					const url = btn.dataset.url;
-					
+
 					post(url, {
 						csrf_token: _CSRFToken,
 						filename: filename
@@ -1636,7 +1606,7 @@
 		const _initUploaderEvents = (containerSelector, input, success, error) => {
 
 			document.addEventListener('click', function (event) {
-				if (event.target.closest(`${containerSelector} .btn-browse`)) { 
+				if (event.target.closest(`${containerSelector} .btn-browse`)) {
 					const inputElement = document.querySelector(`${containerSelector} #${input}`);
 					if (inputElement) {
 						inputElement.click();
@@ -1647,7 +1617,7 @@
 			});
 
 			document.addEventListener('change', function (event) {
-				if (event.target.matches(`${containerSelector} #${input}`)) { 
+				if (event.target.matches(`${containerSelector} #${input}`)) {
 					const form = document.querySelector(`${containerSelector} #uploadForm`);
 
 					if (!form) {
@@ -1662,7 +1632,7 @@
 						console.error(`Form element with selector '${containerSelector} #uploadForm' not found.`);
 						return;
 					}
-					const url = urlElement.action; 
+					const url = urlElement.action;
 
 					formData.append('csrf_token', _CSRFToken);
 
@@ -1681,8 +1651,13 @@
 								return;
 							}
 
-							if (success) { 
+							if (success) {
 								return success(response);
+							}
+						},
+						onError: (args) => {
+							if (error) { 
+								return error(args);
 							}
 						}
 					});
@@ -1741,7 +1716,7 @@
 			google.charts.load("current", { packages: ['calendar'] });
 			google.charts.setOnLoadCallback(drawChart);
 
-			function drawChart() { 
+			function drawChart() {
 				if (data === null) {
 					throw new Error("Set the data in table property");
 				}
@@ -1892,17 +1867,17 @@
 	}();
 
 	const _mortgageCalculator = function () {
-		
+
 		const _calculateMortgage = () => {
 			const resultContainer = document.querySelector('.mortgage-calculator-form #result');
-			if (!resultContainer) { 
+			if (!resultContainer) {
 				return;
 			}
 
 			const result = _getAmortization();
 
-			resultContainer.setAttribute("monthlyPayment", result.monthlyPayment); 
-			resultContainer.innerHTML = `&#8369;${result.formattedMonthlyPayment}`; 
+			resultContainer.setAttribute("monthlyPayment", result.monthlyPayment);
+			resultContainer.innerHTML = `&#8369;${result.formattedMonthlyPayment}`;
 		};
 
 		const _calculateMortgageOnChange = () => {
@@ -1922,22 +1897,16 @@
 			}
 
 			const downPaymentOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90];
-			const select = document.createElement('select');
-			select.id = "mortgageDownpayment";
-			select.classList.add("form-select");
+			const select = createElements('select', { id: "mortgageDownpayment", class: "form-select" },
+				downPaymentOptions.map(option =>
+					createElements('option', { value: option, ...(option === 20 ? { selected: true } : {}) }, [
+						document.createTextNode(`${option}%`)
+					])
+				)
+			);
 
-			downPaymentOptions.forEach(option => {
-				const optionElement = document.createElement('option');
-				optionElement.value = option;
-				optionElement.textContent = `${option}%`;
-				if (option === 20) {
-					optionElement.selected = true;
-				}
-				select.appendChild(optionElement);
-			});
-
-			container.insertAdjacentElement('afterend', select); 
-			container.remove(); 
+			container.insertAdjacentElement('afterend', select);
+			container.remove();
 		};
 
 		const _createInterestSelection = () => {
@@ -1946,19 +1915,13 @@
 				return;
 			}
 
-			const select = document.createElement('select');
-			select.id = "mortgageInterest";
-			select.classList.add("form-select");
-
-			for (let rate = 0; rate <= 20; rate += 0.25) {
-				const option = document.createElement('option');
-				option.value = rate;
-				option.textContent = `${rate}%`;
-				if (rate === 3.75) {
-					option.selected = true;
-				}
-				select.appendChild(option);
-			}
+			const select = createElements('select', { id: "mortgageInterest", class: "form-select" },
+				Array.from({ length: 81 }, (_, i) => i * 0.25).map(rate => // More efficient way to generate the array
+					createElements('option', { value: rate, ...(rate === 3.75 ? { selected: true } : {}) }, [
+						document.createTextNode(`${rate}%`)
+					])
+				)
+			);
 
 			container.insertAdjacentElement('afterend', select);
 			container.remove();
@@ -1971,19 +1934,13 @@
 			}
 
 			const yearsOptions = Array.from({ length: 30 }, (_, i) => i + 1);
-			const select = document.createElement('select');
-			select.id = "mortgageYear";
-			select.classList.add("form-select");
-
-			yearsOptions.forEach(year => {
-				const option = document.createElement('option');
-				option.value = year;
-				option.textContent = `${year} Years`;
-				if (year === 3) {
-					option.selected = true;
-				}
-				select.appendChild(option);
-			});
+			const select = createElements('select', { id: "mortgageYear", class: "form-select" },
+				yearsOptions.map(year =>
+					createElements('option', { value: year, ...(year === 3 ? { selected: true } : {}) }, [
+						document.createTextNode(`${year} Years`)
+					])
+				)
+			);
 
 			container.insertAdjacentElement('afterend', select);
 			container.remove();
@@ -2050,7 +2007,7 @@
 
 			const monthlyPayment = _pmt({
 				rate: (interestRate / 100) / paymentsPerYear,
-				nper: paymentsPerYear * years, 
+				nper: paymentsPerYear * years,
 				presentValue: - loanAmount
 			});
 
@@ -2086,8 +2043,8 @@
 
 	}();
 
-	return {
-		initBeforeLoad: function() {
+	const eo = {
+		initBeforeLoad: function () {
 			/* Address.initBeforeLoad(); */
 			_video._initBeforeLoad();
 			_slider._initBeforeLoad();
@@ -2111,9 +2068,10 @@
 					window.dispatchEvent(new Event('resizeEnd'));
 				}, 500);
 			});
-			
+
 		},
 
+		eoSettings,
 		epochToTimeString,
 		trim,
 		formatFileSize,
@@ -2143,12 +2101,14 @@
 			googleChart
 		},
 	}
+
+	return eo;
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-	eo.initBeforeLoad();
+	window.eo.initBeforeLoad();
 });
 
 window.addEventListener('load', function () {
-	eo.initAfterLoad();
+	window.eo.initAfterLoad();
 });

@@ -1,0 +1,29 @@
+{
+  "name": "eo",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"lint-all": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eman00x2x/eo.js.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eman00x2x/eo.js/issues"
+  },
+  "homepage": "https://github.com/eman00x2x/eo.js#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.1",
+    "globals": "^15.14.0"
+  }
+}
