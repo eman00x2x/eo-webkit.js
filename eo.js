@@ -1,18 +1,25 @@
 // eo.js
 ; (function (factory) {
 	if (typeof define === "function" && define.amd) {
-		// AMD. Register as an anonymous module.
 		define([], factory);
 	} else if (typeof exports === "object") {
-		// Node/CommonJS
 		module.exports = factory();
 	} else {
-		// Browser globals
 		window.eo = factory();
 	}
 })(function () {
 
 	"use strict";
+
+	const DOMAIN = "";
+	const CDN = "";
+	const API_KEY = {};
+
+	const settings = ({ domain, cdn, apiKey = {} } = {}) => {
+		eo.DOMAIN = domain;
+		eo.CDN = cdn;
+		eo.API_KEY = apiKey;
+	};
 
 	const isInDevelopment = () => {
 		const inDevelopmentMetaTag = document.querySelector('meta[name="inDevelopment"]');
@@ -104,20 +111,20 @@
 		);
 	};
 
+	
 	/**
-	 * Generates a random string of hexadecimal characters, given a string pattern.
+	 * Generates a random hexadecimal string of the specified length.
 	 *
-	 * The given string pattern should contain 'x' characters, which will be replaced with a random
-	 * hexadecimal character (0-9, A-F). The resulting string will have the same length as the
-	 * given pattern.
+	 * The function uses the Web Cryptography API to generate cryptographically
+	 * secure random values, which are then converted to a hexadecimal string.
 	 *
-	 * @param {string} [text='xxxxxx'] - The string pattern to generate a random string from
-	 * @returns {string} A randomly generated string of hexadecimal characters
+	 * @param {number} length - The length of the random hexadecimal string to generate
+	 * @returns {string} A random hexadecimal string of the specified length
 	 */
-	const getRandomChar = (text = 'xxxxxx') => {
-		return text.replace(/[018]/g, c =>
-			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-		);
+	const getRandomChar = (length) => {
+		const array = new Uint8Array(length);
+		window.crypto.getRandomValues(array);
+		return Array.from(array, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
 	};
 
 	/**
@@ -149,19 +156,13 @@
 	 * @returns {string} A human-readable string representation of the given number
 	 */
 	const convertCurrency = (amount) => {
-		// Nine Zeroes for Billions
 		return Math.abs(Number(amount)) >= 1.0e+9
 
 			? Math.abs(Number(amount)) / 1.0e+9 + "B"
-			// Six Zeroes for Millions 
 			: Math.abs(Number(amount)) >= 1.0e+6
-
 				? Math.abs(Number(amount)) / 1.0e+6 + "M"
-				// Three Zeroes for Thousands
 				: Math.abs(Number(amount)) >= 1.0e+3
-
 					? Math.abs(Number(amount)) / 1.0e+3 + "K"
-
 					: Math.abs(Number(amount));
 	};
 
@@ -243,38 +244,85 @@
 	 * @param {object} [options] - The options object
 	 * @returns {Promise} The promise object
 	 */
-	const post = (url, data, { beforeSend, onSuccess, onError, onComplete, processData = true, contentType = 'application/x-www-form-urlencoded; charset=UTF-8' } = {}) => {
-		return $.ajax({
-			type: 'POST',
-			url,
-			data,
-			processData,
-			contentType,
-			beforeSend,
-			success(response) {
-				onSuccess?.(response);
-				if (isInDevelopment() == 1) {
-					console.log(response);
-				}
-			},
-			error(jqXHR, textStatus, errorThrown) {
-				onError?.(jqXHR, textStatus, errorThrown);
-				if (textStatus == "error") {
-					alert.error(errorThrown);
-					button.enable();
-				}
-				
-				if (isInDevelopment() == 1) {
-					button.enable();
-					throw { jqXHR, textStatus, errorThrown };
-				}
+	const post = (url, data, {
+		beforeSend,
+		onSuccess,
+		onError,
+		onComplete,
+		processData = true,
+		contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
+	} = {}) => {
 
-				console.log(jqXHR, textStatus, errorThrown);
-			},
-			complete(jqXHR, textStatus) {
-				onComplete?.(jqXHR, textStatus);
+		if (beforeSend) beforeSend();
+
+		let body;
+		let headers = {};
+
+		if (Array.isArray(data) && data.every(item => 'name' in item && 'value' in item)) {
+			body = new URLSearchParams();
+			data.forEach(({ name, value }) => {
+				body.append(name, value);
+			});
+			body = body.toString();
+			headers['Content-Type'] = contentType;
+		} else if (data instanceof FormData) {
+			body = data;
+		} else if (processData && typeof data === 'object') {
+			if (contentType.includes('application/json')) {
+				body = JSON.stringify(data);
+				headers['Content-Type'] = contentType;
+			} else {
+				body = new URLSearchParams();
+				Object.keys(data).forEach(key => {
+					if (Array.isArray(data[key])) {
+						data[key].forEach(value => body.append(`${key}[]`, value));
+					} else {
+						body.append(key, data[key]);
+					}
+				});
+				body = body.toString();
+				headers['Content-Type'] = contentType;
 			}
-		});
+		} else {
+			body = data;
+		}
+		
+		fetch(url, {
+			method: 'POST',
+			headers,
+			body
+		})
+			.then(async response => {
+				const responseData = await response.json();
+
+				if (response.ok) {
+					onSuccess?.(responseData);
+					if (isInDevelopment() == 1) {
+						console.log(responseData);
+					}
+				} else {
+					const error = new Error(response.statusText);
+					onError?.(response, response.statusText, error);
+					if (response.statusText === "error") {
+						alert.error(error);
+						button.enable();
+					}
+
+					if (isInDevelopment() == 1) {
+						button.enable();
+						throw { response, textStatus: response.statusText, errorThrown: error };
+					}
+
+					console.log(response, response.statusText, error);
+				}
+			})
+			.catch(error => {
+				onError?.(null, error.message, error);
+				console.log(error);
+			})
+			.finally(() => {
+				onComplete?.();
+			});
 	};
 
 	/**
@@ -292,31 +340,34 @@
 	 * @param {object} [options] - The options object
 	 * @returns {Promise} The promise object
 	 */
-	const get = (url, { beforeRequest, onSuccess, onError, async = false } = {}) => {
-		const x = beforeRequest?.();
-		if (x === false) { return; }
-		return $.ajax({
-			url,
-			async,
-			success(response) {
-				onSuccess?.(response);
-				return response;
-			},
-			error(jqXHR, textStatus, errorThrown) {
-				const inDevelopment = document.querySelector('meta[name="inDevelopment"]').content;
-				onError?.(jqXHR, textStatus, errorThrown);
-				if (textStatus == "error") {
-					alert.error(errorThrown);
-					button.enable();
+	const get = (url, { beforeRequest, onSuccess, onError } = {}) => {
+		const shouldProceed = beforeRequest?.();
+
+		if (shouldProceed === false) return;
+
+		fetch(url)
+			.then(async response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 
-				if (inDevelopment == 1) {
+				const responseData = await response.text();
+
+				onSuccess?.(responseData);
+				button.enable();
+				return responseData;
+			})
+			.catch(error => {
+				onError?.(null, "error", error);
+
+				alert.error(error);
+				button.enable();
+
+				if (isInDevelopment() == 1) {
 					button.enable();
-					throw { jqXHR, textStatus, errorThrown };
+					throw error;
 				}
-				
-			}
-		});
+			});
 	};
 
 	/**
@@ -432,44 +483,63 @@
 		};
 
 		const create = (rangeContainerSelector, options = {}) => {
-			$(`<div class='range'></div>`).appendTo(rangeContainerSelector);
+			const rangeContainer = document.createElement('div');
+			rangeContainer.classList.add('range');
+			document.querySelector(rangeContainerSelector).appendChild(rangeContainer);
 
-			const rangeContainer = document.querySelector('.range');
-			if (rangeContainer === null || rangeContainer === undefined) {
+
+			if (rangeContainer === null) {
 				return;
 			}
 
 			const mergedOptions = { ...defaultOptions, ...options };
 			noUiSlider.create(rangeContainer, mergedOptions);
-			$(`<div class='slider-non-linear-step-value'></div>`).insertAfter('.range');
+
+			const sliderValueDisplay = document.createElement('div');
+			sliderValueDisplay.classList.add('slider-non-linear-step-value');
+			rangeContainer.parentNode.insertBefore(sliderValueDisplay, rangeContainer.nextSibling);
+
 
 			_createSliderInputElement(rangeContainerSelector, rangeContainer);
 		};
 
 		const _createSliderInputElement = (sliderElement, rangeContainer) => {
-			let inputFromId = $(sliderElement).data('input-from-id') || inputFromElementId;
-			let inputToId = $(sliderElement).data('input-to-id') || inputToElementId;
+			let inputFromId = document.querySelector(sliderElement).dataset.inputFromId || inputFromElementId;
+			let inputToId = document.querySelector(sliderElement).dataset.inputToId || inputToElementId;
 
-			$(sliderElement).prepend(`<input type='hidden' name='${inputFromId}' id='${inputFromId}' value=''>`);
-			$(sliderElement).prepend(`<input type='hidden' name='${inputToId}' id='${inputToId}' value=''>`);
+			const inputFrom = document.createElement('input');
+			inputFrom.type = 'hidden';
+			inputFrom.name = inputFromId;
+			inputFrom.id = inputFromId;
+			inputFrom.value = '';
+			document.querySelector(sliderElement).prepend(inputFrom);
+
+			const inputTo = document.createElement('input');
+			inputTo.type = 'hidden';
+			inputTo.name = inputToId;
+			inputTo.id = inputToId;
+			inputTo.value = '';
+			document.querySelector(sliderElement).prepend(inputTo);
+
 
 			rangeContainer.noUiSlider.on('update', (values) => {
-				$('.slider-non-linear-step-value').html(`<span class="text-muted">Range:</span> P${convertCurrency(values[0])} - P${convertCurrency(values[1])}`);
-				$('#' + inputFromId + '').val(values[0]);
-				$('#' + inputToId + '').val(values[1]);
+				const sliderValueDisplay = document.querySelector('.slider-non-linear-step-value');
+				sliderValueDisplay.innerHTML = `<span class="text-muted">Range:</span> P${convertCurrency(values[0])} - P${convertCurrency(values[1])}`;
+				document.getElementById(inputFromId).value = values[0];
+				document.getElementById(inputToId).value = values[1];
 			});
 		};
 
 		const _initSLider = () => {
 			const rangeContainerSelector = '.slider-display';
 			const rangeContainer = document.querySelector(rangeContainerSelector);
-			if (rangeContainer === null || rangeContainer === undefined) {
+			if (rangeContainer === null) {
 				return;
 			}
 
-			const min = $(rangeContainerSelector).data('min') || minValue;
-			const max = $(rangeContainerSelector).data('max') || maxValue;;
-			const step = $(rangeContainerSelector).data('min') || stepValue;;
+			const min = Number(document.querySelector(rangeContainerSelector).dataset.min) || minValue;
+			const max = Number(document.querySelector(rangeContainerSelector).dataset.max) || maxValue;
+			const step = Number(document.querySelector(rangeContainerSelector).dataset.step) || stepValue;
 
 			defaultOptions.start = [min, max];
 			defaultOptions.range.min = min;
@@ -500,163 +570,184 @@
 
 	const _video = function () {
 		const _handleVideoAdd = () => {
-			$(document).on('click', '.btn-add-video', function () {
-				const input = $('#youtubeUrl');
-				const btnSpinner = $('.btn-add-video .spinner-border');
-				const btnText = $('.btn-add-video .btn-text');
-				const video = getYoutubeVideoData(input.val());
+			document.addEventListener('click', function (event) {
+				if (event.target.closest('.btn-add-video')) {
+					const input = document.getElementById('youtubeUrl');
+					const btnSpinner = document.querySelector('.btn-add-video .spinner-border');
+					const btnText = document.querySelector('.btn-add-video .btn-text');
+					const video = getYoutubeVideoData(input.value);
 
-				const _resetForm = () => {
-					btnSpinner.addClass("d-none");
-					btnText.removeClass("d-none");
-					input.prop("disabled", false);
-				};
+					const _resetForm = () => {
+						btnSpinner.classList.add("d-none");
+						btnText.classList.remove("d-none");
+						input.disabled = false;
+					};
 
-				const _invalidResponse = (error) => {
-					input.addClass('is-invalid');
-					_resetForm();
-					alert.error(error);
-					return false;;
-				}
+					const _invalidResponse = (error) => {
+						input.classList.add('is-invalid');
+						_resetForm();
+						alert.error(error); 
+						return false;
+					};
 
-				btnSpinner.removeClass("d-none");
-				btnText.addClass("d-none");
-				input.prop("disabled", true);
+					btnSpinner.classList.remove("d-none");
+					btnText.classList.add("d-none");
+					input.disabled = true;
 
-				if (input.val() === "") {
-					return _invalidResponse("Youtube Url is required!");
-				} else if (video.id === undefined) {
-					return _invalidResponse(video.message);
-				} else if ($(`.${video.id}`)[0]) {
-					return _invalidResponse("Video already added!");
-				} else {
-					const videoContainer = $("<div>", {
-						class: video.id,
-						"data-id": video.id
-					}).append(
-						// Hidden input elements
-						$("<input>", { type: "hidden", name: `videos[${video.id}][id]`, value: video.id }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][thumbnail][default]`, value: video.thumbnail.default }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][thumbnail][hq]`, value: video.thumbnail.hq }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][thumbnail][mq]`, value: video.thumbnail.mq }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][thumbnail][sd]`, value: video.thumbnail.sd }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][thumbnail][maxres]`, value: video.thumbnail.maxres }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][url]`, value: video.url }),
-						$("<input>", { type: "hidden", name: `videos[${video.id}][embed]`, value: video.embed }),
+					if (input.value === "") {
+						return _invalidResponse("Youtube Url is required!");
+					} else if (video.id === undefined) {
+						return _invalidResponse(video.message);
+					} else if (document.querySelector(`.${CSS.escape(video.id)}`)) {
+						return _invalidResponse("Video already added!");
+					} else {
+						const videoContainer = document.createElement('div');
+						videoContainer.classList.add(video.id);
+						videoContainer.dataset.id = video.id;
 
-						// Delete button container
-						$("<div>", { class: "btn-delete-container w-100 text-end p-1" }).append(
-							$("<span>", {
-								class: "btn btn-danger btn-remove-video",
-								"data-id": video.id
-							}).append($("<i>", { class: "ti ti-trash" }))
-						),
+						const createHiddenInput = (name, value) => {
+							const input = document.createElement('input');
+							input.type = 'hidden';
+							input.name = `videos[${video.id}]${name}`;
+							input.value = value;
+							return input;
+						};
 
-						// Video thumbnail with playback
-						$("<div>", {
-							class: "avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white",
-							"data-id": video.id,
-							"data-url": video.url,
-							"data-embed": video.embed,
-							style: `background-image: url(${video.thumbnail.sd}); height:120px !important;`
-						}).append($("<i>", { class: "ti ti-brand-youtube fs-32" }))
-					);
+						videoContainer.appendChild(createHiddenInput('[id]', video.id));
+						videoContainer.appendChild(createHiddenInput('[thumbnail][default]', video.thumbnail.default));
+						videoContainer.appendChild(createHiddenInput('[thumbnail][hq]', video.thumbnail.hq));
+						videoContainer.appendChild(createHiddenInput('[thumbnail][mq]', video.thumbnail.mq));
+						videoContainer.appendChild(createHiddenInput('[thumbnail][sd]', video.thumbnail.sd));
+						videoContainer.appendChild(createHiddenInput('[thumbnail][maxres]', video.thumbnail.maxres));
+						videoContainer.appendChild(createHiddenInput('[url]', video.url));
+						videoContainer.appendChild(createHiddenInput('[embed]', video.embed));
+						videoContainer.appendChild(createHiddenInput('[created_at]', Date.now()));
 
-					// Prepend the video container to the video list container
-					$(".video-list-container").prepend(videoContainer);
+						const btnDeleteContainer = document.createElement('div');
+						btnDeleteContainer.classList.add('btn-delete-container', 'w-100', 'text-end', 'p-1');
 
-					// Apply CSS to the delete button container
-					$(`.${video.id} .btn-delete-container`).css({
-						position: "relative",
-						top: "40px",
-						right: 0,
-						width: "3rem",
-						height: "2.5rem",
-						"z-index": 1
-					});
+						const btnRemoveVideo = document.createElement('span');
+						btnRemoveVideo.classList.add('btn', 'btn-danger', 'btn-remove-video');
+						btnRemoveVideo.dataset.id = video.id;
 
-					input.val("");
-					input.removeClass('is-invalid');
-					_resetForm();
+						const deleteIcon = document.createElement('i');
+						deleteIcon.classList.add('ti', 'ti-trash');
+						btnRemoveVideo.appendChild(deleteIcon);
+						btnDeleteContainer.appendChild(btnRemoveVideo);
+						videoContainer.appendChild(btnDeleteContainer);
+
+						const btnPlayback = document.createElement('div');
+						btnPlayback.classList.add('avatar', 'avatar-xxxl', 'p-2', 'btn-playback', 'cursor-pointer', 'text-white');
+						btnPlayback.dataset.id = video.id;
+						btnPlayback.dataset.url = video.url;
+						btnPlayback.dataset.embed = video.embed;
+						btnPlayback.style.backgroundImage = `url(${video.thumbnail.sd})`;
+						btnPlayback.style.height = '120px';
+						const playIcon = document.createElement('i');
+						playIcon.classList.add('ti', 'ti-brand-youtube', 'fs-32');
+						btnPlayback.appendChild(playIcon);
+						videoContainer.appendChild(btnPlayback);
+
+						const videoListContainer = document.querySelector('.video-list-container');
+						videoListContainer.prepend(videoContainer);
+
+						input.value = "";
+						input.classList.remove('is-invalid');
+						_resetForm();
+					}
 				}
 			});
 		};
 
 		const _handleVideoPlayback = () => {
-			$(document).on('click', '.btn-playback', function () {
-				const embed = $(this).data('embed');
-				const url = $(this).data('url');
-				const id = $(this).data('id');
-				let html = ``;
-				modal.create({
-					id: id,
-					size: 'fullscreen',
-					callback: function () {
-						html += `<div class='row justify-content-center'>`;
-						html += `<div class='col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12'>`;
-						html += `<h4 class='fw-normal'>${url}</h4>`;
-						/* html += `<div id='player-youtube' data-plyr-provider='youtube' data-plyr-embed-id='${id}'></div>`; */
-						html += `<iframe class='w-100' height='560' src='${embed}' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe>`;
-						html += `</div>`;
-						html += `</div>`;
-						return html;
-					},
-					status: "info",
-					destroyable: true
-				});
-				/* window.Plyr && (new Plyr('#player-youtube')); */
-				$(`#${id}`).modal('show');
+			document.addEventListener('click', function (event) {
+				if (event.target.closest('.btn-playback')) {
+					const btn = event.target.closest('.btn-playback');
+					const embed = btn.dataset.embed;
+					const url = btn.dataset.url;
+					const id = btn.dataset.id;
+					let html = ``;
+					_modal.create({
+						id: id,
+						size: 'fullscreen',
+						callback: function () {
+							html += `<div class='row justify-content-center'>`;
+							html += `<div class='col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12'>`;
+							html += `<iframe class='w-100' height='560' src='${embed}' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe>`;
+							html += `<div class='text-center'>`;
+							html += `<span class='btn mt-3' data-bs-dismiss='modal'><i class='ti ti-x me-1'></i> Close</span>`;
+							html += `</div>`;
+							html += `</div>`;
+							html += `</div>`;
+							return html;
+						},
+						status: "info",
+						destroyable: true
+					});
+
+					const modalElement = document.getElementById(id);
+					modalElement.querySelector('.modal-content').style.backgroundColor = 'rgba(0, 0, 0, 1)';
+				}
 			});
 		};
 
 		const _handleVideoDeletion = () => {
-			$(document).on('click', '.btn-remove-video', function () {
-				const $this = $(this);
-				const id = $this.data('id');
-				$(`.${id}`).remove();
+			document.addEventListener('click', function (event) {
+				if (event.target.closest('.btn-remove-video')) {
+					const btn = event.target.closest('.btn-remove-video');
+					const id = btn.dataset.id;
+					const videoElement = document.querySelector(`.${CSS.escape(id)}`);
+					if (videoElement) {
+						videoElement.remove();
+					}
+				}
 			});
 		};
 
 		const _createVideoformId = () => {
-			$('.btn-delete-container').css({
-				position: "relative",
-				top: "40px",
-				right: 0,
-				width: "3rem",
-				height: "2.5rem",
-				"z-index": 1
-			});
+			const container = document.getElementById('videoInput');
+			if (!container) {
+				return false;
+			}
 
-			// Append HTML structure to #videoInput
-			$('#videoInput').append(
-				$("<div>", { class: "d-flex gap-1" }).append(
-					$("<div>", { class: "form-floating flex-fill" }).append(
-						$("<input>", {
-							type: "text",
-							id: "youtubeUrl",
-							class: "form-control",
-							placeholder: "",
-							"aria-label": "Youtube Url",
-							"aria-describedby": "basic-addon1"
-						}),
-						$("<label>", { for: "youtubeUrl" }).append(
-							$("<i>", { class: "ti ti-brand-youtube" }),
-							" Paste Youtube Url"
-						)
-					),
-					$("<span>", { class: "btn btn-primary btn-add-video" }).append(
-						$("<span>", {
-							class: "spinner-border spinner-border-sm d-none",
-							role: "status",
-							"aria-hidden": "true"
-						}),
-						$("<span>", { class: "btn-text fs-18" }).append(
-							$("<i>", { class: "ti ti-plus me-1" }),
-							" Add Video"
-						)
-					)
-				)
-			);
+			const createElements = (tag, attributes = {}, children = []) => {
+				const element = document.createElement(tag);
+				for (const [key, value] of Object.entries(attributes)) {
+					element.setAttribute(key, value);
+				}
+				children.forEach(child => element.appendChild(child));
+				return element;
+			};
+
+			const formGroup = createElements('div', { class: 'd-flex gap-1' }, [
+				createElements('div', { class: 'form-floating flex-fill' }, [
+					createElements('input', {
+						type: 'text',
+						id: 'youtubeUrl',
+						class: 'form-control',
+						placeholder: '',
+						'aria-label': 'Youtube Url',
+						'aria-describedby': 'basic-addon1'
+					}),
+					createElements('label', { for: 'youtubeUrl' }, [
+						createElements('i', { class: 'ti ti-brand-youtube' }),
+						document.createTextNode(' Paste Youtube Url')
+					])
+				]),
+				createElements('span', { class: 'btn btn-primary btn-add-video' }, [
+					createElements('span', {
+						class: 'spinner-border spinner-border-sm d-none',
+						role: 'status',
+						'aria-hidden': 'true'
+					}),
+					createElements('span', { class: 'btn-text fs-18' }, [
+						createElements('i', { class: 'ti ti-plus me-1' }),
+						document.createTextNode(' Add Video')
+					])
+				])
+			]);
+
+			container.appendChild(formGroup);
 		};
 
 		return {
@@ -711,25 +802,46 @@
 
 	const tomSelect = function () {
 		const init = (containerId) => {
-			window.TomSelect && (new TomSelect(`${containerId}`, {
-				copyClassesToDropdown: false,
-				dropdownParent: 'body',
-				controlInput: '<input>',
-				render: {
-					item: function (data, escape) {
-						if (data.customProperties) {
-							return `<div><span class='dropdown-item-indicator'>${data.customProperties}</span>${escape(data.text)}</div>`;
-						}
-						return `<div>${escape(data.text)}</div>`;
+			if (window.TomSelect) {
+				new TomSelect(document.querySelector(containerId), {
+					copyClassesToDropdown: false,
+					dropdownParent: 'body',
+					controlInput: '<input>', 
+					render: {
+						item: function (data, escape) {
+							if (data.customProperties) {
+								const div = document.createElement('div');
+								const span = document.createElement('span');
+								span.classList.add('dropdown-item-indicator');
+								span.textContent = data.customProperties;
+								div.appendChild(span);
+								div.appendChild(document.createTextNode(escape(data.text)));
+								return div;
+							}
+							const div = document.createElement('div');
+							div.textContent = escape(data.text);
+							return div;
+
+						},
+						option: function (data, escape) {
+							if (data.customProperties) {
+								const div = document.createElement('div');
+								const span = document.createElement('span');
+								span.classList.add('dropdown-item-indicator');
+								span.textContent = data.customProperties;
+								div.appendChild(span);
+								div.appendChild(document.createTextNode(escape(data.text)));
+								return div;
+							}
+							const div = document.createElement('div');
+							div.textContent = escape(data.text);
+							return div;
+						},
 					},
-					option: function (data, escape) {
-						if (data.customProperties) {
-							return `<div><span class='dropdown-item-indicator'>${data.customProperties}</span>${escape(data.text)}</div>`;
-						}
-						return `<div>${escape(data.text)}</div>`;
-					},
-				},
-			}));
+				});
+			} else { 
+				throw new Error(`TomSelect script is not inlcuded in head. ${CDN}/vendor/tom-select/tom-select.min.js`);
+			}
 		};
 
 		return {
@@ -740,61 +852,74 @@
 	const alert = function () {
 
 		const _display = (message, element) => {
-			const messageContainer = $(element);
+			const messageContainer = document.querySelector(element);
 
-			if (!messageContainer[0]) {
-				$(`<div>`, {
-					class: 'response'
-				}).prependTo('body');
+			if (!messageContainer) {
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('response');
+				document.body.prepend(newDiv); 
 			}
 
-			$(`${element}`).html(message);
+			document.querySelector(element).innerHTML = message; 
 		};
 
 		const success = (message, element = '.response') => {
-			const html = $("<div>", {
-				class: "message alert alert-success alert-dismissible show",
-				role: "alert"
-			}).append(
-				$("<span>", { text: message }),
-				$("<button>", {
-					type: "button",
-					class: "btn-close",
-					"data-bs-dismiss": "alert",
-					"aria-label": "Close"
-				})
-			);
-			_display(html, element);
+			const alertDiv = document.createElement('div');
+			alertDiv.classList.add('message', 'alert', 'alert-success', 'alert-dismissible', 'show');
+			alertDiv.setAttribute('role', 'alert');
+
+			const messageSpan = document.createElement('span');
+			messageSpan.textContent = message;
+			alertDiv.appendChild(messageSpan);
+
+			const closeButton = document.createElement('button');
+			closeButton.type = 'button';
+			closeButton.classList.add('btn-close');
+			closeButton.setAttribute('data-bs-dismiss', 'alert');
+			closeButton.setAttribute('aria-label', 'Close');
+			alertDiv.appendChild(closeButton);
+
+			_display(alertDiv.outerHTML, element); 
 		};
 
 		const error = (message, element = '.response') => {
-			const html = $("<div>", {
-				class: "message alert alert-danger alert-dismissible show",
-				role: "alert"
-			}).append(
-				$("<span>", { text: message }),
-				$("<button>", {
-					type: "button",
-					class: "btn-close",
-					"data-bs-dismiss": "alert",
-					"aria-label": "Close"
-				})
-			);
-			_display(html, element);
+			const alertDiv = document.createElement('div');
+			alertDiv.classList.add('message', 'alert', 'alert-danger', 'alert-dismissible', 'show');
+			alertDiv.setAttribute('role', 'alert');
+
+			const messageSpan = document.createElement('span');
+			messageSpan.textContent = message;
+			alertDiv.appendChild(messageSpan);
+
+			const closeButton = document.createElement('button');
+			closeButton.type = 'button';
+			closeButton.classList.add('btn-close');
+			closeButton.setAttribute('data-bs-dismiss', 'alert');
+			closeButton.setAttribute('aria-label', 'Close');
+			alertDiv.appendChild(closeButton);
+
+			_display(alertDiv.outerHTML, element); 
 		};
 
 		const loader = (message = "Processing, Please wait...", element = '.response') => {
-			const html = $("<div>", {
-				class: "bg-white p-3 mt-3 rounded border"
-			}).append(
-				$("<div>", {
-					class: "d-flex gap-3 align-items-center"
-				}).append(
-					$("<div>", { class: "loader" }),
-					$("<p>", { class: "mb-0", text: message })
-				)
-			);
-			_display(html, element);
+			const loaderDiv = document.createElement('div');
+			loaderDiv.classList.add('bg-white', 'p-3', 'mt-3', 'rounded', 'border');
+
+			const innerDiv = document.createElement('div');
+			innerDiv.classList.add('d-flex', 'gap-3', 'align-items-center');
+
+			const loaderSpinner = document.createElement('div');
+			loaderSpinner.classList.add('loader');
+			innerDiv.appendChild(loaderSpinner);
+
+			const messageParagraph = document.createElement('p');
+			messageParagraph.classList.add('mb-0');
+			messageParagraph.textContent = message;
+			innerDiv.appendChild(messageParagraph);
+
+			loaderDiv.appendChild(innerDiv);
+
+			_display(loaderDiv.outerHTML, element); 
 		};
 
 		const message = (message, element = '.response') => {
@@ -814,22 +939,25 @@
 		 * Disable all buttons on the page, visually and interactively
 		 */
 		const disable = (element = ".btn") => {
-			$(`${element}`).css({
-				cursor: 'wait',
-				pointerEvents: 'none',
-				opacity: 0.5
-			}).prop('disabled', true);
+			const elements = document.querySelectorAll(element); 
+
+			elements.forEach(el => {
+				el.style.cursor = 'wait';
+				el.style.pointerEvents = 'none';
+				el.style.opacity = 0.5;
+				el.disabled = true; 
+			});
 		};
 
-		/**
-		 * Enable all buttons on the page, visually and interactively
-		 */
 		const enable = (element = ".btn") => {
-			$(`${element}`).css({
-				cursor: 'pointer',
-				pointerEvents: 'auto',
-				opacity: 1
-			}).prop('disabled', false);
+			const elements = document.querySelectorAll(element); 
+
+			elements.forEach(el => {
+				el.style.cursor = 'pointer';
+				el.style.pointerEvents = 'auto';
+				el.style.opacity = 1;
+				el.disabled = false; 
+			});
 		};
 
 		return {
@@ -837,10 +965,6 @@
 			enable
 		};
 	}();
-
-	
-
-	
 
 	/**
 	 * Submits the given form id, handles validation, redirects, and callbacks
@@ -853,10 +977,14 @@
 	 * @param {String} [options.redirectUrl] - the url to redirect to on success
 	 * @returns {JQueryPromise} - the promise returned by $.post
 	 */
-	function submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {}) {
-
-		$(document).on('submit', `${formId}`, function (event) {
-			event.preventDefault();
+	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
+		formId = formId.replace('#', '');
+		
+		document.addEventListener('submit', function (event) {
+			consosle.log(event.target.id);
+			if (event.target.id === formId) {
+				event.preventDefault();
+			}
 		});
 
 		const _validatorResponse = (validator) => {
@@ -872,8 +1000,19 @@
 			return false;
 		};
 
-		const form = $(formId);
-		const formData = form.serializeArray();
+		const form = document.getElementById(formId);
+
+		if (!form) { 
+			console.error(`Form with ID '${formId}' not found!`);
+			return; 
+		}
+
+		const formData = Array.from(form.elements)
+			.filter(element => element.name) 
+			.map(element => ({
+				name: element.name,
+				value: element.value
+			}));
 
 		formData.push({ name: 'csrf_token', value: _CSRFToken });
 
@@ -881,10 +1020,9 @@
 			onBeforeSend(formData);
 		}
 
-		return post(form.attr('action'), formData, {
+		return post(form.action, formData, {
 			beforeSend: () => {
 				alert.loader();
-				$('html, body').animate({ scrollTop: 0 }, 'slow');
 
 				if (typeof validation === 'object') {
 					if (typeof validate !== 'undefined') {
@@ -893,7 +1031,7 @@
 							alert.error(validationErrors);
 							return false;
 						}
-					} else { 
+					} else {
 						console.log("validate.js is not included in the head. Include it from " + CDN + "/js/vendor/validatejs-0.13.1/validate.min.js or https://validatejs.org/#validatejs-download");
 					}
 				}
@@ -933,8 +1071,8 @@
 			onComplete: () => {
 				button.enable();
 			}
-		});
-	}
+		});	
+	};
 
 	/**
 	 * Moves an HTML element from one location to another within the DOM.
@@ -947,15 +1085,15 @@
 	 * the function returns without making any changes.
 	 */
 	const moveHtmlElement = function (fromElementId, toElementId) {
-		const fromElement = $(fromElementId);
-		const toElement = $(toElementId);
+		const fromElement = document.getElementById(fromElementId);
+		const toElement = document.getElementById(toElementId);
 
 		if (fromElement === null || toElement === null) {
 			return;
 		}
 
-		toElement.html(fromElement.html());
-		fromElement.html('');
+		toElement.innerHTML = fromElement.innerHTML;
+		fromElement.innerHTML = '';
 	};
 
 	const _modal = function () {
@@ -970,40 +1108,54 @@
 		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
 			const destroyableClass = destroyable ? "modal-destroyable" : "";
 
-			let html = $("<div>", {
-				class: `modal ${destroyableClass}`,
-				id: id,
-				"aria-labelledby": "modal",
-				"aria-hidden": "true"
-			}).append(
-				$("<div>", {
-					class: `modal-dialog modal-${size}`
-				}).append(
-					$("<div>", {
-						class: "modal-content"
-					}).append(
-						status ? $("<div>", {
-							class: `modal-status bg-${status}`
-						}) : "",
-						$("<div>", {
-							class: "modal-body"
-						}).append(
-							$("<span>", {
-								class: "btn-close",
-								"data-bs-dismiss": "modal",
-								"aria-label": "Close"
-							}),
-							$("<div>", {
-								class: "response-modal"
-							}).append(
-								callback !== undefined ? callback() : ""
-							)
-						)
-					)
-				)
-			);
+			let html = document.createElement('div');
+			html.classList.add('modal', destroyableClass); 
+			html.id = id;
+			html.setAttribute('aria-labelledby', 'modal');
+			html.setAttribute('aria-hidden', 'true');
 
-			$("body").append(html);
+			const modalDialog = document.createElement('div');
+			modalDialog.classList.add('modal-dialog', `modal-${size}`);
+			html.appendChild(modalDialog);
+
+			const modalContent = document.createElement('div');
+			modalContent.classList.add('modal-content');
+			modalDialog.appendChild(modalContent);
+
+			if (status) {
+				const modalStatus = document.createElement('div');
+				modalStatus.classList.add('modal-status', `bg-${status}`);
+				modalContent.appendChild(modalStatus);
+			}
+
+			const modalBody = document.createElement('div');
+			modalBody.classList.add('modal-body');
+			modalContent.appendChild(modalBody);
+
+			const closeButton = document.createElement('span');
+			closeButton.classList.add('btn-close');
+			closeButton.setAttribute('data-bs-dismiss', 'modal');
+			closeButton.setAttribute('aria-label', 'Close');
+			modalBody.appendChild(closeButton);
+
+			const responseModal = document.createElement('div');
+			responseModal.classList.add('response-modal');
+			modalBody.appendChild(responseModal);
+
+			if (callback !== undefined) {
+				const callbackContent = callback(); 
+				if (typeof callbackContent === 'string') {
+					responseModal.innerHTML = callbackContent; 
+				} else if (callbackContent instanceof Element) {
+					responseModal.appendChild(callbackContent); 
+				} else {
+					console.warn('Callback function should return either a string or an Element')
+				}
+			}
+
+			const htmlString = html.outerHTML;
+
+			document.body.appendChild(html);
 
 			new bootstrap.Modal(document.getElementById(id), {
 				keyboard: false
@@ -1011,19 +1163,29 @@
 		};
 
 		const _handleModalClose = () => {
-			$(document).on('click', '.btn-close', function () {
-				$(this).closest('.modal').modal('hide');
+			document.addEventListener('click', function (event) {
+				if (event.target.classList.contains('btn-close')) {
+					const modal = event.target.closest('.modal');
+					if (modal) {
+						const bsModal = bootstrap.Modal.getInstance(modal);
+						if (bsModal) {
+							bsModal.hide();
+						} else {
+							console.error("Modal element not associated with a Bootstrap Modal instance.");
+						}
+					}
+				}
 			});
-		}
+		};
 
 		/**
 		 * Destroys a modal element after it has been closed if it has the "modal-destroyable" class.
 		 * This is a private function and should not be used directly.
 		 */
 		const _destroyModalOnClose = () => {
-			$(document).on('hidden.bs.modal', '.modal', function (event) {
-				const modal = $(`#${event.target.id}`);
-				if (modal.hasClass("modal-destroyable")) {
+			document.addEventListener('hidden.bs.modal', function (event) {
+				const modal = document.getElementById(event.target.id);
+				if (modal && modal.classList.contains("modal-destroyable")) {
 					modal.remove();
 				}
 			});
@@ -1083,46 +1245,51 @@
 		};
 
 		const _createUploadContainer = (uploadContainerSelector ) => {
-			const container = $(uploadContainerSelector);
-			if (!container[0]) {
-				$('body').prepend(`<div class='upload-container'></div>`);
-				containerSelector = '.upload-container';
+			const container = document.querySelector(uploadContainerSelector);
+
+			if (!container) {
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('upload-container');
+				document.body.prepend(newDiv);
+				container = document.querySelector('.upload-container'); 
+				uploadContainerSelector = '.upload-container'; 
 			}
 
-			let html = `<span class='btn btn-dark btn-browse'><i class='ti ti-upload me-2'></i> Upload</span>`;
-			container.html(html);
+			const html = `<span class='btn btn-dark btn-browse'><i class='ti ti-upload me-2'></i> Upload</span>`;
+			container.innerHTML = html;
 		};
 
 		const _createUploadForm = (url, inputId, accept, multiple, containerSelector) => {
-			let html = $("<div>", {
-				class: containerSelector.replace(".", "")
-			}).append(
-				$("<form>", {
-					id: 'uploadForm',
-					class: 'd-none',
-					action: url,
-					method: 'POST',
-					enctype: 'multipart/form-data'
-				}).append(
-					$("<center>").append(
-						multiple ? $("<input>", {
-							type: 'file',
-							name: `${inputId}[]`,
-							id: inputId,
-							multiple: 'multiple',
-							accept: accept
-						}) : $("<input>", {
-							type: 'file',
-							name: inputId,
-							id: inputId,
-							accept: accept,
-							value: ''
-						})
-					)
-				)
-			);
+			const containerDiv = document.createElement('div');
+			containerDiv.classList.add(containerSelector.replace(".", "")); 
 
-			$("body").prepend(html);
+			const form = document.createElement('form');
+			form.id = 'uploadForm';
+			form.classList.add('d-none');
+			form.action = url;
+			form.method = 'POST';
+			form.enctype = 'multipart/form-data';
+
+			const center = document.createElement('center');
+
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.id = inputId;
+			input.accept = accept;
+
+			if (multiple) {
+				input.name = `${inputId}[]`;
+				input.multiple = true;
+			} else {
+				input.name = inputId;
+				input.value = '';
+			}
+
+			center.appendChild(input);
+			form.appendChild(center);
+			containerDiv.appendChild(form);
+
+			document.body.prepend(containerDiv);
 		};
 
 		/**
@@ -1133,282 +1300,402 @@
 		 * @param {Object} [settings] - Additional settings for the image elements.
 		 * @return {string} - The HTML elements as a string.
 		 */
-		const _setMultipleImageUploadContainer = (image, uploadedContainerSelector = '.images-container') => {
-			let html = $("<div>", {
-				class: `${image.id} image_${image.id} me-2 mb-3 flex-grow-1`
-			});
+		const _setMultipleImageUploadContainer = (image, uploadedContainerSelector = 'images-container') => {
+			uploadedContainerSelector.replace(".", "");
+			const container = document.querySelector(uploadedContainerSelector);
 
-			// Create hidden inputs
-			html.append(
-				$("<input>", {
-					type: 'hidden',
-					name: `upload[${image.id}][image_id]`,
-					value: image.id
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `upload[${image.id}][height]`,
-					value: image.height
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `upload[${image.id}][width]`,
-					value: image.width
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `upload[${image.id}][filename]`,
-					value: image.filename
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `upload[${image.id}][url]`,
-					value: image.final_url
-				})
-			);
-
-			// Create image element
-			html.append(
-				$("<div>").append(
-					$("<span>", {
-						class: 'avatar avatar-xxxl',
-						style: `background-image:url('${image.temp_url}');`
-					})
-				)
-			);
-
-			// Create button group
-			html.append(
-				$("<div>", {
-					class: 'btn-list mt-2 text-center'
-				}).append(
-					$("<span>", {
-						class: 'btn btn-md btn-outline-secondary btn-remove-image',
-						title: 'Remove image',
-						"data-container": `.${image.id}`,
-						"data-filename": image.filename,
-						"data-url": `${DOMAIN}/properties/images/${image.id}/delete`
-					}).append(
-						$("<i>", { class: 'ti ti-trash' })
-					),
-					$("<span>", {
-						class: 'btn btn-md btn-outline-primary btn-set-thumbnail',
-						title: 'Set image as thumbnail',
-						"data-container": `.${image.id}`,
-						"data-final-url": image.final_url
-					}).append(
-						$("<i>", { class: 'ti ti-click me-2' }),
-						" Thumbnail"
-					)
-				)
-			);
-
-			// Handle error state
-			if (image.status == 2) {
-				html = $("<div>", {
-					class: 'alert alert-danger alert-dismissible'
-				}).append(
-					$("<i>", {
-						class: 'ti ti-alert-triangle me-2',
-						"aria-hidden": 'true'
-					}),
-					$("<span>", {
-						class: 'p-0 m-0',
-						text: image.message
-					}),
-					$("<button>", {
-						type: 'button',
-						class: 'btn-close',
-						"data-bs-dismiss": 'alert'
-					})
-				);
+			if (!container) {
+				console.log(`Container with selector '${uploadedContainerSelector}' not found.`);
+				return; 
 			}
 
-			$(`${uploadedContainerSelector}`).prepend(html);
-		}
+			let div = document.createElement('div');
+			div.classList.add(image.id, `image_${image.id}`, 'me-2', 'mb-3', 'flex-grow-1');
 
-		function _setSingleUploadContainer(image, uploadedContainerSelector = '.photo-preview') {
+			/* Create hidden inputs */
+			let inputImageId = document.createElement('input');
+			inputImageId.type = 'hidden';
+			inputImageId.name = `upload[${image.id}][image_id]`;
+			inputImageId.value = image.id;
+			div.appendChild(inputImageId);
+
+			let inputHeight = document.createElement('input');
+			inputHeight.type = 'hidden';
+			inputHeight.name = `upload[${image.id}][height]`;
+			inputHeight.value = image.height;
+			div.appendChild(inputHeight);
+
+			let inputWidth = document.createElement('input');
+			inputWidth.type = 'hidden';
+			inputWidth.name = `upload[${image.id}][width]`;
+			inputWidth.value = image.width;
+			div.appendChild(inputWidth);
+
+			let inputFilename = document.createElement('input');
+			inputFilename.type = 'hidden';
+			inputFilename.name = `upload[${image.id}][filename]`;
+			inputFilename.value = image.filename;
+			div.appendChild(inputFilename);
+
+			let inputUrl = document.createElement('input');
+			inputUrl.type = 'hidden';
+			inputUrl.name = `upload[${image.id}][url]`;
+			inputUrl.value = image.final_url;
+			div.appendChild(inputUrl);
+
+			/* Create image element */
+			let imageDiv = document.createElement('div');
+			let imageSpan = document.createElement('span');
+			imageSpan.classList.add('avatar', 'avatar-xxxl');
+			imageSpan.style.backgroundImage = `url('${image.temp_url}')`;
+			imageDiv.appendChild(imageSpan);
+			div.appendChild(imageDiv);
+
+			/* Create button group */
+			let buttonDiv = document.createElement('div');
+			buttonDiv.classList.add('btn-list', 'mt-2', 'text-center');
+
+			let removeButton = document.createElement('span');
+			removeButton.classList.add('btn', 'btn-md', 'btn-outline-secondary', 'btn-remove-image');
+			removeButton.title = 'Remove image';
+			removeButton.dataset.container = image.id;
+			removeButton.dataset.filename = image.filename;
+			removeButton.dataset.url = `${DOMAIN}/properties/images/${image.id}/delete`;
+			
+			let removeIcon = document.createElement('i');
+			removeIcon.classList.add('ti', 'ti-trash');
+			removeButton.appendChild(removeIcon);
+			buttonDiv.appendChild(removeButton);
+
+			let thumbnailButton = document.createElement('span');
+			thumbnailButton.classList.add('btn', 'btn-md', 'btn-outline-primary', 'btn-set-thumbnail');
+			thumbnailButton.title = 'Set image as thumbnail';
+			thumbnailButton.dataset.container = image.id;
+			thumbnailButton.dataset.finalUrl = image.final_url;
+
+			let thumbnailIcon = document.createElement('i');
+			thumbnailIcon.classList.add('ti', 'ti-click', 'me-2');
+			thumbnailButton.appendChild(thumbnailIcon);
+			thumbnailButton.appendChild(document.createTextNode(" Thumbnail"));
+			buttonDiv.appendChild(thumbnailButton);
+
+			div.appendChild(buttonDiv);
+
+			/* Handle error state */
+			if (image.status == 2) {
+				let alertDiv = document.createElement('div');
+				alertDiv.classList.add('alert', 'alert-danger', 'alert-dismissible');
+
+				let alertIcon = document.createElement('i');
+				alertIcon.classList.add('ti', 'ti-alert-triangle', 'me-2');
+				alertIcon.setAttribute('aria-hidden', 'true');
+				alertDiv.appendChild(alertIcon);
+
+				let messageSpan = document.createElement('span');
+				messageSpan.classList.add('p-0', 'm-0');
+				messageSpan.textContent = image.message;
+				alertDiv.appendChild(messageSpan);
+
+				let closeButton = document.createElement('button');
+				closeButton.type = 'button';
+				closeButton.classList.add('btn-close');
+				closeButton.dataset.bsDismiss = 'alert';
+				alertDiv.appendChild(closeButton);
+
+				div = alertDiv; 
+			}
+
+			if (container) {
+				container.prepend(div);
+			} else {
+				console.error("Container element not found.");
+			}
+		};
+
+		const _setSingleUploadContainer = (image, uploadedContainerSelector = '.photo-preview') => {
+			const previewElement = document.querySelector(uploadedContainerSelector);
+
+			if (!previewElement) {
+				console.error(`Element with selector '${uploadedContainerSelector}' not found.`);
+				return; 
+			}
+
+
 			if (image.status == 1) {
-				const previewElement = $(uploadedContainerSelector);
-
-				previewElement.css("background-image", "url(" + image.temp_url + ")");
+				previewElement.style.backgroundImage = `url(${image.temp_url})`; 
 				alert.message("");
 
-				$('#photo').val(image.final_url);
+				const photoInput = document.getElementById('photo');
+				if (photoInput) {
+					photoInput.value = image.final_url;
+				} else {
+					console.error("Element with ID 'photo' not found.");
+				}
+
 			} else {
 				alert.message(image.message);
 			}
 
-			$(`${uploadedContainerSelector} .btn-browse`).show();
-		}
+			const browseButton = document.querySelector(`${uploadedContainerSelector} .btn-browse`);
+			if (browseButton) {
+				browseButton.style.display = 'block';
+			} else {
+				console.error(`Element with selector '${uploadedContainerSelector} .btn-browse' not found.`);
+			}
+		};
 
 		const _setMultipleFileUploadContainer = (file, uploadedContainerSelector = '.files-container') => {
-			let html = "";
-
-			// Create the file element
-			const fileElement = $("<div>", { class: 'flex-grow-1' }).append(
-				$("<input>", {
-					type: 'hidden',
-					name: `documents[${file.id}][id]`,
-					value: file.id
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `documents[${file.id}][filename]`,
-					value: file.filename
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `documents[${file.id}][size]`,
-					value: file.size
-				}),
-				$("<input>", {
-					type: 'hidden',
-					name: `documents[${file.id}][finalUrl]`,
-					value: file.final_url
-				}),
-				$("<div>", { class: 'd-flex p-y align-items-center' }).append(
-					$("<span>", { class: 'avatar me-2' }).append(
-						$("<i>", { class: 'ti ti-pdf fs-18' })
-					),
-					$("<div>", { class: 'flex-fill' }).append(
-						$("<div>", { class: 'font-weight-medium' }).append(
-							$("<input>", {
-								type: 'text',
-								name: `documents[${file.id}][alias]`,
-								value: file.alias,
-								class: 'border-0 w-100'
-							})
-						),
-						$("<div>", { class: 'text-secondary small', text: file.size })
-					)
-				)
-			);
-
-			// Create the button
-			const button = $("<div>", { class: 'btn-list' }).append(
-				$("<span>", {
-					class: 'btn-remove-document cursor-pointer p-2',
-					"data-id": file.id,
-					"data-filename": file.filename
-				}).append(
-					$("<i>", { class: 'ti ti-trash me-1' }),
-					" Remove"
-				)
-			);
-
-			// Handle error or append the content
-			if (file.status == 2) {
-				html = $("<div>", {
-					class: 'alert alert-danger alert-dismissible',
-					id: file.id
-				}).append(
-					$("<i>", { class: 'ti ti-alert-triangle me-2', "aria-hidden": 'true' }),
-					$("<span>", { class: 'p-0 m-0', text: file.message }),
-					$("<button>", {
-						type: 'button',
-						class: 'btn-close',
-						"data-bs-dismiss": 'alert'
-					})
-				).prop('outerHTML'); // Convert the jQuery object to HTML string
-			} else {
-				html = $("<li>", {
-					class: `list-group-item d-flex gap-3 justify-content-between align-items-center py-3 file_${file.id}`
-				}).append(
-					fileElement,
-					button
-				).prop('outerHTML'); // Convert the jQuery object to HTML string
+			const container = document.querySelector(uploadedContainerSelector);
+			if (!container) {
+				console.error(`Container with selector '${uploadedContainerSelector}' not found.`);
+				return;
 			}
 
-			// Prepend the generated HTML
-			$(`${uploadedContainerSelector}`).prepend(html);
-		}
+			let html = "";
+
+			/* Create the file element */
+			const fileElement = document.createElement('div');
+			fileElement.classList.add('flex-grow-1');
+
+			const inputId = document.createElement('input');
+			inputId.type = 'hidden';
+			inputId.name = `documents[${file.id}][id]`;
+			inputId.value = file.id;
+			fileElement.appendChild(inputId);
+
+			const inputFilename = document.createElement('input');
+			inputFilename.type = 'hidden';
+			inputFilename.name = `documents[${file.id}][filename]`;
+			inputFilename.value = file.filename;
+			fileElement.appendChild(inputFilename);
+
+			const inputSize = document.createElement('input');
+			inputSize.type = 'hidden';
+			inputSize.name = `documents[${file.id}][size]`;
+			inputSize.value = file.size;
+			fileElement.appendChild(inputSize);
+
+			const inputFinalUrl = document.createElement('input');
+			inputFinalUrl.type = 'hidden';
+			inputFinalUrl.name = `documents[${file.id}][finalUrl]`;
+			inputFinalUrl.value = file.final_url;
+			fileElement.appendChild(inputFinalUrl);
+
+			const fileInfoDiv = document.createElement('div');
+			fileInfoDiv.classList.add('d-flex', 'p-y', 'align-items-center');
+
+			const avatarSpan = document.createElement('span');
+			avatarSpan.classList.add('avatar', 'me-2');
+			const pdfIcon = document.createElement('i');
+			pdfIcon.classList.add('ti', 'ti-pdf', 'fs-18');
+			avatarSpan.appendChild(pdfIcon);
+			fileInfoDiv.appendChild(avatarSpan);
+
+			const fileDetailsDiv = document.createElement('div');
+			fileDetailsDiv.classList.add('flex-fill');
+
+			const aliasInputDiv = document.createElement('div');
+			aliasInputDiv.classList.add('font-weight-medium');
+			const aliasInput = document.createElement('input');
+			aliasInput.type = 'text';
+			aliasInput.name = `documents[${file.id}][alias]`;
+			aliasInput.value = file.alias;
+			aliasInput.classList.add('border-0', 'w-100');
+			aliasInputDiv.appendChild(aliasInput);
+			fileDetailsDiv.appendChild(aliasInputDiv);
+
+			const sizeDiv = document.createElement('div');
+			sizeDiv.classList.add('text-secondary', 'small');
+			sizeDiv.textContent = file.size;
+			fileDetailsDiv.appendChild(sizeDiv);
+			fileInfoDiv.appendChild(fileDetailsDiv);
+			fileElement.appendChild(fileInfoDiv);
+
+			/* Create the button */
+			const buttonDiv = document.createElement('div');
+			buttonDiv.classList.add('btn-list');
+
+			const removeButton = document.createElement('span');
+			removeButton.classList.add('btn-remove-document', 'cursor-pointer', 'p-2');
+			removeButton.dataset.id = file.id;
+			removeButton.dataset.filename = file.filename;
+			const removeIcon = document.createElement('i');
+			removeIcon.classList.add('ti', 'ti-trash', 'me-1');
+			removeButton.appendChild(removeIcon);
+			removeButton.appendChild(document.createTextNode(" Remove"));
+			buttonDiv.appendChild(removeButton);
+
+			/* Handle error or append the content */
+			if (file.status == 2) {
+				const alertDiv = document.createElement('div');
+				alertDiv.classList.add('alert', 'alert-danger', 'alert-dismissible');
+				alertDiv.id = file.id;
+
+				const alertIcon = document.createElement('i');
+				alertIcon.classList.add('ti', 'ti-alert-triangle', 'me-2');
+				alertIcon.setAttribute('aria-hidden', 'true');
+				alertDiv.appendChild(alertIcon);
+
+				const messageSpan = document.createElement('span');
+				messageSpan.classList.add('p-0', 'm-0');
+				messageSpan.textContent = file.message;
+				alertDiv.appendChild(messageSpan);
+
+				const closeButton = document.createElement('button');
+				closeButton.type = 'button';
+				closeButton.classList.add('btn-close');
+				closeButton.dataset.bsDismiss = 'alert';
+				alertDiv.appendChild(closeButton);
+
+				html = alertDiv.outerHTML; 
+			} else {
+				const listItem = document.createElement('li');
+				listItem.classList.add('list-group-item', 'd-flex', 'gap-3', 'justify-content-between', 'align-items-center', 'py-3', `file_${file.id}`);
+				listItem.appendChild(fileElement);
+				listItem.appendChild(buttonDiv);
+				html = listItem.outerHTML; 
+			}
+
+			container.prepend(html);
+		};
 
 		const _initFileUploaderEvents = () => {
-			$(document).on('click', '.btn-remove-document', function () {
-				const btn = $(this);
-				const id = btn.data('id');
-				const filename = btn.data('filename');
+			document.addEventListener('click', function (event) {
+				if (event.target.closest('.btn-remove-document')) {
+					const btn = event.target.closest('.btn-remove-document');
+					const id = btn.dataset.id;
+					const filename = btn.dataset.filename;
 
-				get(`${DOMAIN}/properties/removeDocument/${filename}`, {
-					onSuccess: function (response) {
-						if (response.status == 2) {
-							alert.error(response.message);
+					get(`${DOMAIN}/properties/removeDocument/${filename}`, {
+						onSuccess: function (response) {
+							if (response.status == 2) {
+								alert.error(response.message);
+							}
+							const fileElement = document.querySelector(`.file_${id}`);
+							if (fileElement) {
+								fileElement.remove();
+							} else {
+								console.error(`File element with class 'file_${id}' not found.`);
+							}
 						}
-						$(`.file_${id}`).remove();
-					}
-				});
-			});	
+					});
+				}
+			});
 		};
 
 		const _initImageUploaderEvents = () => {
-			$(document).on('click', '.btn-set-thumbnail', function () {
-				const btn = $(this);
-				const finalUrl = btn.data('final-url');
-				$(`.btn-set-thumbnail`).removeClass('btn-success').addClass('btn-outline-primary').html("<i class='ti ti-click me-2'></i> Thumbnail");
-				btn.addClass('btn-success').removeClass('btn-outline-primary').html("<i class='ti ti-check me-2'></i> Thumbnail");
-				$('#thumb_img').val(finalUrl);
-			});
+			document.addEventListener('click', function (event) {
 
-			$(document).on('click', '.btn-remove-image', function () {
-				const btn = $(this);
-				const container = btn.data('container');
-				const filename = btn.data('filename');
-				const url = btn.data('url');
+				if (event.target.closest('.btn-set-thumbnail')) {
+					const btn = event.target.closest('.btn-set-thumbnail');
+					const finalUrl = btn.dataset.finalUrl;
 
-				post(url, {
-					csrf_token: _CSRFToken,
-					filename: filename
-				}, {
-					onSuccess: function (response) {
-						if (response.status == 1) {
-							$(`${container}`).remove();
-						}
-						alert.message(response.message);
+					const thumbnailButtons = document.querySelectorAll('.btn-set-thumbnail');
+					thumbnailButtons.forEach(button => {
+						button.classList.remove('btn-success');
+						button.classList.add('btn-outline-primary');
+						button.innerHTML = "<i class='ti ti-click me-2'></i> Thumbnail";
+					});
+
+					btn.classList.add('btn-success');
+					btn.classList.remove('btn-outline-primary');
+					btn.innerHTML = "<i class='ti ti-check me-2'></i> Thumbnail";
+
+					const thumbImgInput = document.getElementById('thumb_img');
+					if (thumbImgInput) {
+						thumbImgInput.value = finalUrl;
+					} else {
+						console.error("Element with ID 'thumb_img' not found.");
 					}
-				});
-			});	
+				} else if (event.target.closest('.btn-remove-image')) {
+					const btn = event.target.closest('.btn-remove-image');
+					const container = btn.dataset.container;
+					const filename = btn.dataset.filename;
+					const url = btn.dataset.url;
+					
+					post(url, {
+						csrf_token: _CSRFToken,
+						filename: filename
+					}, {
+						onSuccess: function (response) {
+							if (response.status == 1) {
+								const elementToRemove = document.querySelector(container);
+								if (elementToRemove) {
+									elementToRemove.remove();
+								} else {
+									console.error(`Element with selector '${container}' not found.`);
+								}
+							}
+							alert.message(response.message);
+						}
+					});
+				}
+			});
 		};
 
 		const _initUploaderEvents = (containerSelector, input, success, error) => {
 
-			$(document).on('click', `${containerSelector} .btn-browse`, function () {
-				$(`${containerSelector} #${input}`).click();
+			document.addEventListener('click', function (event) {
+				if (event.target.closest(`${containerSelector} .btn-browse`)) { 
+					const inputElement = document.querySelector(`${containerSelector} #${input}`);
+					if (inputElement) {
+						inputElement.click();
+					} else {
+						console.error(`Input element with selector '${containerSelector} #${input}' not found.`);
+					}
+				}
 			});
 
-			$(document).on('change', `${containerSelector} #${input}`, function () {
-				const form = document.querySelector(`${containerSelector} #uploadForm`);
-				const formData = new FormData(form);
+			document.addEventListener('change', function (event) {
+				if (event.target.matches(`${containerSelector} #${input}`)) { 
+					const form = document.querySelector(`${containerSelector} #uploadForm`);
 
-				const url = $(`${containerSelector} #uploadForm`).attr('action')
-				formData.append('csrf_token', _CSRFToken);
-
-				post(url, formData, {
-					processData: false,
-					contentType: false,
-					beforeSend: () => {
-						alert.loader("Please wait while you are uploading...");
-						button.disable();
-					},
-					onSuccess: (response) => {
-						alert.message("");
-						button.enable();
-						if (response.status == 2) {
-							alert.error(response.message);
-							return;
-						}
-
-						if (success) { 
-							return success(response);
-						}
+					if (!form) {
+						console.error(`Form element with selector '${containerSelector} #uploadForm' not found.`);
+						return;
 					}
-				});
 
-				$(`${containerSelector} #${input}`).val('');
+					const formData = new FormData(form);
+
+					const urlElement = document.querySelector(`${containerSelector} #uploadForm`);
+					if (!urlElement) {
+						console.error(`Form element with selector '${containerSelector} #uploadForm' not found.`);
+						return;
+					}
+					const url = urlElement.action; 
+
+					formData.append('csrf_token', _CSRFToken);
+
+					post(url, formData, {
+						processData: false,
+						contentType: false,
+						beforeSend: () => {
+							alert.loader("Please wait while you are uploading...");
+							button.disable();
+						},
+						onSuccess: (response) => {
+							alert.message("");
+							button.enable();
+							if (response.status == 2) {
+								alert.error(response.message);
+								return;
+							}
+
+							if (success) { 
+								return success(response);
+							}
+						}
+					});
+
+					const inputElementToClear = document.querySelector(`${containerSelector} #${input}`);
+					if (inputElementToClear) {
+						inputElementToClear.value = '';
+					} else {
+						console.error(`Input element with selector '${containerSelector} #${input}' not found.`);
+					}
+				}
 			});
 		};
-
-		
 
 		return {
 			create: _create,
@@ -1608,80 +1895,98 @@
 		
 		const _calculateMortgage = () => {
 			const resultContainer = document.querySelector('.mortgage-calculator-form #result');
-			if (resultContainer === null || resultContainer === undefined) { return; }
+			if (!resultContainer) { 
+				return;
+			}
 
 			const result = _getAmortization();
-			$('.mortgage-calculator-form #result').attr("monthlyPayment", result.monthlyPayment);
-			$('.mortgage-calculator-form #result').html("&#8369;" + result.formattedMonthlyPayment);
+
+			resultContainer.setAttribute("monthlyPayment", result.monthlyPayment); 
+			resultContainer.innerHTML = `&#8369;${result.formattedMonthlyPayment}`; 
 		};
 
 		const _calculateMortgageOnChange = () => {
-			$(document).on(
-				'change',
-				'.mortgage-calculator-form #mortgageDownpayment, .mortgage-calculator-form #mortgageInterest, .mortgage-calculator-form #mortgageYear',
-				function () {
+			document.addEventListener('change', function (event) {
+				if (event.target.matches('.mortgage-calculator-form #mortgageDownpayment') ||
+					event.target.matches('.mortgage-calculator-form #mortgageInterest') ||
+					event.target.matches('.mortgage-calculator-form #mortgageYear')) {
 					_calculateMortgage();
+				}
 			});
 		};
 
 		const _createDownPaymentSelection = () => {
 			const container = document.querySelector('.mortgage-calculator-form #dpSelection');
-			if (container === null || container === undefined) { return; }
+			if (!container) {
+				return;
+			}
 
 			const downPaymentOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90];
-			const downPaymentSelectionHtml = downPaymentOptions
-				.map((option) => `<option value="${option}" ${option === 20 ? "selected" : ""}>${option}%</option>`)
-				.join("");
-			
-			$(".mortgage-calculator-form #dpSelection").after(
-				$("<select>", {
-					id: "mortgageDownpayment",
-					class: "form-select"
-				}).append(downPaymentSelectionHtml)
-			);
+			const select = document.createElement('select');
+			select.id = "mortgageDownpayment";
+			select.classList.add("form-select");
 
-			$(".mortgage-calculator-form #dpSelection").remove();
+			downPaymentOptions.forEach(option => {
+				const optionElement = document.createElement('option');
+				optionElement.value = option;
+				optionElement.textContent = `${option}%`;
+				if (option === 20) {
+					optionElement.selected = true;
+				}
+				select.appendChild(optionElement);
+			});
+
+			container.insertAdjacentElement('afterend', select); 
+			container.remove(); 
 		};
-
 
 		const _createInterestSelection = () => {
 			const container = document.querySelector('.mortgage-calculator-form #interestSelection');
-			if (container === null || container === undefined) { return; }
-
-			let interestSelectionHtml = "";
-			let isSelected = "";
-			for (let rate = 0; rate <= 20; rate += 0.25) {
-				isSelected = rate === 3.75 ? "selected" : "";
-				interestSelectionHtml += `<option value="${rate}" ${isSelected}>${rate}%</option>`;
+			if (!container) {
+				return;
 			}
 
-			$(".mortgage-calculator-form #interestSelection").after(
-				$("<select>", {
-					id: "mortgageInterest",
-					class: "form-select"
-				}).append(interestSelectionHtml)
-			);
+			const select = document.createElement('select');
+			select.id = "mortgageInterest";
+			select.classList.add("form-select");
 
-			$(".mortgage-calculator-form #interestSelection").remove();
+			for (let rate = 0; rate <= 20; rate += 0.25) {
+				const option = document.createElement('option');
+				option.value = rate;
+				option.textContent = `${rate}%`;
+				if (rate === 3.75) {
+					option.selected = true;
+				}
+				select.appendChild(option);
+			}
+
+			container.insertAdjacentElement('afterend', select);
+			container.remove();
 		};
 
 		const _createYearsSelection = () => {
 			const container = document.querySelector('.mortgage-calculator-form #yearSelection');
-			if (container === null || container === undefined) { return; }
+			if (!container) {
+				return;
+			}
 
 			const yearsOptions = Array.from({ length: 30 }, (_, i) => i + 1);
-			const yearsSelectionHtml = yearsOptions
-				.map((year) => `<option value="${year}" ${year === 3 ? "selected" : ""}>${year} Years</option>`)
-				.join("");
+			const select = document.createElement('select');
+			select.id = "mortgageYear";
+			select.classList.add("form-select");
 
-			$(".mortgage-calculator-form #yearSelection").after(
-				$("<select>", {
-					id: "mortgageYear",
-					class: "form-select"
-				}).append(yearsSelectionHtml)
-			);
+			yearsOptions.forEach(year => {
+				const option = document.createElement('option');
+				option.value = year;
+				option.textContent = `${year} Years`;
+				if (year === 3) {
+					option.selected = true;
+				}
+				select.appendChild(option);
+			});
 
-			$(".mortgage-calculator-form #yearSelection").remove();
+			container.insertAdjacentElement('afterend', select);
+			container.remove();
 		};
 
 		const _pmt = ({ rate, nper, presentValue }) => {
@@ -1708,16 +2013,39 @@
 		};
 
 		const _getAmortization = () => {
-			const container = document.querySelector('#sellingPrice');
-			if (container === null || container === undefined) { return; }
+			const sellingPriceElement = document.getElementById('sellingPrice');
+			if (!sellingPriceElement) {
+				console.error("Selling price element not found.");
+				return;
+			}
 
-			const sellingPrice = parseInt($('#sellingPrice').val(), 10);
-			const downPaymentPercent = parseInt($('#mortgageDownpayment option:selected').val(), 10);
+			const sellingPrice = parseInt(sellingPriceElement.value, 10);
+
+			const downPaymentPercentElement = document.querySelector('#mortgageDownpayment option:checked');
+			if (!downPaymentPercentElement) {
+				console.error("Down payment percentage element not found.");
+				return;
+			}
+
+			const downPaymentPercent = parseInt(downPaymentPercentElement.value, 10);
 			const downPayment = sellingPrice * (downPaymentPercent / 100);
-
 			const loanAmount = sellingPrice - downPayment;
-			const interestRate = parseFloat($('#mortgageInterest option:selected').val());
-			const years = parseInt($('#mortgageYear option:selected').val(), 10) + 1;
+
+			const interestRateElement = document.querySelector('#mortgageInterest option:checked');
+			if (!interestRateElement) {
+				console.error("Interest rate element not found.");
+				return;
+			}
+
+			const interestRate = parseFloat(interestRateElement.value);
+			const yearsElement = document.querySelector('#mortgageYear option:checked');
+
+			if (!yearsElement) {
+				console.error("Loan term element not found.");
+				return;
+			}
+
+			const years = parseInt(yearsElement.value, 10) + 1;
 			const paymentsPerYear = 12;
 
 			const monthlyPayment = _pmt({
@@ -1773,12 +2101,16 @@
 			_modal._initAfterLoad();
 			_mortgageCalculator._initAfterLoad();
 
-			$(window).resize(function () {
-				if (this.resizeTO) clearTimeout(this.resizeTO);
-				this.resizeTO = setTimeout(function () {
-					$(this).trigger('resizeEnd');
+			let resizeTO;
+
+			window.addEventListener('resize', function () {
+				if (resizeTO) {
+					clearTimeout(resizeTO);
+				}
+				resizeTO = setTimeout(function () {
+					window.dispatchEvent(new Event('resizeEnd'));
 				}, 500);
-			});	
+			});
 			
 		},
 
@@ -1798,6 +2130,7 @@
 		moveHtmlElement,
 		userClient,
 		_CSRFToken,
+		settings,
 
 		component: {
 			tinymce,
