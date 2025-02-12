@@ -1349,6 +1349,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			let div = createElements('div', {
 				class: `${image.id} image_${image.id} me-2 mb-3 flex-grow-1`
 			}, [
+				createHiddenInput(`upload[${image.id}][image_id]`),
 				createElements('input', {
 					type: 'hidden',
 					name: `upload[${image.id}][image_id]`,
