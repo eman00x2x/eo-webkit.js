@@ -6,7 +6,8 @@ module.exports = {
 		"node": true       // If you're using Node.js modules (module, exports, require)
 	},
 	"extends": [
-		"eslint:recommended" // Or any other extends you want (e.g., 'airbnb-base')
+		"eslint:recommended", // Or any other extends you want (e.g., 'airbnb-base')
+		"plugin:prettier/recommended"
 	],
 	"parserOptions": {
 		"ecmaVersion": "latest",
