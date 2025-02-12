@@ -272,6 +272,14 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		return element;
 	};
 
+	const createHiddenInput = (name, value) => {
+		return createElements("input", {
+			type: 'hidden',
+			name: name,
+			value: value
+		});
+	}
+
 	/**
 	 * Moves the HTML from the first element matching the fromElementSelector to the first element matching the toElementSelector.
 	 * If either element is not found, the function does nothing.
