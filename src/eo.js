@@ -1354,6 +1354,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				createHiddenInput(`upload[${image.id}][width]`, image.width),
 				createHiddenInput(`upload[${image.id}][filename]`, image.filename),
 				createHiddenInput(`upload[${image.id}][url]`, image.final_url),
+
 				createElements('div', {}, [
 					createElements('span', {
 						class: 'avatar avatar-xxxl',
@@ -1443,26 +1444,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			}
 
 			let fileElement = createElements('div', { class: 'flex-grow-1' }, [
-				createElements('input', {
-					type: 'hidden',
-					name: `documents[${file.id}][id]`,
-					value: file.id
-				}),
-				createElements('input', {
-					type: 'hidden',
-					name: `documents[${file.id}][filename]`,
-					value: file.filename
-				}),
-				createElements('input', {
-					type: 'hidden',
-					name: `documents[${file.id}][size]`,
-					value: file.size
-				}),
-				createElements('input', {
-					type: 'hidden',
-					name: `documents[${file.id}][finalUrl]`,
-					value: file.final_url
-				}),
+
+				createHiddenInput(`documents[${file.id}][id]`, file.id),
+				createHiddenInput(`documents[${file.id}][filename]`, file.filename),
+				createHiddenInput(`documents[${file.id}][size]`, file.size),
+				createHiddenInput(`documents[${file.id}][finalUrl]`, file.final_url),
+				
 				createElements('div', { class: 'd-flex p-y align-items-center' }, [
 					createElements('span', { class: 'avatar me-2' }, [
 						createElements('i', { class: 'ti ti-pdf fs-18' })
