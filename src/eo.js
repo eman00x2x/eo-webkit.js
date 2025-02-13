@@ -1468,7 +1468,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						])
 					])
 				]),
-				createElements('div', { class: 'btn-list' }, [
+				/* createElements('div', { class: 'btn-list' }, [
 					createElements('span', {
 						class: 'btn-remove-document cursor-pointer p-2',
 						'data-id': file.id,
@@ -1477,7 +1477,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						createElements('i', { class: 'ti ti-trash me-1' }),
 						document.createTextNode(" Remove")
 					])
-				])
+				]) */
 			]);
 
 			let listItem;
@@ -1501,9 +1501,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				if (event.target.closest('.btn-remove-document')) {
 					const btn = event.target.closest('.btn-remove-document');
 					const id = btn.dataset.id;
-					const filename = btn.dataset.filename;
+					/* const filename = btn.dataset.filename;
+					const property_id = btn.dataset.property_id; */
 
-					get(`${DOMAIN}/properties/removeDocument/${filename}`, {
+					const remove_url = btn.dataset.remove_url;
+
+					get(remove_url, {
 						onSuccess: function (response) {
 							if (response.status == 2) {
 								alert.error(response.message);
