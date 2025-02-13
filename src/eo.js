@@ -13,7 +13,7 @@ import TomSelect from 'tom-select';
 import 'tom-select/dist/css/tom-select.css'; // Import Tom Select CSS
 import wNumb from 'wnumb';
 import validate from 'validate.js';
-import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML or imported via CSS import
+import 'bootstrap';
 
 ; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
@@ -139,7 +139,6 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		);
 	};
 
-
 	/**
 	   * Generates a random hexadecimal string of the specified length.
 	   *
@@ -195,17 +194,39 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	   * Serializes a given FormData object into a plain JavaScript object.
-	   *
-	   * @param {FormData} formData - The FormData object to serialize
-	   * @returns {object} A plain JavaScript object containing the same key-value pairs as the given FormData object
-	   */
+	 * Serializes a given input into a plain JavaScript object.
+	 *
+	 * This function accepts either a native FormData object, an array of objects
+	 * with 'name' and 'value' properties, or a regular object. It processes the input
+	 * to produce a plain JavaScript object with key-value pairs.
+	 *
+	 * - If the input is a FormData object, it converts the entries to an object.
+	 * - If the input is an array, it reduces the array to an object using the 'name'
+	 *   and 'value' properties of each item.
+	 * - If the input is already a regular object, it is returned as is.
+	 *
+	 * @param {FormData|Array|object} formData - The input to serialize
+	 * @returns {object} A plain JavaScript object containing the serialized data
+	 */
 	const serializeFormData = (formData) => {
-		const data = formData.reduce(function(obj, item) {
-			obj[item.name] = item.value;
-			return obj;
-		}, {});
-		return data;
+		if (formData instanceof FormData) {
+			console.log('instance of FormData');
+			return Object.fromEntries(formData.entries());
+		} else if (Array.isArray(formData) && formData.every(item => typeof item === 'object' && item !== null && 'name' in item && 'value' in item)) {
+			console.log('array of objects');
+			return formData.reduce((acc, item) => {
+				acc[item.name] = item.value;
+				return acc;
+			}, {});
+		} else if (typeof formData === 'object' && formData !== null) {
+			console.log('object');
+			return Object.keys(formData).reduce((acc, key) => {
+				acc[key] = formData[key];
+				return acc;
+			}, {});
+		}
+
+		return formData;
 	};
 
 	/**
@@ -249,10 +270,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			};
 		}
 
-		return {
-			'status': 2,
-			'message': 'Invalid youtube url format!'
-		};
+		alert.error('Invalid YouTube URL');
 	};
 
 	/**
@@ -337,38 +355,29 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		if (beforeSend) beforeSend();
 
-		let body;
-		let headers = {
+		const headers = {
 			'X-Requested-With': 'XMLHttpRequest'
 		};
 
-		if (Array.isArray(data) && data.every(item => 'name' in item && 'value' in item)) {
-			body = new URLSearchParams();
-			data.forEach(({ name, value }) => {
-				body.append(name, value);
-			});
-			body = body.toString();
-			headers['Content-Type'] = contentType;
-		} else if (data instanceof FormData) {
-			body = data;
-		} else if (processData && typeof data === 'object') {
+		let body = data;
+
+		if (processData && (data instanceof FormData || Array.isArray(data) || (typeof data === 'object' && data !== null))) {
+			body = serializeFormData(data);
+
 			if (contentType.includes('application/json')) {
-				body = JSON.stringify(data);
+				body = JSON.stringify(body);
 				headers['Content-Type'] = contentType;
 			} else {
-				body = new URLSearchParams();
-				Object.keys(data).forEach(key => {
-					if (Array.isArray(data[key])) {
-						data[key].forEach(value => body.append(`${key}[]`, value));
-					} else {
-						body.append(key, data[key]);
-					}
-				});
-				body = body.toString();
 				headers['Content-Type'] = contentType;
+				body = Object.keys(body).map(key => {
+					const value = body[key];
+					if (Array.isArray(value)) {
+						return value.map(item => `${encodeURIComponent(key + '[]')}=${encodeURIComponent(item)}`).join('&');
+					} else {
+						return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+					}
+				}).join('&');
 			}
-		} else {
-			body = data;
 		}
 
 		fetch(url, {
@@ -376,46 +385,29 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			headers,
 			body
 		})
-			.then(response => {
+			.then(async response => { // Make sure the function is async
 				if (!response.ok) {
-					return response.text().then(errorMessage => {
-						throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-					});
+					const errorMessage = await response.text();
+					throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
 				}
-
 				return response.text().then(text => {
 					try {
 						const jsonData = JSON.parse(text);
 						return { data: jsonData, type: 'json' };
 					} catch (jsonError) {
-						/* If JSON parsing fails, assume it's HTML or text */
-						if (isInDevelopment() == 1) {
-							console.log('JSON Parse Error:', jsonError);
-						}
+						console.log(jsonError);
 						return { data: text, type: 'html' };
 					}
 				});
 			})
 			.then(result => {
-				if (result.type === 'json') {
-					onSuccess?.(result.data);
-					if (isInDevelopment() == 1) {
-						console.log('JSON Response:', result.data);
-					}
-				} else if (result.type === 'html') {
-					onSuccess?.(result.data);
-					if (isInDevelopment() == 1) {
-						console.log('HTML/Text Response:', result.data);
-					}
-				}
+				(result.type === 'json' ? onSuccess : onSuccess)?.(result.data);
 			})
 			.catch(error => {
-				onError?.(null, error.message, error); // Pass the actual error object
-				console.error('Fetch or Parse Error:', error); // Log the error object
+				onError?.(null, 'error', error);
+				console.error('Fetch Error:', error);
 			})
-			.finally(() => {
-				onComplete?.();
-			});
+			.finally(onComplete);
 	};
 
 	/**
@@ -433,34 +425,40 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	   * @param {object} [options] - The options object
 	   * @returns {Promise} The promise object
 	   */
-	const get = (url, { beforeRequest, onSuccess, onError } = {}) => {
-		const shouldProceed = beforeRequest?.();
+	const get = async(url, { beforeRequest, onSuccess, onError } = {}) => {
+		if (beforeRequest?.() === false) return;
 
-		if (shouldProceed === false) return;
+		try {
+			const response = await fetch(url);
+			if (!response.ok) {
+				const errorMessage = await response.text(); /* Get error message from server if possible */
+				throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`); /* Include message in error */
+			}
 
-		fetch(url)
-			.then(async response => {
-				if (!response.ok) {
-					throw new Error(`HTTP error! Status: ${response.status}`);
-				}
+			const contentType = response.headers.get('Content-Type');
 
-				const responseData = await response.text();
+			let responseData;
 
-				onSuccess?.(responseData);
-				button.enable();
-				return responseData;
-			})
-			.catch(error => {
-				onError?.(null, 'error', error);
+			if (contentType && contentType.includes('application/json')) {
+				responseData = await response.json();
+			} else if (contentType && contentType.includes('text/html')) {
+				responseData = await response.text();
+			} else {
+				responseData = await response.text();
+			}
 
-				alert.error(error);
-				button.enable();
+			onSuccess?.(responseData);
+			button.enable();
+			return responseData;
 
-				if (isInDevelopment() == 1) {
-					button.enable();
-					throw error;
-				}
-			});
+		} catch (error) {
+			onError?.(null, 'error', error); /* Pass the error object itself */
+			alert.error(error); /* Display error message to the user */
+			button.enable();
+
+			console.error('Fetch Error:', error); /* Log the error object for debugging (no need for isInDevelopment check) */
+			/* No need to re-throw the error, let the caller handle it if needed */
+		}
 	};
 
 	/**
@@ -1070,14 +1068,8 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			return;
 		}
 
-		const formData = Array.from(form.elements)
-			.filter(element => element.name)
-			.map(element => ({
-				name: element.name,
-				value: element.value
-			}));
-
-		formData.push({ name: 'csrf_token', value: _CSRFToken });
+		const formData = new FormData(form);
+		formData.append('csrf_token', _CSRFToken);
 
 		if (onBeforeSend) {
 			onBeforeSend(formData);
@@ -1313,7 +1305,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				class: containerSelector.replace('.', '') // Remove the .
 			}, [
 				createElements('form', {
-					id: 'uploadForm',
+					id: 'uploadForm_' + inputId,
 					class: 'd-none',
 					action: url,
 					method: 'POST',
@@ -1440,8 +1432,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _setMultipleFileUploadContainer = (file, uploadedContainerSelector = '.files-container') => {
-			const containerSelector = uploadedContainerSelector.replace('.', '');
-			const container = document.querySelector(containerSelector);
+			const container = document.querySelector(uploadedContainerSelector);
 			if (!container) {
 				console.error(`Container with selector '${uploadedContainerSelector}' not found.`);
 				return;
@@ -1571,6 +1562,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 								}
 							}
 							alert.message(response.message);
+							console.log(response);
 						}
 					});
 				}
@@ -1592,23 +1584,22 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			document.addEventListener('change', function(event) {
 				if (event.target.matches(`${containerSelector} #${input}`)) {
-					const form = document.querySelector(`${containerSelector} #uploadForm`);
+					const form = document.querySelector(`${containerSelector} #uploadForm_${input}`);
 
 					if (!form) {
-						console.error(`Form element with selector '${containerSelector} #uploadForm' not found.`);
+						console.error(`Form element with selector '${containerSelector} #uploadForm_${input}' not found.`);
 						return;
 					}
 
 					const formData = new FormData(form);
+					formData.append('csrf_token', _CSRFToken);
 
-					const urlElement = document.querySelector(`${containerSelector} #uploadForm`);
+					const urlElement = document.querySelector(`${containerSelector} #uploadForm_${input}`);
 					if (!urlElement) {
-						console.error(`Form element with selector '${containerSelector} #uploadForm' not found.`);
+						console.error(`Form element with selector '${containerSelector} #uploadForm_${input}' not found.`);
 						return;
 					}
 					const url = urlElement.action;
-
-					formData.append('csrf_token', _CSRFToken);
 
 					post(url, formData, {
 						processData: false,
@@ -2048,6 +2039,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		},
 
+		userClient,
+		_CSRFToken,
+		settings,
+		moveHtmlElement,
 		createElements,
 		createHiddenInput,
 		epochToTimeString,
@@ -2063,10 +2058,6 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		get,
 		redirect,
 		submitForm,
-		moveHtmlElement,
-		userClient,
-		_CSRFToken,
-		settings,
 
 		component: {
 			tinymce,
