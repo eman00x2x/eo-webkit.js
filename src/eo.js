@@ -15,17 +15,17 @@ import wNumb from 'wnumb';
 import validate from 'validate.js';
 import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML or imported via CSS import
 
-; (function (factory) { // The IIFE (Immediately Invoked Function Expression)
-	if (typeof define === "function" && define.amd) { // Check for AMD (Asynchronous Module Definition)
+; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
+	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
 		define([], factory); // Use AMD define
-	} else if (typeof exports === "object") { // Check for CommonJS
+	} else if (typeof exports === 'object') { // Check for CommonJS
 		module.exports = factory(); // Use CommonJS module.exports
 	} else { // Otherwise, assume global scope (browser)
 		window.eo = factory(); // Attach the module to the window object
 	}
-})(function () {
+})(function() {
 
-	"use strict";
+	'use strict';
 
 	let DOMAIN;
 	let CDN;
@@ -36,14 +36,14 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Checks if the application is in development mode by examining a meta tag.
-	 *
-	 * This function looks for a meta tag with the name "inDevelopment" in the document.
-	 * If the content of this meta tag is "1", the function returns true, indicating
-	 * that the application is in development mode. Otherwise, it returns false.
-	 *
-	 * @returns {boolean} True if the application is in development mode, false otherwise.
-	 */
+	   * Checks if the application is in development mode by examining a meta tag.
+	   *
+	   * This function looks for a meta tag with the name "inDevelopment" in the document.
+	   * If the content of this meta tag is "1", the function returns true, indicating
+	   * that the application is in development mode. Otherwise, it returns false.
+	   *
+	   * @returns {boolean} True if the application is in development mode, false otherwise.
+	   */
 	const isInDevelopment = () => {
 		const inDevelopmentMetaTag = document.querySelector('meta[name="inDevelopment"]');
 		if (inDevelopmentMetaTag.content == 1) {
@@ -53,32 +53,32 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		return false;
 	};
 
-	const _CSRFToken = function () {
+	const _CSRFToken = function() {
 		const metaTagToken = document.querySelector('meta[name="csrf-token"]');
 		if (metaTagToken === null) {
-			const message = "CSRF Token not found in meta tags! <meta name=\"csrf-token\" content=\"{{ csrf_token() }}\">";
+			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
 			alert.error(message);
 			throw new Error(message);
 		}
-		return metaTagToken.content
+		return metaTagToken.content;
 	}();
 
 	/**
-	 * Redirects the browser to a given URL.
-	 *
-	 * @param {string} url - The URL to redirect to
-	 */
+	   * Redirects the browser to a given URL.
+	   *
+	   * @param {string} url - The URL to redirect to
+	   */
 	const redirect = (url) => {
 		window.location = url;
 	};
 
 	/**
-	 * Converts an epoch time (in seconds) to a localized string in the format:
-	 * "Weekday, Month Day, Year, HH:MM AM/PM"
-	 *
-	 * @param {number} epoch - The epoch time, in seconds
-	 * @returns {string} A localized string representation of the date and time
-	 */
+	   * Converts an epoch time (in seconds) to a localized string in the format:
+	   * "Weekday, Month Day, Year, HH:MM AM/PM"
+	   *
+	   * @param {number} epoch - The epoch time, in seconds
+	   * @returns {string} A localized string representation of the date and time
+	   */
 	const epochToTimeString = (epoch) => {
 		const date = new Date(0);
 		date.setUTCSeconds(epoch);
@@ -93,12 +93,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
-	 *
-	 * @param {string} stringValue - The string to trim
-	 * @param {number} maximumLength - The maximum allowed length of the string
-	 * @returns {string} The trimmed string
-	 */
+	   * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
+	   *
+	   * @param {string} stringValue - The string to trim
+	   * @param {number} maximumLength - The maximum allowed length of the string
+	   * @returns {string} The trimmed string
+	   */
 	const trim = (stringValue, maximumLength) => {
 		if (stringValue.length <= maximumLength) {
 			return stringValue;
@@ -108,13 +108,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Converts a given number of bytes to a human-readable string,
-	 * appending the appropriate unit (Bytes, KB, MB, etc.).
-	 *
-	 * @param {number} bytes - The number of bytes to convert
-	 * @param {number} [decimalPlaces=2] - The number of decimal places to include
-	 * @returns {string} A human-readable string representation of the given number of bytes
-	 */
+	   * Converts a given number of bytes to a human-readable string,
+	   * appending the appropriate unit (Bytes, KB, MB, etc.).
+	   *
+	   * @param {number} bytes - The number of bytes to convert
+	   * @param {number} [decimalPlaces=2] - The number of decimal places to include
+	   * @returns {string} A human-readable string representation of the given number of bytes
+	   */
 	const formatFileSize = (bytes, decimalPlaces = 2) => {
 		if (bytes === 0) return '0 Bytes';
 
@@ -126,29 +126,29 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Generates a random UUID (Universally Unique Identifier) version 4.
-	 *
-	 * This function uses the Web Cryptography API to generate a random UUID.
-	 * The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
-	 *
-	 * @returns {string} A randomly generated UUID version 4
-	 */
+	   * Generates a random UUID (Universally Unique Identifier) version 4.
+	   *
+	   * This function uses the Web Cryptography API to generate a random UUID.
+	   * The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+	   *
+	   * @returns {string} A randomly generated UUID version 4
+	   */
 	const uuidv4 = () => {
-		return "00000000-0000-0000-0000-000000000000".replace(/[018]/g, c =>
+		return '00000000-0000-0000-0000-000000000000'.replace(/[018]/g, c =>
 			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
 		);
 	};
 
 
 	/**
-	 * Generates a random hexadecimal string of the specified length.
-	 *
-	 * The function uses the Web Cryptography API to generate cryptographically
-	 * secure random values, which are then converted to a hexadecimal string.
-	 *
-	 * @param {number} length - The length of the random hexadecimal string to generate
-	 * @returns {string} A random hexadecimal string of the specified length
-	 */
+	   * Generates a random hexadecimal string of the specified length.
+	   *
+	   * The function uses the Web Cryptography API to generate cryptographically
+	   * secure random values, which are then converted to a hexadecimal string.
+	   *
+	   * @param {number} length - The length of the random hexadecimal string to generate
+	   * @returns {string} A random hexadecimal string of the specified length
+	   */
 	const getRandomChar = (length) => {
 		const array = new Uint8Array(length);
 		window.crypto.getRandomValues(array);
@@ -156,52 +156,52 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Generates a random number between the given start and end.
-	 *
-	 * The end number is inclusive, so the function will return a number that is
-	 * greater than or equal to start, and less than or equal to end.
-	 *
-	 * @param {number} start - The lowest number to generate
-	 * @param {number} end - The highest number to generate
-	 * @returns {number} A randomly generated number between start and end
-	 */
+	   * Generates a random number between the given start and end.
+	   *
+	   * The end number is inclusive, so the function will return a number that is
+	   * greater than or equal to start, and less than or equal to end.
+	   *
+	   * @param {number} start - The lowest number to generate
+	   * @param {number} end - The highest number to generate
+	   * @returns {number} A randomly generated number between start and end
+	   */
 	const getRandomNum = (start, end) => {
 		return Math.floor(Math.random() * (end - start + 1)) + start;
 	};
 
 	/**
-	 * Converts a given number to a human-readable currency format.
-	 *
-	 * The function will return a string that represents the given number in a
-	 * human-readable format. The format will be one of the following:
-	 *
-	 * - Billions: 1,234,567,890,000 -> 1.23B
-	 * - Millions: 1,234,567 -> 1.23M
-	 * - Thousands: 1,234 -> 1.23K
-	 * - Default: 1234 -> 1234
-	 *
-	 * @param {number} amount - The number to convert to a human-readable format
-	 * @returns {string} A human-readable string representation of the given number
-	 */
+	   * Converts a given number to a human-readable currency format.
+	   *
+	   * The function will return a string that represents the given number in a
+	   * human-readable format. The format will be one of the following:
+	   *
+	   * - Billions: 1,234,567,890,000 -> 1.23B
+	   * - Millions: 1,234,567 -> 1.23M
+	   * - Thousands: 1,234 -> 1.23K
+	   * - Default: 1234 -> 1234
+	   *
+	   * @param {number} amount - The number to convert to a human-readable format
+	   * @returns {string} A human-readable string representation of the given number
+	   */
 	const convertCurrency = (amount) => {
 		return Math.abs(Number(amount)) >= 1.0e+9
 
-			? Math.abs(Number(amount)) / 1.0e+9 + "B"
+			? Math.abs(Number(amount)) / 1.0e+9 + 'B'
 			: Math.abs(Number(amount)) >= 1.0e+6
-				? Math.abs(Number(amount)) / 1.0e+6 + "M"
+				? Math.abs(Number(amount)) / 1.0e+6 + 'M'
 				: Math.abs(Number(amount)) >= 1.0e+3
-					? Math.abs(Number(amount)) / 1.0e+3 + "K"
+					? Math.abs(Number(amount)) / 1.0e+3 + 'K'
 					: Math.abs(Number(amount));
 	};
 
 	/**
-	 * Serializes a given FormData object into a plain JavaScript object.
-	 *
-	 * @param {FormData} formData - The FormData object to serialize
-	 * @returns {object} A plain JavaScript object containing the same key-value pairs as the given FormData object
-	 */
+	   * Serializes a given FormData object into a plain JavaScript object.
+	   *
+	   * @param {FormData} formData - The FormData object to serialize
+	   * @returns {object} A plain JavaScript object containing the same key-value pairs as the given FormData object
+	   */
 	const serializeFormData = (formData) => {
-		const data = formData.reduce(function (obj, item) {
+		const data = formData.reduce(function(obj, item) {
 			obj[item.name] = item.value;
 			return obj;
 		}, {});
@@ -209,26 +209,26 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Returns a YouTube video object given a YouTube video URL.
-	 *
-	 * The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.
-	 *
-	 * The supported YouTube URL formats are:
-	 *
-	 * - http://www.youtube.com/watch?v=VIDEO_ID
-	 * - http://www.youtube.com/watch?v=VIDEO_ID&feature=player_embedded
-	 * - http://www.youtube.com/watch?v=VIDEO_ID&feature=feedrec_grec_index
-	 * - http://www.youtube.com/user/USER_NAME#p/a/u/1/VIDEO_ID
-	 * - http://www.youtube.com/v/VIDEO_ID?fs=1&hl=en_US&rel=0
-	 * - http://www.youtube.com/watch?v=VIDEO_ID#t=0m10s
-	 * - http://www.youtube.com/embed/VIDEO_ID?rel=0
-	 * - http://youtu.be/VIDEO_ID
-	 *
-	 * If the given URL is not a supported YouTube URL format, the function returns an object with a status of 2 and an error message.
-	 *
-	 * @param {string} url - The YouTube video URL to parse
-	 * @returns {object} The parsed YouTube video object, or an object with a status of 2 and an error message if the given URL is invalid
-	 */
+	   * Returns a YouTube video object given a YouTube video URL.
+	   *
+	   * The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.
+	   *
+	   * The supported YouTube URL formats are:
+	   *
+	   * - http://www.youtube.com/watch?v=VIDEO_ID
+	   * - http://www.youtube.com/watch?v=VIDEO_ID&feature=player_embedded
+	   * - http://www.youtube.com/watch?v=VIDEO_ID&feature=feedrec_grec_index
+	   * - http://www.youtube.com/user/USER_NAME#p/a/u/1/VIDEO_ID
+	   * - http://www.youtube.com/v/VIDEO_ID?fs=1&hl=en_US&rel=0
+	   * - http://www.youtube.com/watch?v=VIDEO_ID#t=0m10s
+	   * - http://www.youtube.com/embed/VIDEO_ID?rel=0
+	   * - http://youtu.be/VIDEO_ID
+	   *
+	   * If the given URL is not a supported YouTube URL format, the function returns an object with a status of 2 and an error message.
+	   *
+	   * @param {string} url - The YouTube video URL to parse
+	   * @returns {object} The parsed YouTube video object, or an object with a status of 2 and an error message if the given URL is invalid
+	   */
 	const getYoutubeVideoData = (url) => {
 		const urlRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 		const match = url.match(urlRegex);
@@ -250,19 +250,19 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		}
 
 		return {
-			"status": 2,
-			"message": "Invalid youtube url format!"
+			'status': 2,
+			'message': 'Invalid youtube url format!'
 		};
 	};
 
 	/**
-	 * Creates an HTML element with the given tag name and attributes, and appends the given children to it.
-	 *
-	 * @param {string} tag - The HTML tag name of the element to create
-	 * @param {object} [attributes] - An object containing key-value pairs of attributes to set on the element
-	 * @param {array} [children] - An array of elements to append to the created element
-	 * @returns {HTMLElement} The created element
-	 */
+	   * Creates an HTML element with the given tag name and attributes, and appends the given children to it.
+	   *
+	   * @param {string} tag - The HTML tag name of the element to create
+	   * @param {object} [attributes] - An object containing key-value pairs of attributes to set on the element
+	   * @param {array} [children] - An array of elements to append to the created element
+	   * @returns {HTMLElement} The created element
+	   */
 	const createElements = (tag, attributes = {}, children = []) => {
 		const element = document.createElement(tag);
 		for (const [key, value] of Object.entries(attributes)) {
@@ -273,26 +273,26 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	const createHiddenInput = (name, value) => {
-		return createElements("input", {
+		return createElements('input', {
 			type: 'hidden',
 			name: name,
 			value: value
 		});
-	}
+	};
 
 	/**
-	 * Moves the HTML from the first element matching the fromElementSelector to the first element matching the toElementSelector.
-	 * If either element is not found, the function does nothing.
-	 * @param {string} fromElementSelector - CSS selector for the element to move the HTML from
-	 * @param {string} toElementSelector - CSS selector for the element to move the HTML to
-	 */
-	const moveHtmlElement = function (fromElementSelector, toElementSelector) {
+	   * Moves the HTML from the first element matching the fromElementSelector to the first element matching the toElementSelector.
+	   * If either element is not found, the function does nothing.
+	   * @param {string} fromElementSelector - CSS selector for the element to move the HTML from
+	   * @param {string} toElementSelector - CSS selector for the element to move the HTML to
+	   */
+	const moveHtmlElement = function(fromElementSelector, toElementSelector) {
 		const fromElements = document.querySelectorAll(fromElementSelector);
 		const toElement = document.querySelector(toElementSelector);
 
 		if (fromElements.length === 0 || toElement === null) {
 			if (isInDevelopment() == 1) {
-				console.log("Element not found");
+				console.log('Element not found');
 			}
 			return;
 		}
@@ -305,27 +305,27 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Makes a POST request to the given URL with the given data.
-	 * This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
-	 * The beforeSend callback is called before the request is sent.
-	 *
-	 * If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
-	 * If the request returns an HTML or text response, the onSuccess callback is called with the response text.
-	 *
-	 * If the request fails, the onError callback is called with the error message and the actual error object.
-	 *
-	 * The onComplete callback is called after the request has completed, regardless of success or failure.
-	 *
-	 * @param {string} url - The URL to make the request to
-	 * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
-	 * @param {object} [options] - Options for the request
-	 * @param {function} [options.beforeSend] - Called before the request is sent
-	 * @param {function} [options.onSuccess] - Called when the request returns a JSON response
-	 * @param {function} [options.onError] - Called when the request fails
-	 * @param {function} [options.onComplete] - Called after the request has completed
-	 * @param {boolean} [options.processData=true] - Whether to process the data before sending it
-	 * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
-	 */
+	   * Makes a POST request to the given URL with the given data.
+	   * This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
+	   * The beforeSend callback is called before the request is sent.
+	   *
+	   * If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
+	   * If the request returns an HTML or text response, the onSuccess callback is called with the response text.
+	   *
+	   * If the request fails, the onError callback is called with the error message and the actual error object.
+	   *
+	   * The onComplete callback is called after the request has completed, regardless of success or failure.
+	   *
+	   * @param {string} url - The URL to make the request to
+	   * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
+	   * @param {object} [options] - Options for the request
+	   * @param {function} [options.beforeSend] - Called before the request is sent
+	   * @param {function} [options.onSuccess] - Called when the request returns a JSON response
+	   * @param {function} [options.onError] - Called when the request fails
+	   * @param {function} [options.onComplete] - Called after the request has completed
+	   * @param {boolean} [options.processData=true] - Whether to process the data before sending it
+	   * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
+	   */
 	const post = (url, data, {
 		beforeSend,
 		onSuccess,
@@ -390,7 +390,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					} catch (jsonError) {
 						/* If JSON parsing fails, assume it's HTML or text */
 						if (isInDevelopment() == 1) {
-							console.log("JSON Parse Error:", jsonError);
+							console.log('JSON Parse Error:', jsonError);
 						}
 						return { data: text, type: 'html' };
 					}
@@ -400,18 +400,18 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				if (result.type === 'json') {
 					onSuccess?.(result.data);
 					if (isInDevelopment() == 1) {
-						console.log("JSON Response:", result.data);
+						console.log('JSON Response:', result.data);
 					}
 				} else if (result.type === 'html') {
 					onSuccess?.(result.data);
 					if (isInDevelopment() == 1) {
-						console.log("HTML/Text Response:", result.data);
+						console.log('HTML/Text Response:', result.data);
 					}
 				}
 			})
 			.catch(error => {
 				onError?.(null, error.message, error); // Pass the actual error object
-				console.error("Fetch or Parse Error:", error); // Log the error object
+				console.error('Fetch or Parse Error:', error); // Log the error object
 			})
 			.finally(() => {
 				onComplete?.();
@@ -419,20 +419,20 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Send a GET request to the given URL.
-	 *
-	 * This function returns a promise object that resolves to the response from the server.
-	 *
-	 * The function takes an optional object with the following properties as its last argument:
-	 *
-	 * - `beforeRequest`: a function called before the request is sent.
-	 * - `onSuccess`: a function called when the request is successful.
-	 * - `onError`: a function called when the request fails.
-	 *
-	 * @param {string} url - The URL to send the request to
-	 * @param {object} [options] - The options object
-	 * @returns {Promise} The promise object
-	 */
+	   * Send a GET request to the given URL.
+	   *
+	   * This function returns a promise object that resolves to the response from the server.
+	   *
+	   * The function takes an optional object with the following properties as its last argument:
+	   *
+	   * - `beforeRequest`: a function called before the request is sent.
+	   * - `onSuccess`: a function called when the request is successful.
+	   * - `onError`: a function called when the request fails.
+	   *
+	   * @param {string} url - The URL to send the request to
+	   * @param {object} [options] - The options object
+	   * @returns {Promise} The promise object
+	   */
 	const get = (url, { beforeRequest, onSuccess, onError } = {}) => {
 		const shouldProceed = beforeRequest?.();
 
@@ -451,7 +451,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return responseData;
 			})
 			.catch(error => {
-				onError?.(null, "error", error);
+				onError?.(null, 'error', error);
 
 				alert.error(error);
 				button.enable();
@@ -464,14 +464,14 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	};
 
 	/**
-	 * Gets the user client information from local storage or fetches it from IPInfo and determines the browser.
-	 * @returns {object} The client information, with the following properties:
-	 * - `userAgent`: The user agent string
-	 * - `geo`: The geo information from IPInfo
-	 * - `browser`: The browser name
-	 */
-	const userClient = function () {
-		return function () {
+	   * Gets the user client information from local storage or fetches it from IPInfo and determines the browser.
+	   * @returns {object} The client information, with the following properties:
+	   * - `userAgent`: The user agent string
+	   * - `geo`: The geo information from IPInfo
+	   * - `browser`: The browser name
+	   */
+	const userClient = function() {
+		return function() {
 			const clientInfo = {
 				userAgent: null,
 				geo: null,
@@ -479,11 +479,11 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			};
 
 			/**
-			 * Gets the user's geo information from IPInfo and stores it in the user client information.
-			 * @private
-			 * @throws {Error} If there is an error getting the geo information
-			 */
-			const _getGeoInfo = async () => {
+				   * Gets the user's geo information from IPInfo and stores it in the user client information.
+				   * @private
+				   * @throws {Error} If there is an error getting the geo information
+				   */
+			const _getGeoInfo = async() => {
 				try {
 					const response = await get('https://ipinfo.io/json');
 					clientInfo.geo = response;
@@ -494,10 +494,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			};
 
 			/**
-			 * Determines the browser name from the user agent string.
-			 * @private
-			 * @returns {void}
-			 */
+				   * Determines the browser name from the user agent string.
+				   * @private
+				   * @returns {void}
+				   */
 			const _determineBrowser = () => {
 				const browserNames = {
 					opera: 'Opera',
@@ -509,13 +509,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					blink: 'Blink'
 				};
 
-				const isOpera = navigator.userAgent.includes("Opera") || navigator.userAgent.includes('Opr')
+				const isOpera = navigator.userAgent.includes('Opera') || navigator.userAgent.includes('Opr');
 				const isEdge = navigator.userAgent.includes('Edg');
 				const isEdgeChromium = navigator.userAgent.includes('EdgA');
 				const isIE = /MSIE|Trident/.test(navigator.userAgent);
-				const isChrome = navigator.userAgent.indexOf("Chrome");
+				const isChrome = navigator.userAgent.indexOf('Chrome');
 				const isSafari = navigator.userAgent.includes('Safari');
-				const isFirefox = navigator.userAgent.includes("Firefox");
+				const isFirefox = navigator.userAgent.includes('Firefox');
 				const isBlink = (isChrome || isOpera) && !!window.CSS;
 
 				clientInfo.browser = browserNames[
@@ -532,10 +532,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			};
 
 			/**
-			 * Retrieves the client info from local storage, if it exists.
-			 * If no data is found, it will gather the user agent, geo info, and browser name.
-			 * @returns {void}
-			 */
+				   * Retrieves the client info from local storage, if it exists.
+				   * If no data is found, it will gather the user agent, geo info, and browser name.
+				   * @returns {void}
+				   */
 			const _getClientFromLocalStorage = () => {
 				const storedClient = localStorage.getItem('EOclient');
 
@@ -557,10 +557,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		}();
 	}();
 
-	const _slider = function () {
+	const _slider = function() {
 
-		const inputFromElementId = "sliderFrom";
-		const inputToElementId = "sliderTo";
+		const inputFromElementId = 'sliderFrom';
+		const inputToElementId = 'sliderTo';
 		const minValue = 1000;
 		const maxValue = 10000;
 		const stepValue = 1000;
@@ -595,7 +595,8 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _createSliderInputElement = (sliderElement, rangeContainer) => {
-			let inputFromId = document.querySelector(sliderElement).dataset.inputFromId || inputFromElementId;
+			let inputFromId = document.querySelector(sliderElement)
+				.dataset.inputFromId || inputFromElementId;
 			let inputToId = document.querySelector(sliderElement).dataset.inputToId || inputToElementId;
 
 			const inputFrom = createElements('input', {
@@ -658,13 +659,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const slider = function () {
-		return { create: _slider.create }
+	const slider = function() {
+		return { create: _slider.create };
 	}();
 
-	const _video = function () {
+	const _video = function() {
 		const _handleVideoAdd = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.closest('.btn-add-video')) {
 					const input = document.getElementById('youtubeUrl');
 					const btnSpinner = document.querySelector('.btn-add-video .spinner-border');
@@ -672,8 +673,8 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					const video = getYoutubeVideoData(input.value);
 
 					const _resetForm = () => {
-						btnSpinner.classList.add("d-none");
-						btnText.classList.remove("d-none");
+						btnSpinner.classList.add('d-none');
+						btnText.classList.remove('d-none');
 						input.disabled = false;
 					};
 
@@ -684,16 +685,16 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						return false;
 					};
 
-					btnSpinner.classList.remove("d-none");
-					btnText.classList.add("d-none");
+					btnSpinner.classList.remove('d-none');
+					btnText.classList.add('d-none');
 					input.disabled = true;
 
-					if (input.value === "") {
-						return _invalidResponse("Youtube Url is required!");
+					if (input.value === '') {
+						return _invalidResponse('Youtube Url is required!');
 					} else if (video.id === undefined) {
 						return _invalidResponse(video.message);
 					} else if (document.querySelector(`.${CSS.escape(video.id)}`)) {
-						return _invalidResponse("Video already added!");
+						return _invalidResponse('Video already added!');
 					} else {
 						const videoContainer = createElements('div', { class: video.id, 'data-id': video.id });
 
@@ -730,7 +731,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						const videoListContainer = document.querySelector('.video-list-container');
 						videoListContainer.prepend(videoContainer);
 
-						input.value = "";
+						input.value = '';
 						input.classList.remove('is-invalid');
 						_resetForm();
 					}
@@ -739,7 +740,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _handleVideoPlayback = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.closest('.btn-playback')) {
 					const btn = event.target.closest('.btn-playback');
 					const embed = btn.dataset.embed;
@@ -748,7 +749,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					_modal.create({
 						id: id,
 						size: 'fullscreen',
-						callback: function () {
+						callback: function() {
 							return createElements('div', { class: 'row justify-content-center' }, [
 								createElements('div', { class: 'col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12' }, [
 									createElements('iframe', {
@@ -770,7 +771,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 								])
 							]);
 						},
-						status: "info",
+						status: 'info',
 						destroyable: true
 					});
 
@@ -781,7 +782,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _handleVideoDeletion = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.closest('.btn-remove-video')) {
 					const btn = event.target.closest('.btn-remove-video');
 					const id = btn.dataset.id;
@@ -842,7 +843,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const tinymce = function () {
+	const tinymce = function() {
 		const init = (containerId, options = {}) => {
 			const textarea = document.querySelector(containerId);
 			if (textarea === null || textarea === undefined) {
@@ -866,21 +867,21 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
 					CDN + '/css/global.style.css'
 				]
-			}
+			};
 
 			const mergedOptions = { ...defaultOptions, ...options };
 
 			tinyMCE.remove();
 			tinyMCE.init(mergedOptions);
-		}
+		};
 
 		return {
 			init
-		}
+		};
 
 	}();
 
-	const tomSelect = function () {
+	const tomSelect = function() {
 		const init = (containerId) => {
 			if (window.TomSelect) {
 				new TomSelect(document.querySelector(containerId), {
@@ -888,7 +889,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					dropdownParent: 'body',
 					controlInput: '<input>',
 					render: {
-						item: function (data, escape) {
+						item: function(data, escape) {
 							if (data.customProperties) {
 								return createElements('div', {}, [
 									createElements('span', { class: 'dropdown-item-indicator' }, [
@@ -902,7 +903,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 								]);
 							}
 						},
-						option: function (data, escape) {
+						option: function(data, escape) {
 							if (data.customProperties) {
 								return createElements('div', {}, [
 									createElements('span', { class: 'dropdown-item-indicator' }, [
@@ -928,7 +929,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const alert = function () {
+	const alert = function() {
 		const _display = (message, element) => {
 			const messageContainer = document.querySelector(element);
 
@@ -963,7 +964,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		const error = (message, element = '.response') => _displayAlert(message, 'danger', element);
 
-		const loader = (message = "Processing, Please wait...", element = '.response') => {
+		const loader = (message = 'Processing, Please wait...', element = '.response') => {
 			const loaderDiv = createElements('div', {
 				class: 'bg-white p-3 mt-3 rounded border'
 			}, [
@@ -996,11 +997,11 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const button = function () {
+	const button = function() {
 		/**
-		 * Disable all buttons on the page, visually and interactively
-		 */
-		const disable = (element = ".btn") => {
+			 * Disable all buttons on the page, visually and interactively
+			 */
+		const disable = (element = '.btn') => {
 			const elements = document.querySelectorAll(element);
 
 			elements.forEach(el => {
@@ -1011,7 +1012,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			});
 		};
 
-		const enable = (element = ".btn") => {
+		const enable = (element = '.btn') => {
 			const elements = document.querySelectorAll(element);
 
 			elements.forEach(el => {
@@ -1029,20 +1030,20 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	}();
 
 	/**
-	 * Submits the given form id, handles validation, redirects, and callbacks
-	 *
-	 * @param {String} formId - the form id to submit
-	 * @param {{ validation: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
-	 * @param {{ validation: Object }} [options.validation] - the validation object, see https://validatejs.org/#validatejs-validators
-	 * @param {Function} [options.callback] - the callback function to call on success
-	 * @param {Function} [options.onBeforeSend] - the callback function to call before sending
-	 * @param {String} [options.redirectUrl] - the url to redirect to on success
-	 * @returns {JQueryPromise} - the promise returned by $.post
-	 */
+	   * Submits the given form id, handles validation, redirects, and callbacks
+	   *
+	   * @param {String} formId - the form id to submit
+	   * @param {{ validation: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
+	   * @param {{ validation: Object }} [options.validation] - the validation object, see https://validatejs.org/#validatejs-validators
+	   * @param {Function} [options.callback] - the callback function to call on success
+	   * @param {Function} [options.onBeforeSend] - the callback function to call before sending
+	   * @param {String} [options.redirectUrl] - the url to redirect to on success
+	   * @returns {JQueryPromise} - the promise returned by $.post
+	   */
 	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
 		formId = formId.replace('#', '');
 
-		document.addEventListener('submit', function (event) {
+		document.addEventListener('submit', function(event) {
 			console.log(event.target.id);
 			if (event.target.id === formId) {
 				event.preventDefault();
@@ -1088,13 +1089,16 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 				if (typeof validation === 'object') {
 					if (typeof validate !== 'undefined') {
-						const validationErrors = _validatorResponse(validate(serializeFormData(formData), validation));
+						const validationErrors = _validatorResponse(
+							validate(serializeFormData(formData), validation)
+						);
 						if (validationErrors) {
 							alert.error(validationErrors);
 							return false;
 						}
 					} else {
-						console.log("validate.js is not included in the head. Include it from " + CDN + "/js/vendor/validatejs-0.13.1/validate.min.js or https://validatejs.org/#validatejs-download");
+						console.log('validate.js is not included in the head. Include it from ' +
+							CDN + '/js/vendor/validatejs-0.13.1/validate.min.js or https://validatejs.org/#validatejs-download');
 					}
 				}
 
@@ -1110,7 +1114,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						}
 
 						if (redirectUrl) {
-							alert.loader("Please wait while you are redirecting...");
+							alert.loader('Please wait while you are redirecting...');
 							setTimeout(() => {
 								redirect(redirectUrl);
 							}, 10);
@@ -1118,7 +1122,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					}
 				} catch (e) {
 					if (callback) {
-						alert.message("");
+						alert.message('');
 						callback(serializeFormData(formData), responseData);
 
 						if (isInDevelopment() == 1) {
@@ -1127,7 +1131,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					}
 
 					if (redirectUrl) {
-						alert.loader("Please wait while you are redirecting...");
+						alert.loader('Please wait while you are redirecting...');
 						setTimeout(() => {
 							redirect(redirectUrl);
 						}, 10);
@@ -1140,17 +1144,17 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		});
 	};
 
-	const _modal = function () {
+	const _modal = function() {
 		/**
-		 * Creates a modal element with a given id, size, content, status and destroyable flag.
-		 * @param {string} id - The id of the modal element.
-		 * @param {string} size - The size of the modal element. Can be "xs", "sm", "md", "lg", "xl", "fullscreen".
-		 * @param {function} [callback] - A callback function to be called to generate the modal content.
-		 * @param {boolean} [status=false] - Whether to add a modal status element to the modal element.
-		 * @param {boolean} [destroyable=false] - Whether to add a modal destroyable class to the modal element.
-		 */
+			 * Creates a modal element with a given id, size, content, status and destroyable flag.
+			 * @param {string} id - The id of the modal element.
+			 * @param {string} size - The size of the modal element. Can be "xs", "sm", "md", "lg", "xl", "fullscreen".
+			 * @param {function} [callback] - A callback function to be called to generate the modal content.
+			 * @param {boolean} [status=false] - Whether to add a modal status element to the modal element.
+			 * @param {boolean} [destroyable=false] - Whether to add a modal destroyable class to the modal element.
+			 */
 		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
-			const destroyableClass = destroyable ? "modal-destroyable" : "";
+			const destroyableClass = destroyable ? 'modal-destroyable' : '';
 
 			const modal = createElements('div', {
 				class: `modal ${destroyableClass}`,
@@ -1205,7 +1209,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _handleModalClose = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.classList.contains('btn-close')) {
 					const modal = event.target.closest('.modal');
 					if (modal) {
@@ -1213,7 +1217,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						if (bsModal) {
 							bsModal.hide();
 						} else {
-							console.error("Modal element not associated with a Bootstrap Modal instance.");
+							console.error('Modal element not associated with a Bootstrap Modal instance.');
 						}
 					}
 				}
@@ -1221,13 +1225,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		/**
-		 * Destroys a modal element after it has been closed if it has the "modal-destroyable" class.
-		 * This is a private function and should not be used directly.
-		 */
+			 * Destroys a modal element after it has been closed if it has the "modal-destroyable" class.
+			 * This is a private function and should not be used directly.
+			 */
 		const _destroyModalOnClose = () => {
-			document.addEventListener('hidden.bs.modal', function (event) {
+			document.addEventListener('hidden.bs.modal', function(event) {
 				const modal = document.getElementById(event.target.id);
-				if (modal && modal.classList.contains("modal-destroyable")) {
+				if (modal && modal.classList.contains('modal-destroyable')) {
 					modal.remove();
 				}
 			});
@@ -1242,27 +1246,27 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const modal = function () {
+	const modal = function() {
 		return {
 			create: _modal.create
-		}
+		};
 	}();
 
-	const uploader = function () {
+	const uploader = function() {
 
 		/**
-		 * Creates a new file uploader.
-		 * @param {Object} options - Options to configure the uploader.
-		 * @param {string} [options.uploadContainerSelector] - The CSS selector of the container element to create the uploader in.
-		 * @param {string} options.url - The URL to send the upload to.
-		 * @param {string} [options.inputId] - The ID of the input element to use as the file input.
-		 * @param {string} [options.uploadType] - The type of upload. Either "image" or "document". Default is "image".
-		 * @param {string} [options.accept] - The MIME type of the file to accept. Default is "image/*".
-		 * @param {boolean} [options.multiple] - Whether to allow multiple files to be uploaded. Default is true.
-		 * @param {function} [options.success] - A callback to call when the upload is successful.
-		 * @param {function} [options.error] - A callback to call when the upload fails.
-		 * @returns {void}
-		 */
+			 * Creates a new file uploader.
+			 * @param {Object} options - Options to configure the uploader.
+			 * @param {string} [options.uploadContainerSelector] - The CSS selector of the container element to create the uploader in.
+			 * @param {string} options.url - The URL to send the upload to.
+			 * @param {string} [options.inputId] - The ID of the input element to use as the file input.
+			 * @param {string} [options.uploadType] - The type of upload. Either "image" or "document". Default is "image".
+			 * @param {string} [options.accept] - The MIME type of the file to accept. Default is "image/*".
+			 * @param {boolean} [options.multiple] - Whether to allow multiple files to be uploaded. Default is true.
+			 * @param {function} [options.success] - A callback to call when the upload is successful.
+			 * @param {function} [options.error] - A callback to call when the upload fails.
+			 * @returns {void}
+			 */
 		const _create = ({ uploadContainerSelector, url, inputId = 'browseFile', uploadType = 'image', accept = 'image/*', multiple = true, success = false, error = false }) => {
 
 			if (uploadType !== 'image' && uploadType !== 'document') {
@@ -1306,7 +1310,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		const _createUploadForm = (url, inputId, accept, multiple, containerSelector) => {
 			const containerDiv = createElements('div', {
-				class: containerSelector.replace(".", "") // Remove the .
+				class: containerSelector.replace('.', '') // Remove the .
 			}, [
 				createElements('form', {
 					id: 'uploadForm',
@@ -1331,13 +1335,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		/**
-		 * Generates HTML elements for displaying and manipulating image uploads.
-		 *
-		 * @param {Object} image - An objects containing image upload information.
-		 * @param {string} [uploader="properties"] - The uploader from which the images are being uploaded.
-		 * @param {Object} [settings] - Additional settings for the image elements.
-		 * @return {string} - The HTML elements as a string.
-		 */
+			 * Generates HTML elements for displaying and manipulating image uploads.
+			 *
+			 * @param {Object} image - An objects containing image upload information.
+			 * @param {string} [uploader="properties"] - The uploader from which the images are being uploaded.
+			 * @param {Object} [settings] - Additional settings for the image elements.
+			 * @return {string} - The HTML elements as a string.
+			 */
 		const _setMultipleImageUploadContainer = (image, uploadedContainerSelector = 'images-container') => {
 			const container = document.querySelector(uploadedContainerSelector);
 
@@ -1378,7 +1382,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						'data-final-url': image.final_url
 					}, [
 						createElements('i', { class: 'ti ti-click me-2' }),
-						document.createTextNode(" Thumbnail")
+						document.createTextNode(' Thumbnail')
 					])
 				]),
 
@@ -1399,12 +1403,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			if (container) {
 				container.prepend(div);
 			} else {
-				console.error("Container element not found.");
+				console.error('Container element not found.');
 			}
 		};
 
 		const _setSingleUploadContainer = (image, uploadedContainerSelector = '.photo-preview') => {
-			const containerSelector = uploadedContainerSelector.replace(".", "");
+			const containerSelector = uploadedContainerSelector.replace('.', '');
 			const previewElement = document.querySelector(containerSelector);
 
 			if (!previewElement) {
@@ -1414,13 +1418,13 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			if (image.status == 1) {
 				previewElement.style.backgroundImage = `url(${image.temp_url})`;
-				alert.message("");
+				alert.message('');
 
 				const photoInput = document.getElementById('photo');
 				if (photoInput) {
 					photoInput.value = image.final_url;
 				} else {
-					console.error("Element with ID 'photo' not found.");
+					console.error('Element with ID \'photo\' not found.');
 				}
 
 			} else {
@@ -1436,7 +1440,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _setMultipleFileUploadContainer = (file, uploadedContainerSelector = '.files-container') => {
-			const containerSelector = uploadedContainerSelector.replace(".", "");
+			const containerSelector = uploadedContainerSelector.replace('.', '');
 			const container = document.querySelector(containerSelector);
 			if (!container) {
 				console.error(`Container with selector '${uploadedContainerSelector}' not found.`);
@@ -1449,7 +1453,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				createHiddenInput(`documents[${file.id}][filename]`, file.filename),
 				createHiddenInput(`documents[${file.id}][size]`, file.size),
 				createHiddenInput(`documents[${file.id}][finalUrl]`, file.final_url),
-				
+
 				createElements('div', { class: 'd-flex p-y align-items-center' }, [
 					createElements('span', { class: 'avatar me-2' }, [
 						createElements('i', { class: 'ti ti-pdf fs-18' })
@@ -1469,15 +1473,15 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					])
 				]),
 				/* createElements('div', { class: 'btn-list' }, [
-					createElements('span', {
-						class: 'btn-remove-document cursor-pointer p-2',
-						'data-id': file.id,
-						'data-filename': file.filename
-					}, [
-						createElements('i', { class: 'ti ti-trash me-1' }),
-						document.createTextNode(" Remove")
-					])
-				]) */
+							createElements('span', {
+								class: 'btn-remove-document cursor-pointer p-2',
+								'data-id': file.id,
+								'data-filename': file.filename
+							}, [
+								createElements('i', { class: 'ti ti-trash me-1' }),
+								document.createTextNode(" Remove")
+							])
+						]) */
 			]);
 
 			let listItem;
@@ -1497,17 +1501,17 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _initFileUploaderEvents = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.closest('.btn-remove-document')) {
 					const btn = event.target.closest('.btn-remove-document');
 					const id = btn.dataset.id;
 					/* const filename = btn.dataset.filename;
-					const property_id = btn.dataset.property_id; */
+							  const property_id = btn.dataset.property_id; */
 
 					const remove_url = btn.dataset.remove_url;
 
 					get(remove_url, {
-						onSuccess: function (response) {
+						onSuccess: function(response) {
 							if (response.status == 2) {
 								alert.error(response.message);
 							}
@@ -1524,7 +1528,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 
 		const _initImageUploaderEvents = () => {
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 
 				if (event.target.closest('.btn-set-thumbnail')) {
 					const btn = event.target.closest('.btn-set-thumbnail');
@@ -1534,18 +1538,18 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 					thumbnailButtons.forEach(button => {
 						button.classList.remove('btn-success');
 						button.classList.add('btn-outline-primary');
-						button.innerHTML = "<i class='ti ti-click me-2'></i> Thumbnail";
+						button.innerHTML = '<i class=\'ti ti-click me-2\'></i> Thumbnail';
 					});
 
 					btn.classList.add('btn-success');
 					btn.classList.remove('btn-outline-primary');
-					btn.innerHTML = "<i class='ti ti-check me-2'></i> Thumbnail";
+					btn.innerHTML = '<i class=\'ti ti-check me-2\'></i> Thumbnail';
 
 					const thumbImgInput = document.getElementById('thumb_img');
 					if (thumbImgInput) {
 						thumbImgInput.value = finalUrl;
 					} else {
-						console.error("Element with ID 'thumb_img' not found.");
+						console.error('Element with ID \'thumb_img\' not found.');
 					}
 				} else if (event.target.closest('.btn-remove-image')) {
 					const btn = event.target.closest('.btn-remove-image');
@@ -1557,7 +1561,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						csrf_token: _CSRFToken,
 						filename: filename
 					}, {
-						onSuccess: function (response) {
+						onSuccess: function(response) {
 							if (response.status == 1) {
 								const elementToRemove = document.querySelector(container);
 								if (elementToRemove) {
@@ -1575,7 +1579,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 		const _initUploaderEvents = (containerSelector, input, success, error) => {
 
-			document.addEventListener('click', function (event) {
+			document.addEventListener('click', function(event) {
 				if (event.target.closest(`${containerSelector} .btn-browse`)) {
 					const inputElement = document.querySelector(`${containerSelector} #${input}`);
 					if (inputElement) {
@@ -1586,7 +1590,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				}
 			});
 
-			document.addEventListener('change', function (event) {
+			document.addEventListener('change', function(event) {
 				if (event.target.matches(`${containerSelector} #${input}`)) {
 					const form = document.querySelector(`${containerSelector} #uploadForm`);
 
@@ -1610,11 +1614,11 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 						processData: false,
 						contentType: false,
 						beforeSend: () => {
-							alert.loader("Please wait while you are uploading...");
+							alert.loader('Please wait while you are uploading...');
 							button.disable();
 						},
 						onSuccess: (response) => {
-							alert.message("");
+							alert.message('');
 							button.enable();
 							if (response.status == 2) {
 								alert.error(response.message);
@@ -1653,7 +1657,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 	}();
 
-	const googleChart = function () {
+	const googleChart = function() {
 
 		const bar = ({ containerId, data = null, options = {} } = {}) => {
 			const container = document.getElementById(containerId);
@@ -1661,12 +1665,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['bar'] });
+			google.charts.load('current', { packages: ['bar'] });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
@@ -1683,12 +1687,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['calendar'] });
+			google.charts.load('current', { packages: ['calendar'] });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
@@ -1705,12 +1709,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['corechart'], mapsApiKey: apiKey });
+			google.charts.load('current', { packages: ['corechart'], mapsApiKey: apiKey });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
@@ -1718,7 +1722,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 				if (options.displayMode !== undefined && options.displayMode == 'markers') {
 					if (apiKey === null) {
-						throw new Error("Markers require geocoding, you'll need a ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings");
+						throw new Error('Markers require geocoding, you\'ll need a ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
 					}
 				}
 
@@ -1734,12 +1738,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['corechart'] });
+			google.charts.load('current', { packages: ['corechart'] });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
@@ -1756,12 +1760,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['line'] });
+			google.charts.load('current', { packages: ['line'] });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
@@ -1778,19 +1782,19 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['map'], mapsApiKey: apiKey });
+			google.charts.load('current', { packages: ['map'], mapsApiKey: apiKey });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
 				const chart = new google.visualization.Map(container);
 
 				if (apiKey === null) {
-					throw new Error("Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings");
+					throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
 				}
 
 				chart.draw(dataTable, options);
@@ -1805,19 +1809,19 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return false;
 			}
 
-			google.charts.load("current", { packages: ['corechart'] });
+			google.charts.load('current', { packages: ['corechart'] });
 			google.charts.setOnLoadCallback(drawChart);
 
 			function drawChart() {
 				if (data === null) {
-					throw new Error("Set the data in table property");
+					throw new Error('Set the data in table property');
 				}
 
 				const dataTable = data(new google.visualization.DataTable());
 				const chart = new google.visualization.ScatterChart(container);
 
 				const defaultOptions = { trendlines: { 0: {} } };
-				const mergeOptions = { ...defaultOptions, ...options }
+				const mergeOptions = { ...defaultOptions, ...options };
 
 				chart.draw(dataTable, mergeOptions);
 			}
@@ -1836,7 +1840,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		};
 	}();
 
-	const _mortgageCalculator = function () {
+	const _mortgageCalculator = function() {
 
 		const _calculateMortgage = () => {
 			const resultContainer = document.querySelector('.mortgage-calculator-form #result');
@@ -1846,12 +1850,12 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			const result = _getAmortization();
 
-			resultContainer.setAttribute("monthlyPayment", result.monthlyPayment);
+			resultContainer.setAttribute('monthlyPayment', result.monthlyPayment);
 			resultContainer.innerHTML = `&#8369;${result.formattedMonthlyPayment}`;
 		};
 
 		const _calculateMortgageOnChange = () => {
-			document.addEventListener('change', function (event) {
+			document.addEventListener('change', function(event) {
 				if (event.target.matches('.mortgage-calculator-form #mortgageDownpayment') ||
 					event.target.matches('.mortgage-calculator-form #mortgageInterest') ||
 					event.target.matches('.mortgage-calculator-form #mortgageYear')) {
@@ -1867,7 +1871,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			}
 
 			const downPaymentOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90];
-			const select = createElements('select', { id: "mortgageDownpayment", class: "form-select" },
+			const select = createElements('select', { id: 'mortgageDownpayment', class: 'form-select' },
 				downPaymentOptions.map(option =>
 					createElements('option', { value: option, ...(option === 20 ? { selected: true } : {}) }, [
 						document.createTextNode(`${option}%`)
@@ -1885,7 +1889,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 				return;
 			}
 
-			const select = createElements('select', { id: "mortgageInterest", class: "form-select" },
+			const select = createElements('select', { id: 'mortgageInterest', class: 'form-select' },
 				Array.from({ length: 81 }, (_, i) => i * 0.25).map(rate => // More efficient way to generate the array
 					createElements('option', { value: rate, ...(rate === 3.75 ? { selected: true } : {}) }, [
 						document.createTextNode(`${rate}%`)
@@ -1904,7 +1908,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			}
 
 			const yearsOptions = Array.from({ length: 30 }, (_, i) => i + 1);
-			const select = createElements('select', { id: "mortgageYear", class: "form-select" },
+			const select = createElements('select', { id: 'mortgageYear', class: 'form-select' },
 				yearsOptions.map(year =>
 					createElements('option', { value: year, ...(year === 3 ? { selected: true } : {}) }, [
 						document.createTextNode(`${year} Years`)
@@ -1931,7 +1935,10 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			for (let i = 0; i <= numberOfPayments; i++) {
 				const interest = remaining * (interestRate / 100 / paymentsPerYear);
 				const principle = monthlyPayment - interest;
-				const row = [i, principle > 0 ? (principle < monthlyPayment ? principle : monthlyPayment) : 0, interest > 0 ? interest : 0, remaining > 0 ? remaining : 0];
+				const row = [i, principle > 0 ?
+					(principle < monthlyPayment ?
+						principle : monthlyPayment) : 0, interest > 0 ?
+						interest : 0, remaining > 0 ? remaining : 0];
 				schedule.push(row);
 				remaining -= principle;
 			}
@@ -1942,7 +1949,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 		const _getAmortization = () => {
 			const sellingPriceElement = document.getElementById('sellingPrice');
 			if (!sellingPriceElement) {
-				console.error("Selling price element not found.");
+				console.error('Selling price element not found.');
 				return;
 			}
 
@@ -1950,7 +1957,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			const downPaymentPercentElement = document.querySelector('#mortgageDownpayment option:checked');
 			if (!downPaymentPercentElement) {
-				console.error("Down payment percentage element not found.");
+				console.error('Down payment percentage element not found.');
 				return;
 			}
 
@@ -1960,7 +1967,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			const interestRateElement = document.querySelector('#mortgageInterest option:checked');
 			if (!interestRateElement) {
-				console.error("Interest rate element not found.");
+				console.error('Interest rate element not found.');
 				return;
 			}
 
@@ -1968,7 +1975,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			const yearsElement = document.querySelector('#mortgageYear option:checked');
 
 			if (!yearsElement) {
-				console.error("Loan term element not found.");
+				console.error('Loan term element not found.');
 				return;
 			}
 
@@ -2014,7 +2021,7 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 	}();
 
 	const eo = {
-		initBeforeLoad: function () {
+		initBeforeLoad: function() {
 			/* Address.initBeforeLoad(); */
 			_video._initBeforeLoad();
 			_slider._initBeforeLoad();
@@ -2030,17 +2037,19 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 
 			let resizeTO;
 
-			window.addEventListener('resize', function () {
+			window.addEventListener('resize', function() {
 				if (resizeTO) {
 					clearTimeout(resizeTO);
 				}
-				resizeTO = setTimeout(function () {
+				resizeTO = setTimeout(function() {
 					window.dispatchEvent(new Event('resizeEnd'));
 				}, 500);
 			});
 
 		},
 
+		createElements,
+		createHiddenInput,
 		epochToTimeString,
 		trim,
 		formatFileSize,
@@ -2069,15 +2078,15 @@ import bootstrap from 'bootstrap'; // Bootstrap CSS is usually included in HTML 
 			uploader,
 			googleChart
 		},
-	}
+	};
 
 	return eo;
 });
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
 	window.eo.initBeforeLoad();
 });
 
-window.addEventListener('load', function () {
+window.addEventListener('load', function() {
 	window.eo.initAfterLoad();
 });
