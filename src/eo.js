@@ -4,16 +4,15 @@
 /* global module */ // For CommonJS
 /* global exports */ // For CommonJS
 
-import tinyMCE from 'tinymce';
-import 'tinymce/themes/silver/theme'; // And plugins
+/* import tinyMCE from '../node_modules/tinymce/tinymce.js';
+import '../node_modules/tinymce/themes/silver/theme'; // And plugins
 import google from 'google-charts'; // Google Charts usually attaches to the window object
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css'; // Import noUiSlider CSS
 import TomSelect from 'tom-select';
 import 'tom-select/dist/css/tom-select.css'; // Import Tom Select CSS
 import wNumb from 'wnumb';
-import validate from 'validate.js';
-import 'bootstrap';
+import validate from 'validate.js'; */
 
 ; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
@@ -210,16 +209,25 @@ import 'bootstrap';
 	 */
 	const serializeFormData = (formData) => {
 		if (formData instanceof FormData) {
-			console.log('instance of FormData');
-			return Object.fromEntries(formData.entries());
+			const object = {};
+			formData.forEach((value, key) => {
+				const keys = key.split('[').map(k => k.replace(']', ''));
+				keys.reduce((acc, currentKey, index) => {
+				if (index === keys.length - 1) {
+					acc[currentKey] = value;
+				} else {
+					if (!acc[currentKey]) acc[currentKey] = {};
+					return acc[currentKey];
+				}
+				}, object);
+			});
+			return object;
 		} else if (Array.isArray(formData) && formData.every(item => typeof item === 'object' && item !== null && 'name' in item && 'value' in item)) {
-			console.log('array of objects');
 			return formData.reduce((acc, item) => {
 				acc[item.name] = item.value;
 				return acc;
 			}, {});
 		} else if (typeof formData === 'object' && formData !== null) {
-			console.log('object');
 			return Object.keys(formData).reduce((acc, key) => {
 				acc[key] = formData[key];
 				return acc;
