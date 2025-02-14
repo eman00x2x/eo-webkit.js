@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="csrf-token" content="">
+	<meta http-equiv="pragma" content="no-cache" />
 	<title>EO.js</title>
 
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
@@ -131,13 +132,13 @@ html {
 						<div class="row align-content-center mb-4">
 							<div class="col-md-6 col-12">
 								<div class="form-floating">
-									<input type="text" class="form-control" id="epoch" name="epoch" placeholder="Epoch" value="1739528783">
+									<input type="text" class="form-control" id="epoch" placeholder="Epoch" value="1739528783">
 									<label for="floatingInput">Epoch</label>
 								</div>
 							</div>
 						
 							<div class="col-md-6 col-12">
-								<span class="small">Result:</span>
+								<span class="small text-muted">Result:</span>
 								<div class="border p-2 bg-light" style="height:80%">
 									<pre class="epochResult"></pre>
 								</div>
@@ -154,37 +155,52 @@ html {
 							@returns {string} The trimmed string
 						</code>
 						<p class="mt-2">Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.</p>
+
+						<div class="row align-content-center mb-4">
+							<div class="col-md-6 col-12">
+								<p class="small text-muted trimLongText">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam pretium vel sem sit amet sagittis. Mauris congue et nibh
+								et posuere. Mauris eget velit sed metus porttitor venenatis.</p>
+								<div class="form-floating">
+									<input type="number" class="form-control" id="trim" placeholder="Maximum Length" value="90">
+									<label for="floatingInput">Maximum Length</label>
+								</div>
+							</div>
+						
+							<div class="col-md-6 col-12">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-2 bg-light" style="height:80%">
+									<p class="trimResult break-word"></p>
+								</div>
+							</div>
+						</div>
+
 					</div>
 
 					<div name="#formatFileSize" class="mb-3 border-bottom">
-						<h3>eo.formatFileSize(bytes, decimalPlaces = 2)</h3>
+						<h3>eo.formatFileSize(bytes, decimalPlaces = 0)</h3>
 						<code class="">
 							@param {number} bytes - The number of bytes to convert<br/>
 							@param {number} [decimalPlaces=2] - The number of decimal places to include<br/>
 							@returns {string} A human-readable string representation of the given number of bytes
 						</code>
 						<p class="mt-2">Converts a given number of bytes to a human-readable string, appending the appropriate unit (Bytes, KB, MB, etc.).</p>
-					</div>
 
-					<div name="#uuidv4" class="mb-3 border-bottom">
-						<h3>eo.uuidv4()</h3>
-						<code class="">
-							@returns {string} A randomly generated UUID version 4
-						</code>
-						<p class="mt-2">Generates a random UUID (Universally Unique Identifier) version 4.
-							<br/>This function uses the Web Cryptography API to generate a random UUID.
-							<br/>The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.</p>
-					</div>
+						<div class="row align-content-center mb-4">
+							<div class="col-md-6 col-12">
+								<div class="form-floating">
+									<input type="number" class="form-control" id="formatFileSize" placeholder="bytes" value="100000000000000000000000000">
+									<label for="floatingInput">Bytes</label>
+								</div>
+							</div>
+						
+							<div class="col-md-6 col-12">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-2 bg-light" style="height:80%">
+									<p class="formatFileSizeResult"></p>
+								</div>
+							</div>
+						</div>
 
-					<div name="#getRandomChar" class="mb-3 border-bottom">
-						<h3>eo.getRandomChar(length)</h3>
-						<code class="">
-							@param {number} length - The length of the random hexadecimal string to generate<br/>
-							@returns {string} A random hexadecimal string of the specified length
-						</code>
-						<p class="mt-2">Generates a random hexadecimal string of the specified length.
-							<br/>The function uses the Web Cryptography API to generate cryptographically secure random values, which are then converted to a hexadecimal string.
-						</p>
 					</div>
 
 					<div name="#uuidv4" class="mb-3 border-bottom">
@@ -196,8 +212,44 @@ html {
 							<br />This function uses the Web Cryptography API to generate a random UUID.
 							<br />The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
 						</p>
+
+						<div class="mb-4">
+							<span class="small text-muted">Result:</span>
+							<div class="border p-2 bg-light" style="height:80%">
+								<p class="uuidv4Result"></p>
+							</div>
+							<span class="btn btn-primary mt-2 btn-generateUUID">Generete UUID</span>
+						</div>
+						
 					</div>
-					
+
+					<div name="#getRandomChar" class="mb-3 border-bottom">
+						<h3>eo.getRandomChar(length)</h3>
+						<code class="">
+							@param {number} length - The length of the random hexadecimal string to generate<br/>
+							@returns {string} A random hexadecimal string of the specified length
+						</code>
+						<p class="mt-2">Generates a random hexadecimal string of the specified length.
+							<br/>The function uses the Web Cryptography API to generate cryptographically secure random values, which are then converted to a hexadecimal string.
+						</p>
+
+						<div class="row align-content-center mb-4">
+							<div class="col-md-6 col-12">
+								<div class="form-floating">
+									<input type="number" class="form-control" id="getRandomCharLength" placeholder="6" value="6">
+									<label for="floatingInput">Random Char Length</label>
+								</div>
+							</div>
+						
+							<div class="col-md-6 col-12">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-2 bg-light" style="height:80%">
+									<p class="getRandomCharResult"></p>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div name="#getRandomNum" class="mb-3 border-bottom">
 						<h3>eo.getRandomNum(start, end)</h3>
 						<code class="">
@@ -208,10 +260,34 @@ html {
 						<p class="mt-2">Generates a random number between the given start and end.
 							<br/>The end number is inclusive, so the function will return a number that is greater than or equal to start, and less than or equal to end.
 						</p>
+
+						<div class="row align-content-center mb-4">
+							<div class="col-md-6 col-12">
+								<div class="d-flex gap-3">
+									<div class="form-floating">
+										<input type="number" class="form-control" id="getRandomNumStart" placeholder="Start From" value="100000">
+										<label for="floatingInput">Start From</label>
+									</div>
+
+									<div class="form-floating">
+										<input type="number" class="form-control" id="getRandomNumEnd" placeholder="End To" value="999999">
+										<label for="floatingInput">End To</label>
+									</div>
+								</div>
+								<span class="btn btn-primary mt-2 btn-getRandomNum">Generete Random Number</span>
+							</div>
+						
+							<div class="col-md-6 col-12">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-2 bg-light" style="height:50%">
+									<p class="getRandomNumResult"></p>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div name="#convertCurrency" class="mb-3 border-bottom">
-						<h3>eo.convertCurrency(length)</h3>
+						<h3>eo.convertCurrency(amount)</h3>
 						<code class="">
 							@param {number} amount - The number to convert to a human-readable format<br/>
 							@returns {string} A human-readable string representation of the given number
@@ -224,6 +300,22 @@ html {
 							<br/>- Thousands: 1,234 -> 1.23K
 							<br/>- Default: 1234 -> 1234
 						</p>
+
+						<div class="row align-content-center mb-4">
+							<div class="col-md-6 col-12">
+								<div class="form-floating">
+									<input type="number" class="form-control" id="amount" placeholder="amount" value="1234567">
+									<label for="floatingInput">Amount</label>
+								</div>
+							</div>
+						
+							<div class="col-md-6 col-12">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-2 bg-light" style="height:80%">
+									<p class="convertCurrencyResult"></p>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div name="#serializeFormData" class="mb-3 border-bottom">
@@ -256,11 +348,130 @@ html {
 							</div>
 
 							<div class="col-md-6 col-12">
-								<span class="small">Result:</span>
-								<div class="border p-2 bg-light" style="height:80%">
-									<code class="serializeFormDataFormResult"></code>
+								<span class="small text-muted">Result:</span>
+								<div class="border p-3 mt-2 bg-light" style="height:80%">
+									<pre class="serializeFormDataFormResult"></pre>
 								</div>
 							</div>
+						</div>
+					</div>
+
+					<div name="#getYoutubeVideoData" class="mb-3 border-bottom">
+						<h3>eo.getYoutubeVideoData(url)</h3>
+						<code class="">
+							@param {string} url - The YouTube video URL to parse<br/>
+							@returns {object} The parsed YouTube video object, or an error alert if the given URL is invalid
+						</code>
+						<p class="mt-2">Returns a YouTube video object given a YouTube video URL.
+							<br />The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.<br />
+
+							<br />The supported YouTube URL formats are:
+							<br/> - http://www.youtube.com/watch?v=VIDEO_ID
+							<br/> - http://www.youtube.com/watch?v=VIDEO_ID&feature=player_embedded
+							<br/> - http://www.youtube.com/watch?v=VIDEO_ID&feature=feedrec_grec_index
+							<br/> - http://www.youtube.com/user/USER_NAME#p/a/u/1/VIDEO_ID
+							<br/> - http://www.youtube.com/v/VIDEO_ID?fs=1&hl=en_US&rel=0
+							<br/> - http://www.youtube.com/watch?v=VIDEO_ID#t=0m10s
+							<br/> - http://www.youtube.com/embed/VIDEO_ID?rel=0
+							<br/> - http://youtu.be/VIDEO_ID
+						</p>
+					
+						<div class="mb-4">
+							<div class="form-floating">
+								<input type="url" class="form-control" id="youtubeUrl" placeholder="Youtube Url" value="https://www.youtube.com/watch?v=bD9whtdq7dw">
+								<label for="floatingInput">Youtube Url</label>
+							</div>
+							<div class="mt-3">
+								<span class="small text-muted">Result:</span>
+								<div class="border p-3 mt-2 bg-light" style="height:80%">
+									<pre class="youtubeVideoDataResult"></pre>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div name="#createElements" class="mb-3 border-bottom">
+						<h3>eo.createElements(tag, attributes = {}, children)</h3>
+						<code class="">
+							@param {string} tag - The HTML tag name for the element to be created.
+							<br />@param {object} [attributes={}] - An object representing key-value pairs of attributes for the element.
+							<br />@param {Array} [children] - An array of children to append to the created element. Children can be strings or DOM nodes.
+							<br />@returns {HTMLElement} The created and configured HTML element.
+							<br />@throws {Error} If the tag is not a valid string, attributes is not an object, or children is not an array.
+						</code>
+						<p class="mt-2">Creates an HTML element with a specified tag name, attributes, and children.<br/>
+						
+							<br />The function performs type checking and sanitization on the inputs to ensure
+							safe and valid element creation. The tag name is sanitized, and attributes
+							are set securely. Children can be strings or DOM nodes and are appended
+							to the created element after sanitization.
+						</p>
+
+						<div>
+							<span class="small text-muted">Sample Usage:</span>
+							<pre class="border p-3 mt-2 bg-light">
+const div = eo.createElements('div', { class: 'container', id: 'main' }, [
+	eo.createElements('p', {}, ['Hello, world!']),
+	'Some text',
+]);
+document.body.appendChild(div);</pre>
+						</div>
+					</div>
+
+					<div name="#moveHtmlElement" class="mb-3 border-bottom">
+						<h3>eo.moveHtmlElement(fromSelector, toSelector)</h3>
+						<code class="">
+							@param {string} fromSelector - The CSS selector for the element to move the content from.
+							<br/>@param {string} toSelector - The CSS selector for the element to move the content to.
+						</code>
+						<p class="mt-2">Move the innerHTML of the element matching fromSelector to the element matching toSelector.</p>
+					
+						<div>
+							<span class="small text-muted">Sample Usage:</span>
+							<pre class="border p-3 mt-2 bg-light">moveHtmlElement('.source', '#destination');</pre>
+						</div>
+					</div>
+
+					<div name="#post" class="mb-3 border-bottom">
+						<h3>eo.post</h3>
+						<code class="">
+							@param {string} url - The URL to make the request to
+							<br />@param {(Array<{name: string, value: string}> | FormData | object)} data - The data to send in the request body
+							<br />@param {object} [options] - Options for the request
+							<br />@param {function} [onBeforeSend] - Called before the request is sent
+							<br />@param {function} [onSuccess] - Called when the request returns a JSON response
+							<br />@param {function} [onError] - Called when the request fails
+							<br />@param {function} [onComplete] - Called after the request has completed
+							<br />@param {string} [contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
+						</code>
+
+						<div class="mt-3">
+							<span class="small text-muted">Syntax</span>
+							<div class="mt-2 border p-3 bg-light">
+								eo.post(url, data, {
+								<br/> &nbsp; &nbsp; onBeforeSend,
+								<br/> &nbsp; &nbsp; onSuccess,
+								<br/> &nbsp; &nbsp; onError,
+								<br/> &nbsp; &nbsp; onComplete,
+								<br/> &nbsp; &nbsp; contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
+								<br/>} = {})
+							</div>
+						</div>
+
+						<p class="mt-2">Makes a POST request to the given URL with the given data.
+						<br />This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
+						<br />The beforeSend callback is called before the request is sent.
+						<br />
+						<br />If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
+						<br />If the request returns an HTML or text response, the onSuccess callback is called with the response text.
+						<br />
+						<br />If the request fails, the onError callback is called with the error message and the actual error object.
+						<br />
+						<br />The onComplete callback is called after the request has completed, regardless of success or failure.</p>
+					
+						<div>
+							<span class="small text-muted">Sample Usage:</span>
+							<pre class="border p-3 mt-2 bg-light">eo.post('https://www.domain.com', new FormData(form));</pre>
 						</div>
 					</div>
 

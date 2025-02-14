@@ -3,30 +3,155 @@
 
 const epochToTime = () => {
     const id = document.getElementById('epoch');
-    let result = eo.epochToTimeString(id.value);
-    console.log(result);
-    document.querySelector('.epochResult').text = result;
+	let result = eo.epochToTimeString(id.value);
+	document.querySelector('.epochResult').innerHTML = result;
+
+	id.addEventListener('input', function(e) {
+		result = eo.epochToTimeString(e.target.value);
+		document.querySelector('.epochResult').innerHTML = result;
+	});
+};
+
+const trimLongText = () => {
+	const longText = document.querySelector('.trimLongText').textContent;
+	const id = document.getElementById('trim');
+	let result = eo.trim(longText, id.value);
+	document.querySelector('.trimResult').innerHTML = result;
+
+	id.addEventListener('input', function(e) {
+		result = eo.trim(longText, e.target.value);
+		document.querySelector('.trimResult').innerHTML = result;
+	});
+};
+
+const formatFileSize = () => {
+	const id = document.getElementById('formatFileSize');
+	let result = eo.formatFileSize(id.value);
+	document.querySelector('.formatFileSizeResult').innerHTML = result;
+
+	id.addEventListener('input', function(e) {
+		result = eo.formatFileSize(e.target.value);
+		document.querySelector('.formatFileSizeResult').innerHTML = result;
+	});
+};
+
+const uuidv4 = () => {
+	const btn = document.querySelector('.btn-generateUUID');
+	btn.addEventListener('click', function(e) {
+		e.preventDefault();
+		const result = eo.uuidv4();
+		document.querySelector('.uuidv4Result').innerHTML = result;
+	});
+
+	const result = eo.uuidv4();
+	document.querySelector('.uuidv4Result').innerHTML = result;
+};
+
+const getRandomChar = () => {
+	const id = document.getElementById('getRandomCharLength');
+	let result = eo.getRandomChar(id.value);
+	document.querySelector('.getRandomCharResult').innerHTML = result;
+
+	id.addEventListener('input', function(e) {
+		result = eo.getRandomChar(e.target.value);
+		document.querySelector('.getRandomCharResult').innerHTML = result;
+	});
+};
+
+const getRandomNum = () => {
+	const startNum = document.getElementById('getRandomNumStart');
+	const endNum = document.getElementById('getRandomNumEnd');
+	let result = eo.getRandomNum(parseInt(startNum.value), parseInt(endNum.value));
+	document.querySelector('.getRandomNumResult').innerHTML = result;
+
+	const btn = document.querySelector('.btn-getRandomNum');
+	btn.addEventListener('click', function(e) {
+		e.preventDefault();
+		let result = eo.getRandomNum(parseInt(startNum.value), parseInt(endNum.value));
+		document.querySelector('.getRandomNumResult').innerHTML = result;
+	});
+};
+
+const convertCurrency = () => {
+	const amount = document.getElementById('amount');
+	let result = eo.convertCurrency(amount.value);
+	document.querySelector('.convertCurrencyResult').innerHTML = result;
+
+	amount.addEventListener('input', function(e) {
+		result = eo.convertCurrency(e.target.value);
+		document.querySelector('.convertCurrencyResult').innerHTML = result;
+	});
+};
+
+const getYoutubeVideoData = () => {
+	const id = document.getElementById('youtubeUrl');
+	let result = eo.getYoutubeVideoData(id.value);
+
+	let text = iterateObject(result);
+	document.querySelector('.youtubeVideoDataResult').innerHTML = text;
+
+	id.addEventListener('input', function(e) {
+		result = eo.getYoutubeVideoData(e.target.value);
+		let text = iterateObject(result);
+		document.querySelector('.youtubeVideoDataResult').innerHTML = text;
+	});
 };
 
 const serializeFormDataResult = () => {
-    const btn = document.querySelector(".btn-serializeFormData");
-    btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        let text = '';
-        const form = document.getElementById('serializeFormDataForm');
-        const formData = new FormData(form);
-        const result = eo.serializeFormData(formData);
-        
-        text += '{<br/>';
-        Object.keys(result).forEach(key => {
-            text += '&nbsp; &nbsp; ' + key + ': "' + result[key] + '",<br />';
-        });
-        text += '}';
-        document.querySelector('.serializeFormDataFormResult').innerHTML = text;
-    })
+    const btn = document.querySelector('.btn-serializeFormData');
+	btn.addEventListener('click', function(e) {
+		e.preventDefault();
+
+		const form = document.getElementById('serializeFormDataForm');
+		const formData = new FormData(form);
+		const result = eo.serializeFormData(formData);
+
+		let text = iterateObject(result);
+		document.querySelector('.serializeFormDataFormResult').innerHTML = text;
+	});
 };
 
-window.addEventListener('load', function () {
-    epochToTime();
-    serializeFormDataResult();
+
+function iterateObject(obj, indent = 2) {
+	let result = '';
+
+	function recurse(currObj, level) {
+		const indentSpace = ' '.repeat(level * indent);
+		if (typeof currObj === 'object' && currObj !== null) {
+			if (Array.isArray(currObj)) {
+				result += `${indentSpace}[\n`;
+				currObj.forEach(item => recurse(item, level + 1));
+				result += `${indentSpace}]\n`;
+			} else {
+				result += `${indentSpace}{\n`;
+				for (let key in currObj) {
+					if (currObj.hasOwnProperty(key)) {
+						result += `${indentSpace}  "${key}": `;
+						recurse(currObj[key], level + 1);
+					}
+				}
+				result += `${indentSpace}}\n`;
+			}
+		} else {
+			if (typeof currObj === 'string') {
+				result += `"${currObj}"\n`;
+			} else {
+				result += `${currObj}\n`;
+			}
+		}
+	}
+	recurse(obj, 0);
+	return result;
+}
+
+window.addEventListener('load', function() {
+	epochToTime();
+	uuidv4();
+	getRandomChar();
+	getRandomNum();
+	convertCurrency();
+	formatFileSize();
+	trimLongText();
+	serializeFormDataResult();
+	getYoutubeVideoData();
 });

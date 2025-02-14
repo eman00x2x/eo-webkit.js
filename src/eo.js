@@ -62,6 +62,8 @@ import validate from 'validate.js'; */
 		return metaTagToken.content;
 	}();
 
+	const _sanitize = str => new Option(str).innerHTML;
+
 	/**
 	   * Redirects the browser to a given URL.
 	   *
@@ -114,7 +116,7 @@ import validate from 'validate.js'; */
 	   * @param {number} [decimalPlaces=2] - The number of decimal places to include
 	   * @returns {string} A human-readable string representation of the given number of bytes
 	   */
-	const formatFileSize = (bytes, decimalPlaces = 2) => {
+	const formatFileSize = (bytes, decimalPlaces = 0) => {
 		if (bytes === 0) return '0 Bytes';
 
 		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -148,7 +150,7 @@ import validate from 'validate.js'; */
 	   * @returns {string} A random hexadecimal string of the specified length
 	   */
 	const getRandomChar = (length) => {
-		const array = new Uint8Array(length);
+		const array = new Uint8Array(length - 3);
 		window.crypto.getRandomValues(array);
 		return Array.from(array, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
 	};
@@ -164,6 +166,10 @@ import validate from 'validate.js'; */
 	   * @returns {number} A randomly generated number between start and end
 	   */
 	const getRandomNum = (start, end) => {
+		if (start > end) {
+			throw new Error('Start must be less than or equal to End');
+		}
+
 		return Math.floor(Math.random() * (end - start + 1)) + start;
 	};
 
@@ -182,14 +188,20 @@ import validate from 'validate.js'; */
 	   * @returns {string} A human-readable string representation of the given number
 	   */
 	const convertCurrency = (amount) => {
-		return Math.abs(Number(amount)) >= 1.0e+9
+		const num = Math.abs(Number(amount));
+		const suffixes = ['', 'K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'Nn', 'Dc', 'Ud', 'Dd', 'Td', 'Qdd', 'Qnd', 'Sxd', 'Spd', 'Od', 'Nd', 'V']; // Added suffixes for larger numbers up to Googol
+		const factor = [
+			1, 1e3, 1e6, 1e9, 1e12, 1e15, 1e18, 1e21, 1e24, 1e27, 1e30, 1e33,
+			1e36, 1e39, 1e42, 1e45, 1e48, 1e51, 1e54, 1e57, 1e60, 1e63, 1e100
+		];
 
-			? Math.abs(Number(amount)) / 1.0e+9 + 'B'
-			: Math.abs(Number(amount)) >= 1.0e+6
-				? Math.abs(Number(amount)) / 1.0e+6 + 'M'
-				: Math.abs(Number(amount)) >= 1.0e+3
-					? Math.abs(Number(amount)) / 1.0e+3 + 'K'
-					: Math.abs(Number(amount));
+		for (let i = factor.length - 1; i >= 0; i--) {
+			if (num >= factor[i]) {
+			return (num / factor[i]).toFixed(num % factor[i] === 0 ? 0 : 2) + suffixes[i];
+			}
+		}
+
+		return num.toString();
 	};
 
 	/**
@@ -209,19 +221,7 @@ import validate from 'validate.js'; */
 	 */
 	const serializeFormData = (formData) => {
 		if (formData instanceof FormData) {
-			const object = {};
-			formData.forEach((value, key) => {
-				const keys = key.split('[').map(k => k.replace(']', ''));
-				keys.reduce((acc, currentKey, index) => {
-				if (index === keys.length - 1) {
-					acc[currentKey] = value;
-				} else {
-					if (!acc[currentKey]) acc[currentKey] = {};
-					return acc[currentKey];
-				}
-				}, object);
-			});
-			return object;
+			return Object.fromEntries(formData.entries());
 		} else if (Array.isArray(formData) && formData.every(item => typeof item === 'object' && item !== null && 'name' in item && 'value' in item)) {
 			return formData.reduce((acc, item) => {
 				acc[item.name] = item.value;
@@ -238,26 +238,25 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Returns a YouTube video object given a YouTube video URL.
-	   *
-	   * The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.
-	   *
-	   * The supported YouTube URL formats are:
-	   *
-	   * - http://www.youtube.com/watch?v=VIDEO_ID
-	   * - http://www.youtube.com/watch?v=VIDEO_ID&feature=player_embedded
-	   * - http://www.youtube.com/watch?v=VIDEO_ID&feature=feedrec_grec_index
-	   * - http://www.youtube.com/user/USER_NAME#p/a/u/1/VIDEO_ID
-	   * - http://www.youtube.com/v/VIDEO_ID?fs=1&hl=en_US&rel=0
-	   * - http://www.youtube.com/watch?v=VIDEO_ID#t=0m10s
-	   * - http://www.youtube.com/embed/VIDEO_ID?rel=0
-	   * - http://youtu.be/VIDEO_ID
-	   *
-	   * If the given URL is not a supported YouTube URL format, the function returns an object with a status of 2 and an error message.
-	   *
-	   * @param {string} url - The YouTube video URL to parse
-	   * @returns {object} The parsed YouTube video object, or an object with a status of 2 and an error message if the given URL is invalid
-	   */
+	 * Returns a YouTube video object given a YouTube video URL.
+	 *
+	 * The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.
+	 *
+	 * The supported YouTube URL formats are:
+	 * - http://www.youtube.com/watch?v=VIDEO_ID
+	 * - http://www.youtube.com/watch?v=VIDEO_ID&feature=player_embedded
+	 * - http://www.youtube.com/watch?v=VIDEO_ID&feature=feedrec_grec_index
+	 * - http://www.youtube.com/user/USER_NAME#p/a/u/1/VIDEO_ID
+	 * - http://www.youtube.com/v/VIDEO_ID?fs=1&hl=en_US&rel=0
+	 * - http://www.youtube.com/watch?v=VIDEO_ID#t=0m10s
+	 * - http://www.youtube.com/embed/VIDEO_ID?rel=0
+	 * - http://youtu.be/VIDEO_ID
+	 *
+	 * If the given URL is not a supported YouTube URL format, an alert is shown with an error message.
+	 *
+	 * @param {string} url - The YouTube video URL to parse
+	 * @returns {object} The parsed YouTube video object, or an error alert if the given URL is invalid
+	 */
 	const getYoutubeVideoData = (url) => {
 		const urlRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 		const match = url.match(urlRegex);
@@ -282,49 +281,58 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Creates an HTML element with the given tag name and attributes, and appends the given children to it.
-	   *
-	   * @param {string} tag - The HTML tag name of the element to create
-	   * @param {object} [attributes] - An object containing key-value pairs of attributes to set on the element
-	   * @param {array} [children] - An array of elements to append to the created element
-	   * @returns {HTMLElement} The created element
-	   */
+	 * Creates an HTML element with a specified tag name, attributes, and children.
+	 *
+	 * The function performs type checking and sanitization on the inputs to ensure
+	 * safe and valid element creation. The tag name is sanitized, and attributes
+	 * are set securely. Children can be strings or DOM nodes and are appended
+	 * to the created element after sanitization.
+	 *
+	 * @param {string} tag - The HTML tag name for the element to be created.
+	 * @param {object} [attributes={}] - An object representing key-value pairs of attributes for the element.
+	 * @param {Array} [children=[]] - An array of children to append to the created element. Children can be strings or DOM nodes.
+	 * @returns {HTMLElement} The created and configured HTML element.
+	 * @throws {Error} If the tag is not a valid string, attributes is not an object, or children is not an array.
+	 */
 	const createElements = (tag, attributes = {}, children = []) => {
-		const element = document.createElement(tag);
-		for (const [key, value] of Object.entries(attributes)) {
-			element.setAttribute(key, value);
-		}
-		children.forEach(child => element.appendChild(child));
+		if (typeof tag !== 'string' || !tag.trim()) throw new Error('Invalid tag name');
+		if (typeof attributes !== 'object' || attributes === null) throw new Error('Attributes must be an object');
+		if (!Array.isArray(children)) throw new Error('Children must be an array');
+
+		const element = document.createElement(_sanitize(tag));
+		Object.entries(attributes).forEach(([key, value]) => element.setAttribute(_sanitize(key), _sanitize(String(value))));
+		children.forEach(child => {
+			element.appendChild(typeof child === 'string' ? document.createTextNode(_sanitize(child)) : child);
+		});
+
 		return element;
 	};
 
 	const createHiddenInput = (name, value) => {
+		if (typeof name !== 'string' || !name.trim()) throw new Error('Invalid name');
+		if (typeof value !== 'string') throw new Error('Invalid value');
+
 		return createElements('input', {
 			type: 'hidden',
-			name: name,
-			value: value
+			name: _sanitize(name),
+			value: _sanitize(value)
 		});
 	};
 
 	/**
-	   * Moves the HTML from the first element matching the fromElementSelector to the first element matching the toElementSelector.
-	   * If either element is not found, the function does nothing.
-	   * @param {string} fromElementSelector - CSS selector for the element to move the HTML from
-	   * @param {string} toElementSelector - CSS selector for the element to move the HTML to
-	   */
-	const moveHtmlElement = function(fromElementSelector, toElementSelector) {
-		const fromElements = document.querySelectorAll(fromElementSelector);
-		const toElement = document.querySelector(toElementSelector);
+	 * Move the innerHTML of the element matching fromSelector to the element matching toSelector.
+	 *
+	 * @param {string} fromSelector - The CSS selector for the element to move the content from.
+	 * @param {string} toSelector - The CSS selector for the element to move the content to.
+	 */
+	const moveHtmlElement = (fromSelector, toSelector) => {
+		const fromElement = document.querySelector(_sanitize(fromSelector));
+		const toElement = document.querySelector(_sanitize(toSelector));
 
-		if (fromElements.length === 0 || toElement === null) {
-			if (isInDevelopment() == 1) {
-				console.log('Element not found');
-			}
+		if (!fromElement || !toElement) {
+			if (isInDevelopment()) console.log('Element not found');
 			return;
 		}
-
-		// Get the FIRST element from the NodeList (if it exists)
-		const fromElement = fromElements[0]; // Access the first element
 
 		toElement.innerHTML = fromElement.innerHTML;
 		fromElement.innerHTML = '';
@@ -345,7 +353,7 @@ import validate from 'validate.js'; */
 	   * @param {string} url - The URL to make the request to
 	   * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
 	   * @param {object} [options] - Options for the request
-	   * @param {function} [options.beforeSend] - Called before the request is sent
+	   * @param {function} [options.onBeforeSend] - Called before the request is sent
 	   * @param {function} [options.onSuccess] - Called when the request returns a JSON response
 	   * @param {function} [options.onError] - Called when the request fails
 	   * @param {function} [options.onComplete] - Called after the request has completed
@@ -353,7 +361,7 @@ import validate from 'validate.js'; */
 	   * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
 	   */
 	const post = (url, data, {
-		beforeSend,
+		onBeforeSend,
 		onSuccess,
 		onError,
 		onComplete,
@@ -361,7 +369,7 @@ import validate from 'validate.js'; */
 		contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
 	} = {}) => {
 
-		if (beforeSend) beforeSend();
+		if (onBeforeSend) onBeforeSend();
 
 		const headers = {
 			'X-Requested-With': 'XMLHttpRequest'
