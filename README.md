@@ -1,5 +1,5 @@
 
-# eo.userClient
+# **eo.userClient**
 The `eo.userClient` collects and manages client-related data, including:
 * User Agent: The client's browser user agent string.
 * Geo Information: The client's location data (retrieved from ipinfo.io).
@@ -34,7 +34,7 @@ This information is cached in localStorage to avoid redundant API calls.
    * Geo Fetch Failure: Logs an error (Error getting geo info:).
    * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
-# eo.validator
+# **eo.validator**
 The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
 
 * ## Usage Example
