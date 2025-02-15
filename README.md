@@ -64,7 +64,7 @@ if (!validator.validate(data)) {
 }
 ```
 ## Methods
-### 1. `validate(data, rules)`
+### `validate(data, rules)`
 
    Validates the given data object against rules and collects errors.  
    **Parameters:**
@@ -80,36 +80,35 @@ if (!validator.validate(data)) {
    const isValid = validator.validate({ name: "Alice" });
    console.log(isValid); // true or false
    ```
-### 2. `getErrors()`
-Retrieves an array of validation errors from the last `validate()` call.
+### `getErrors()`
 
-**Returns:**
-* `Array<String>` – A list of human-readable error messages.
+   Retrieves an array of validation errors from the last `validate()` call.  
+   **Returns:**
+   * `Array<String>` – A list of human-readable error messages.
+   
+   **Example:**
+   ```javascript
+   console.log(validator.getErrors());
+   // Output: [ "Email is not a valid email address." ]
+   ```
+### `setConstraints(rules)`
+   Sets default validation rules to be used for all future validations.
+   
+   **Parameters:**
+   * `rules (Object)` – The validation rules object.
+   
+   **Example:**
+   ```javascript
+   validator.setConstraints({ username: { required: true } });
+   ```
+### `resetConstraints()`
 
-**Example:**
-```javascript
-console.log(validator.getErrors());
-// Output: [ "Email is not a valid email address." ]
-```
-### 3. `setConstraints(rules)`
-Sets default validation rules to be used for all future validations.
-
-**Parameters:**
-* `rules (Object)` – The validation rules object.
-
-**Example:**
-```javascript
-validator.setConstraints({ username: { required: true } });
-```
-
-### 4. `resetConstraints()`
-Clears all previously set validation rules.
-
-**Example:**
-```javascript
-validator.resetConstraints();
-```
-
+   Clears all previously set validation rules.
+   
+   **Example:**
+   ```javascript
+   validator.resetConstraints();
+   ```
 ## Validation Rules
 The validator supports various rules that can be applied to fields.
 
