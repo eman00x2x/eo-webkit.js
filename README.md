@@ -625,10 +625,12 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
 
    * ## eo.component.alert
    To use the `eo.commponent.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
+   
       * ### Required HTML Structure
          ```html
          <div class="response"></div>
          ```
+
          This will act as the default container for displaying alerts and loaders.
 
       * ### Methods
