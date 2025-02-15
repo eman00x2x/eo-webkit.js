@@ -64,7 +64,7 @@ if (!validator.validate(data)) {
 }
 ```
 ## Methods
-### `validate(data, rules)`
+1. ### `validate(data, rules)`
 
    Validates the given data object against rules and collects errors.  
    **Parameters:**
@@ -80,7 +80,7 @@ if (!validator.validate(data)) {
    const isValid = validator.validate({ name: "Alice" });
    console.log(isValid); // true or false
    ```
-### `getErrors()`
+2. ### `getErrors()`
 
    Retrieves an array of validation errors from the last `validate()` call.  
    **Returns:**
@@ -91,7 +91,7 @@ if (!validator.validate(data)) {
    console.log(validator.getErrors());
    // Output: [ "Email is not a valid email address." ]
    ```
-### `setConstraints(rules)`
+3. ### `setConstraints(rules)`
    Sets default validation rules to be used for all future validations.
    
    **Parameters:**
@@ -101,7 +101,7 @@ if (!validator.validate(data)) {
    ```javascript
    validator.setConstraints({ username: { required: true } });
    ```
-### `resetConstraints()`
+4. ### `resetConstraints()`
 
    Clears all previously set validation rules.
    
