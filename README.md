@@ -25,7 +25,7 @@ This information is cached in localStorage to avoid redundant API calls.
 * ## Implementation Details
    **Fetching Geolocation Data**
    * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
-   * The response is cached in localStorage for future use.  
+   * The response is cached in localStorage for future use.
    **Browser Detection**
    * Uses navigator.userAgent to determine the browser name.
    * Compares the user agent string against common browser signatures.
@@ -593,6 +593,52 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
           onSuccess: (data) => console.log('Config Loaded:', data),
       });
       ```
+
+# eo.submmitForm
+The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
+
+* **Features**
+   * Validates form data using the `eo.validator` before submission.
+   * Submits form data via AJAX (`post` function).
+   * Displays alerts using the `eo.alert`.
+   * Handles success and error responses.
+   * Disables & enables buttons during the request to prevent multiple submissions.
+   * Redirects users upon success if `redirectUrl` is provided.
+
+* **Dependencies**
+   * eo.validator (Read the documentation)
+   * eo.post (Read the documentation)
+
+   * ## Syntax
+      ```javascript
+      eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
+      ```
+   
+   * ## Parameters
+      | Parameter | Type | Description |
+      | --- | --- | --- |
+      | `formId` | `string` | The ID of the form to submit (with or without `#`). |
+      | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
+      | `callback` | `function` | A callback function executed on a successful submission. |
+      | `onBeforeSend` | `function` | A function executed before sending the form data. |
+
+   * ## Example Usage
+      ```javascript
+      eo.submitForm('#myForm', {
+          validation: {
+              name: { required: true, min: 3 },
+              email: { required: true, email: true },
+          },
+          callback: (formData, response) => {
+              console.log('Form submitted successfully:', response);
+          },
+          onBeforeSend: (formData) => {
+              console.log('Processing form data:', formData);
+          },
+          redirectUrl: '/dashboard'
+      });
+      ```
+
 # EO.js Components
    * ## eo.component.video
       The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
@@ -736,3 +782,4 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
                button.enable(); // Enables all buttons with class '.btn'
                button.enable('.custom-button'); // Enables elements with class '.custom-button'
                ```
+

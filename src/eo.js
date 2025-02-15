@@ -905,27 +905,6 @@ import validate from 'validate.js'; */
 	   */
 	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
 		formId = formId.replace('#', '');
-
-		document.addEventListener('submit', function(event) {
-			console.log(event.target.id);
-			if (event.target.id === formId) {
-				event.preventDefault();
-			}
-		});
-
-		const _validatorResponse = (validator) => {
-			const messages = [];
-
-			if (validator) {
-				Object.keys(validator).forEach((key) => {
-					messages.push(validator[key]);
-				});
-				return messages.join(', ');
-			}
-
-			return false;
-		};
-
 		const form = document.getElementById(formId);
 
 		if (!form) {
@@ -933,71 +912,48 @@ import validate from 'validate.js'; */
 			return;
 		}
 
+		document.addEventListener('submit', (event) => {
+			if (event.target.id === formId) event.preventDefault();
+		});
+
 		const formData = new FormData(form);
 		formData.append('csrf_token', _CSRFToken);
 
-		if (onBeforeSend) {
-			onBeforeSend(formData);
-		}
+		onBeforeSend?.(formData);
 
 		return post(form.getAttribute('action'), formData, {
-			beforeSend: () => {
+			onBeforeSend: () => {
 				alert.loader();
+				button.disable();
 
 				if (typeof validation === 'object') {
-					if (typeof validate !== 'undefined') {
-						const validationErrors = _validatorResponse(
-							validate(serializeFormData(formData), validation)
-						);
-						if (validationErrors) {
-							alert.error(validationErrors);
-							return false;
-						}
-					} else {
-						console.log('validate.js is not included in the head. Include it from ' +
-							CDN + '/js/vendor/validatejs-0.13.1/validate.min.js or https://validatejs.org/#validatejs-download');
+					const validation = validator.validate(serializeFormData(formData), validation);
+					if (! validation) {
+						alert.error(validator.getErrors().join('<br /> '));
 					}
 				}
 
-				button.disable();
 			},
 			onSuccess: (responseData) => {
 				try {
 					const response = typeof responseData === 'object' ? responseData : JSON.parse(responseData);
 					alert.message(response.message);
 					if (response.status === 1) {
-						if (callback) {
-							callback(serializeFormData(formData), response);
-						}
-
-						if (redirectUrl) {
-							alert.loader('Please wait while you are redirecting...');
-							setTimeout(() => {
-								redirect(redirectUrl);
-							}, 10);
-						}
+						callback?.(serializeFormData(formData), response);
 					}
 				} catch (e) {
-					if (callback) {
-						alert.message('');
-						callback(serializeFormData(formData), responseData);
-
-						if (isInDevelopment() == 1) {
-							console.log(e);
-						}
-					}
-
-					if (redirectUrl) {
-						alert.loader('Please wait while you are redirecting...');
-						setTimeout(() => {
-							redirect(redirectUrl);
-						}, 10);
-					}
+					alert.message('');
+					callback?.(serializeFormData(formData), responseData);
+					if (isInDevelopment()) console.log(e);
 				}
+
+				if (redirectUrl) {
+					alert.loader('Redirecting...');
+					setTimeout(() => redirect(redirectUrl), 10);
+				}
+				
 			},
-			onComplete: () => {
-				button.enable();
-			}
+			onComplete: button.enable
 		});
 	};
 
@@ -1838,6 +1794,8 @@ import validate from 'validate.js'; */
 		let errors = [];
 
 		const validate = (data, rules = constraints) => {
+			if (typeof rules !== 'object') throw new Error('rules must be an object.');
+			if (typeof data !== 'object' || data instanceof FormData) throw new Error('data must be an object. Use eo.serializeFormData(data) instead.');
 			errors = []; // Reset errors
 			Object.entries(rules).forEach(([field, ruleset]) => {
 				const value = getValue(data, field);
