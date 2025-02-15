@@ -167,9 +167,14 @@ const testCase = () => {
 				email: { presence: true, email: true },
 				age: { presence: true, number: { min: 18, max: 60 } },
 				website: { url: true },
-				'address.street': { presence: true },
+				address: {
+					street: { presence: true },
+					city: { presence: true },
+					zipcode: { presence: true, length: { min: 5, max: 5 } }
+				},
+				/* 'address.street': { presence: true },
 				'address.city': { presence: true },
-				'address.zipcode': { presence: true, length: { min: 5, max: 5 } },
+				'address.zipcode': { presence: true, length: { min: 5, max: 5 } }, */
 				created_at: { date: true }
 			},
 			expected: []
@@ -211,7 +216,9 @@ const testCase = () => {
 	testCases.forEach(({ description, data, constraints, expected }) => {
 		const errors = eo.validator.validate(data, constraints);
 		console.log(description);
+		console.log('Result: Errors');
 		console.log(!errors ? eo.validator.getErrors() : '✅ Passed!');
+		console.log('Expected Errors: ');
 		console.log(expected);
 		console.log('--------------------');
 	});

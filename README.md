@@ -18,9 +18,9 @@ console.log(userClient.browser); // e.g., "Google Chrome"
 userClient **Object**
 | Property | Type | Description |
 | --- | --- | --- |
-| `userAgent | `string | The browser's user agent string. |
-| `geo | `Object | null |
-| `browser | `string | string |
+| `userAgent` | `string` | The browser's user agent string. |
+| `geo` | `Object` | null |
+| `browser` | `string` | string |
 
 ### Implementation Details
 **Fetching Geolocation Data**
@@ -33,6 +33,59 @@ userClient **Object**
 ### Error Handling
 * Geo Fetch Failure: Logs an error (Error getting geo info:).
 * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
+
+# eo.validator
+The eo.validator is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
+
+### Usage Example
+```javascript
+const rules = {
+  name: { required: true, length: { min: 3, max: 50 } },
+  email: { required: true, email: true },
+  age: { number: { min: 18, max: 99 } },
+  address: { 
+    street: { required: true }, 
+    city: { required: true }
+  }
+};
+
+validator.setConstraints(rules);
+
+const data = {
+  name: "John",
+  email: "invalid-email",
+  age: 17,
+  address: { street: "123 Main St" }
+};
+
+if (!validator.validate(data)) {
+  console.log(validator.getErrors()); 
+  // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
+}
+```
+### Methods
+#### `validate(data, rules)
+Validates the given data object against rules and collects errors.
+**Parameters:**
+* `data (Object) – The object to validate.
+* `rules (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+**Returns:**
+* `true if validation passes.
+* `false if validation fails (errors can be retrieved using getErrors()).
+**Example:**
+```javascript
+const isValid = validator.validate({ name: "Alice" });
+console.log(isValid); // true or false
+```
+#### `getErrors()
+Retrieves an array of validation errors from the last `validate()` call.
+**Returns:**
+* `Array<String>` – A list of human-readable error messages.
+**Example:**
+```javascript
+console.log(validator.getErrors());
+// Output: [ "Email is not a valid email address." ]
+```
 
 # eo.redirect(url)
 
