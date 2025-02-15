@@ -49,7 +49,7 @@ import validate from 'validate.js'; */
 		const token = document.querySelector('meta[name="csrf-token"]')?.content;
 		if (!token) {
 			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
-			/* console.error(message); */
+			console.error(message);
 		}
 		return token;
 	})();
@@ -419,7 +419,7 @@ import validate from 'validate.js'; */
 	   * @param {object} [options] - The options object
 	   * @returns {Promise} The promise object
 	   */
-	const get = async(url, { beforeRequest, onSuccess, onError } = {}) => {
+	const get = async (url, { beforeRequest, onSuccess, onError } = {}) => {
 		if (beforeRequest?.() === false) return;
 
 		try {
@@ -598,7 +598,7 @@ import validate from 'validate.js'; */
 		return { create: _slider.create };
 	}();
 
-	const _video = (() => {
+	const video = (() => {
 		const _resetForm = (input, btnSpinner, btnText) => {
 			btnSpinner.classList.add('d-none');
 			btnText.classList.remove('d-none');
@@ -728,11 +728,11 @@ import validate from 'validate.js'; */
 		};
 
 		return {
-			_initAfterLoad: _createVideoForm,
-			_initBeforeLoad: () => {
+			init: () => {
 				_handleVideoAdd();
 				_handleVideoDeletion();
 				_handleVideoPlayback();
+				document.addEventListener('DOMContentLoaded', _createVideoForm());
 			}
 		};
 	})();
@@ -829,59 +829,41 @@ import validate from 'validate.js'; */
 			const messageContainer = document.querySelector(element);
 
 			if (!messageContainer) {
-				const newDiv = document.createElement('div');
-				newDiv.classList.add('response');
-				document.body.prepend(newDiv);
+				document.body.prepend(createElements('div', { class: 'response' }));
 			}
 
 			document.querySelector(element).innerHTML = message;
 		};
 
-		const _displayAlert = (message, type = 'success', element = '.response') => {  // Combined function
+		const _createAlert = (message, type = 'success', element = '.response') => {  // Combined function
 			const alertClasses = `message alert alert-${type} alert-dismissible show`; // Dynamic class
-			const alertDiv = createElements('div', {
-				class: alertClasses,
-				role: 'alert'
-			}, [
+			const alertDiv = createElements('div', { class: alertClasses, role: 'alert' }, [
 				createElements('span', {}, [document.createTextNode(message)]),
 				createElements('button', {
-					type: 'button',
-					class: 'btn-close',
-					'data-bs-dismiss': 'alert',
-					'aria-label': 'Close'
+					type: 'button', class: 'btn-close',
+					'data-bs-dismiss': 'alert', 'aria-label': 'Close'
 				})
 			]);
 
 			_display(alertDiv.outerHTML, element);
 		};
 
-		const success = (message, element = '.response') => _displayAlert(message, 'success', element);
-
-		const error = (message, element = '.response') => _displayAlert(message, 'danger', element);
+		const success = (message, element = '.response') => _createAlert(message, 'success', element);
+		const error = (message, element = '.response') => _createAlert(message, 'danger', element);
 
 		const loader = (message = 'Processing, Please wait...', element = '.response') => {
-			const loaderDiv = createElements('div', {
-				class: 'bg-white p-3 mt-3 rounded border'
-			}, [
-				createElements('div', {
-					class: 'd-flex gap-3 align-items-center'
-				}, [
-					createElements('div', {
-						class: 'loader'
-					}),
-					createElements('p', {
-						class: 'mb-0'
-					}, [
-						document.createTextNode(message)
-					])
+			const loaderDiv = createElements('div', { class: 'bg-white p-3 mt-3 rounded border' }, [
+				createElements('div', { class: 'd-flex gap-3 align-items-center' }, [
+					createElements('div', { class: 'loader' }),
+					createElements('p', { class: 'mb-0' }, [ document.createTextNode(message) ])
 				])
 			]);
 
 			_display(loaderDiv.outerHTML, element);
 		};
 
-		const message = (message, element = '.response') => {
-			_display(message, element);
+		const message = (message, type, element = '.response') => {
+			_createAlert(message, type, element);
 		};
 
 		return {
@@ -1991,14 +1973,14 @@ import validate from 'validate.js'; */
 	const eo = {
 		initBeforeLoad: function() {
 			/* Address.initBeforeLoad(); */
-			_video._initBeforeLoad();
+			/* _video._initBeforeLoad(); */
 			_slider._initBeforeLoad();
 			_mortgageCalculator._initBeforeLoad();
 		},
 
 		initAfterLoad: () => {
 			/* Address.initAfterLoad(); */
-			_video._initAfterLoad();
+			/* _video._initAfterLoad(); */
 			_slider._initAfterLoad();
 			_modal._initAfterLoad();
 			_mortgageCalculator._initAfterLoad();
@@ -2047,7 +2029,8 @@ import validate from 'validate.js'; */
 			alert,
 			button,
 			uploader,
-			googleChart
+			googleChart,
+			video
 		},
 	};
 

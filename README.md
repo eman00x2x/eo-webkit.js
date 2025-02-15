@@ -593,8 +593,8 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
           onSuccess: (data) => console.log('Config Loaded:', data),
       });
       ```
-# Components
-   * ## Video
+# EO.js Components
+   * ## eo.component.video
       The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
       * Add a YouTube video by URL.
       * Play the video in a modal.
@@ -602,6 +602,13 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
       * Create an input form dynamically.
          * `id`, `url`, `embed`, `thumbnail`, and `created_at`
       
+	  * ### Usage
+	     Call eo.component.video.init() before the page loads.
+	     ```javascript
+         window.addEventListener('load', () => {
+         	eo.component.video.init();
+         });
+		 ```
       * ### Required HTML Structure
          To integrate the video module, add the following HTML elements:
          ```html
@@ -610,11 +617,39 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
          <div class="video-list-container"></div>
          ```
          * #### Description
-            * .response - Displays messages after adding a video.
-            * #videoInput - The container where the input field and add button will be appended.
-            * .video-list-container - The section where added videos will be listed.
+            * **.response** - Displays messages after adding a video.
+            * **#videoInput** - The container where the input field and add button will be appended.
+            * **.video-list-container** - The section where added videos will be listed.
             * Clicking on an added video will play it in a fullscreen modal.
             * A delete button is provided to remove a video entry.
 
-
-
+   * ## eo.component.alert
+   To use the `eo.commponent.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
+      * ### Required HTML Structure
+         ```html
+         <div class="response"></div>
+         ```
+         This will act as the default container for displaying alerts and loaders.
+      * ### Methods
+         * #### success(message, element) and error(message, element)
+            Displays a success alert.
+            | Parameter | Type | Default | Description |
+            | --- | --- | --- | --- |
+            | `message` | `String` | *required* | The success message. |
+            | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+            * ##### Example Usage
+               ```javascript
+               eo.component.alert.success('Operation completed successfully!');
+               eo.component.alert.error('An error occurred while processing your request.');
+               ```
+         * #### loader(message, element)
+            Displays a processing loader with a message.
+            | Parameter | Type | Default | Description |
+            | --- | --- | --- | --- |
+            | `message` | `String` | *optional*, `default: 'Processing, Please wait...'` | The success message. |
+            | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+            * ##### Example Usage
+               ```javascript
+               eo.component.alert.loader();
+               eo.component.alert.loader('Uploading file, please wait...');
+               ```

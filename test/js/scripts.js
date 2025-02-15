@@ -225,7 +225,10 @@ const testCase = () => {
 
 };
 
+
+
 window.addEventListener('load', () => {
+	eo.component.video.init();
 	/* testCase(); */
 	epochToTime();
 	uuidv4();
