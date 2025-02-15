@@ -657,3 +657,42 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
                eo.component.alert.loader();
                eo.component.alert.loader('Uploading file, please wait...');
                ```
+
+   * ## eo.component.modal
+      The `eo.component.modal` provides an easy way to create and manage Bootstrap modals dynamically. It supports custom modal sizes, dynamic    content    injection, and automatic cleanup of destroyable modals.
+      
+      * **Features**
+         * Dynamically create modals with custom sizes.
+         * Inject content into the modal using a callback function.
+         * Support for modals with status indicators.
+         * Automatic destruction of modals when closed (if enabled).
+         * Handles modal close events properly.
+      
+      * **Notes**
+         * Ensure Bootstrap is loaded for this module to function properly.
+         * The callback function should return a valid HTML string or a DOM element.
+         * Destroyable modals are automatically removed from the DOM upon closing.
+      
+      * ### Methods
+         * #### create({ id, size, callback, status = false, destroyable = true })
+            Creates and displays a Bootstrap modal.
+            
+            * ##### Parameters
+               | Parameter | Type | Default | Description |
+               | --- | --- | --- | --- |
+               | `id` | `String` | *required* | The unique ID of the modal. |
+               | `size` | `String` | *required* | Modal size (xs, sm, md, lg, xl, fullscreen). |
+               | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
+               | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
+               | `destroyable` | `Boolean`, | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
+            
+            * ##### Example Usage
+               ```javascript
+               modal.create({
+                 id: 'exampleModal',
+                 size: 'md',
+                 callback: () => '<p>This is a dynamic modal!</p>',
+                 status: 'success',
+                 destroyable: true
+               });
+               ```

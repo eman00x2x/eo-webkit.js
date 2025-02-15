@@ -668,7 +668,7 @@ import validate from 'validate.js'; */
 				const btn = event.target.closest('.btn-playback');
 				if (!btn) return;
 
-				_modal.create({
+				modal.create({
 					id: btn.dataset.id,
 					size: 'fullscreen',
 					callback: () => createElements('div', { class: 'row justify-content-center' }, [
@@ -1015,21 +1015,11 @@ import validate from 'validate.js'; */
 		});
 	};
 
-	const _modal = function() {
-		/**
-			 * Creates a modal element with a given id, size, content, status and destroyable flag.
-			 * @param {string} id - The id of the modal element.
-			 * @param {string} size - The size of the modal element. Can be "xs", "sm", "md", "lg", "xl", "fullscreen".
-			 * @param {function} [callback] - A callback function to be called to generate the modal content.
-			 * @param {boolean} [status=false] - Whether to add a modal status element to the modal element.
-			 * @param {boolean} [destroyable=false] - Whether to add a modal destroyable class to the modal element.
-			 */
+	const modal = (() => {
 		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
-			const destroyableClass = destroyable ? 'modal-destroyable' : '';
-
-			const modal = createElements('div', {
-				class: `modal ${destroyableClass}`,
-				id: id,
+			const _modal = createElements('div', {
+				class: `modal ${destroyable ? 'modal-destroyable' : ''}`,
+				id,
 				'aria-labelledby': 'modal',
 				'aria-hidden': 'true'
 			}, [
@@ -1043,68 +1033,41 @@ import validate from 'validate.js'; */
 								'aria-label': 'Close'
 							}),
 							createElements('div', { class: 'response-modal' }, [
-								...(callback ? (() => {
-									const callbackContent = callback();
-
-									if (typeof callbackContent === 'string') {
-										// Treat as HTML and parse:
-										const tempDiv = document.createElement('div');
-										tempDiv.innerHTML = callbackContent; // Parse HTML string
-										const elements = Array.from(tempDiv.childNodes); // Get the parsed elements
-
-										// Check if there is only one element.
-										if (elements.length === 1) {
-											return [elements[0]];
-										} else {
-											return elements; // Return an array of parsed elements
-										}
-
-									} else if (callbackContent instanceof Element) {
-										return [callbackContent]; // Return the Element directly
-									} else {
-										console.warn('Callback should return either a string or an Element');
-										return [];
-									}
-								})() : [])
+								..._parseCallback(callback)
 							])
 						])
 					])
 				])
 			]);
 
-			document.body.appendChild(modal);
+			document.body.appendChild(_modal);
+			new bootstrap.Modal(_modal, { keyboard: false }).show();
+		};
 
-			new bootstrap.Modal(document.getElementById(id), {
-				keyboard: false
-			}).show(document.getElementById(id));
+		const _parseCallback = (callback) => {
+			if (!callback) return [];
+			const content = callback();
+			if (typeof content === 'string') {
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				return [...tempDiv.childNodes];
+			}
+			return content instanceof Element ? [content] : [];
 		};
 
 		const _handleModalClose = () => {
-			document.addEventListener('click', function(event) {
-				if (event.target.classList.contains('btn-close')) {
-					const modal = event.target.closest('.modal');
-					if (modal) {
-						const bsModal = bootstrap.Modal.getInstance(modal);
-						if (bsModal) {
-							bsModal.hide();
-						} else {
-							console.error('Modal element not associated with a Bootstrap Modal instance.');
-						}
-					}
+			document.addEventListener('click', (event) => {
+				const _modal = event.target.closest('.modal');
+				if (event.target.classList.contains('btn-close') && _modal) {
+					bootstrap.Modal.getInstance(modal)?.hide();
 				}
 			});
 		};
 
-		/**
-			 * Destroys a modal element after it has been closed if it has the "modal-destroyable" class.
-			 * This is a private function and should not be used directly.
-			 */
 		const _destroyModalOnClose = () => {
-			document.addEventListener('hidden.bs.modal', function(event) {
-				const modal = document.getElementById(event.target.id);
-				if (modal && modal.classList.contains('modal-destroyable')) {
-					modal.remove();
-				}
+			document.addEventListener('hidden.bs.modal', (event) => {
+				const _modal = document.getElementById(event.target.id);
+				if (_modal?.classList.contains('modal-destroyable')) _modal.remove();
 			});
 		};
 
@@ -1115,13 +1078,7 @@ import validate from 'validate.js'; */
 			},
 			create
 		};
-	}();
-
-	const modal = function() {
-		return {
-			create: _modal.create
-		};
-	}();
+	})();
 
 	const uploader = function() {
 
@@ -1982,7 +1939,7 @@ import validate from 'validate.js'; */
 			/* Address.initAfterLoad(); */
 			/* _video._initAfterLoad(); */
 			_slider._initAfterLoad();
-			_modal._initAfterLoad();
+			modal._initAfterLoad();
 			_mortgageCalculator._initAfterLoad();
 
 			let resizeTO;
