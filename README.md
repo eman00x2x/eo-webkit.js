@@ -331,11 +331,11 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
 
 # eo.getYoutubeVideoData(url)
 `eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
-It retrieves:
-The video ID  
-Thumbnail URLs in various resolutions  
-The direct watch URL  
-The embed URL  
+It retrieves:  
+**The video ID**  
+**Thumbnail URLs** in various resolutions  
+The **direct watch URL**  
+The **embed URL**  
 
 If the URL is invalid, an error alert is triggered.
 
@@ -351,28 +351,28 @@ If the URL is invalid, an error alert is triggered.
    | `null`	| Returns null and triggers an alert if the URL is invalid. |
 
 * ## Example Usage
-   * Valid Youtube URL
+   * **Valid Youtube URL**
       ```javascript
-      const videoData = getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      const videoData = eo.getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
       
       console.log(videoData);
-      // {
-      //   id: "dQw4w9WgXcQ",
-      //   thumbnail: {
-      //     default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
-      //     hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-      //     mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-      //     sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
-      //     maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-      //   },
-      //   url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      //   embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-      // }
+      /* {
+        id: "dQw4w9WgXcQ",
+        thumbnail: {
+          default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
+          hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+          mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+          sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+          maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+        },
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      } */
       ```
    
-   * Invalid YouTube URL
+   * **Invalid YouTube URL**
       ```javascript
-      const videoData = getYoutubeVideoData("https://example.com/video");
+      const videoData = eo.getYoutubeVideoData("https://example.com/video");
       
       console.log(videoData); // null
       // ⚠️ Alert: "Invalid YouTube URL"
@@ -381,30 +381,57 @@ If the URL is invalid, an error alert is triggered.
 * ## Supported Youtube URL Formats
    | Format Type | Example |
    | --- | --- |
-   | Standard URL | https://www.youtube.com/watch?v=VIDEO_ID |
-   | Shortened URL | https://youtu.be/VIDEO_ID |
-   | Embed URL | https://www.youtube.com/embed/VIDEO_ID |
-   | Other Variants | https://www.youtube.com/v/VIDEO_ID, https://www.youtube.com/watch?v=VIDEO_ID&feature=share |
+   | Standard URL | https://www.youtube.com/watch?v=**VIDEO_ID** |
+   | Shortened URL | https://youtu.be/**VIDEO_ID** |
+   | Embed URL | https://www.youtube.com/embed/**VIDEO_ID** |
+   | Other Variants | https://www.youtube.com/v/**VIDEO_ID**, https://www.youtube.com/watch?v=**VIDEO_ID**&feature=share |
 
 # eo.createElements(tag, attributes = {}, children)
-`@param {string} tag - The HTML tag name for the element to be created.
-@param {object} [attributes={}] - An object representing key-value pairs of attributes for the element.
-@param {Array} [children] - An array of children to append to the created element. Children can be strings or DOM nodes.
-@returns {HTMLElement} The created and configured HTML element.
-@throws {Error} If the tag is not a valid string, attributes is not an object, or children is not an array.`
+`eo.createElements(tag, attributes, children)` dynamically creates an HTML element, applies attributes, and appends child elements or text nodes. Ensures data sanitization before inserting into the DOM.
 
-Creates an HTML element with a specified tag name, attributes, and children.  
-  
-The function performs type checking and sanitization on the inputs to ensure safe and valid element creation. The tag name is sanitized, and attributes are set securely. Children can be strings or DOM nodes and are appended to the created element after sanitization.
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `tag` | `string` | The **HTML tag name** (e.g., `'div'`, `'span'`). |
+   | `attributes` | `object` (optional) | An object containing **attribute key-value pairs** (e.g., `{ class: 'btn', id: 'my-button' }`). |
+   | `children` | `array` (optional) | An array of **child elements or strings** (text content). |
 
-Sample Usage:
-```javascript
-const div = eo.createElements('div', { class: 'container', id: 'main' }, [
-        eo.createElements('p', {}, ['Hello, world!']),
-        'Some text',
-]);
-document.body.appendChild(div);
-```
+* ## Returns
+   `HTMLElement` Returns a newly created DOM element with the specified attributes and children.
+
+* ## Example Usage
+   * **Creating a Simple** `<div>`
+      ```javascript
+      const div = createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
+      document.body.appendChild(div);
+      ```
+      * **Output**
+         ```html
+         <div class="container" id="main">Hello, world!</div>
+         ```
+   
+   * **Creating a Nested Structure**
+      ```javascript
+      const button = createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
+      const wrapper = createElements('div', { class: 'wrapper' }, [button]);
+      
+      document.body.appendChild(wrapper);
+      ```
+      * **Output**
+         ```html
+         <div class="wrapper">
+             <button class="btn" type="button">Click Me</button>
+         </div>
+         ```
+
+* ## Error Handling
+| Error Condition | Thrown Error |
+| --- | --- |
+| `tag` is **not a string** or empty | `"Invalid tag name"` |
+| `attributes` is not an object | `"Attributes must be an object"` |
+| `children` is not an array | `"Children must be an array"` |
+
+
 
 # eo.moveHtmlElement(fromSelector, toSelector)
 
