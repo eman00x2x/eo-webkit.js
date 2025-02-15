@@ -1,5 +1,5 @@
 
-# **eo.userClient**
+# $${\color{orange}eo.userClient}$$
 The `eo.userClient` collects and manages client-related data, including:
 * User Agent: The client's browser user agent string.
 * Geo Information: The client's location data (retrieved from ipinfo.io).
