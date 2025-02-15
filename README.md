@@ -194,7 +194,7 @@ Converts an epoch time (in seconds) to a localized string in the format: "Weekda
 
 * ## Parameters
    | Parameter | Type | Default | Description |
-   | --- | --- | --- |
+   | --- | --- | --- | --- |
    | `bytes` | `Number` | Required | The file size in **bytes**. |
    | `decimalPlaces` | `Number` | `0` (optional) | The **number of decimal places** for formatting. |
 
