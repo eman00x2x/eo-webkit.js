@@ -1,7 +1,6 @@
 
 # eo.userClient
-The userClient module collects and manages client-related data, including:
-
+The eo.userClient collects and manages client-related data, including:
 * User Agent: The client's browser user agent string.
 * Geo Information: The client's location data (retrieved from ipinfo.io).
 * Browser Detection: Determines the browser name based on the user agent.
@@ -19,9 +18,9 @@ console.log(userClient.browser); // e.g., "Google Chrome"
 userClient **Object**
 | Property | Type | Description |
 | --- | --- | --- |
-| userAgent | string | The browser's user agent string. |
-| geo | Object | null |
-| browser | string | string |
+| `userAgent | `string | The browser's user agent string. |
+| `geo | `Object | null |
+| `browser | `string | string |
 
 ### Implementation Details
 **Fetching Geolocation Data**
