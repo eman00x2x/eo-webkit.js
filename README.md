@@ -288,9 +288,9 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
 
 # eo.serializeFormData(formData)
 `eo.serializeFormData(formData)` converts form data into a plain JavaScript object. It supports different input types, including:
-* **FormData** (browser API)
-* **Array of object**s (e.g., { name: "email", value: "test@example.com" })
-* **Plain JavaScript objects**
+**FormData** (browser API)  
+**Array of object**s (e.g., { name: "email", value: "test@example.com" })  
+**Plain JavaScript objects**  
 
 * ## Parameters
    | Parameter | Type | Description |
@@ -306,7 +306,7 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
       const formElement = document.querySelector("form");
       const formData = new FormData(formElement);
       
-      console.log(serializeFormData(formData));
+      console.log(eo.serializeFormData(formData));
       // { name: "John", email: "john@example.com", password: "123456" }
       ```
    
@@ -317,7 +317,7 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
           { name: "email", value: "john@example.com" }
       ];
       
-      console.log(serializeFormData(formArray));
+      console.log(eo.serializeFormData(formArray));
       // { username: "johndoe", email: "john@example.com" }
       ```
    
@@ -325,26 +325,66 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
       ```javascript
       const formObject = { age: 25, country: "USA" };
       
-      console.log(serializeFormData(formObject));
+      console.log(eo.serializeFormData(formObject));
       // { age: 25, country: "USA" }
       ```
 
 # eo.getYoutubeVideoData(url)
-`@param {string} url - The YouTube video URL to parse
-@returns {object} The parsed YouTube video object, or an error alert if the given URL is invalid`
+`eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
+It retrieves:
+The video ID  
+Thumbnail URLs in various resolutions  
+The direct watch URL  
+The embed URL  
 
-Returns a YouTube video object given a YouTube video URL.  
-The returned object contains the YouTube video ID, thumbnail URLs, video URL, and embed URL.  
-  
-The supported YouTube URL formats are:  
-\- http://www.youtube.com/watch?v=VIDEO\_ID  
-\- http://www.youtube.com/watch?v=VIDEO\_ID&feature=player\_embedded  
-\- http://www.youtube.com/watch?v=VIDEO\_ID&feature=feedrec\_grec\_index  
-\- http://www.youtube.com/user/USER\_NAME#p/a/u/1/VIDEO\_ID  
-\- http://www.youtube.com/v/VIDEO\_ID?fs=1&hl=en\_US&rel=0  
-\- http://www.youtube.com/watch?v=VIDEO\_ID#t=0m10s  
-\- http://www.youtube.com/embed/VIDEO\_ID?rel=0  
-\- http://youtu.be/VIDEO\_ID
+If the URL is invalid, an error alert is triggered.
+
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The YouTube video URL to extract details from. |
+
+* ## Returns
+   | Type	| Description |
+   | --- | --- |
+   | `Object`	| Returns an object with video details (**if the URL is valid**). |
+   | `null`	| Returns null and triggers an alert if the URL is invalid. |
+
+* ## Example Usage
+   * Valid Youtube URL
+      ```javascript
+      const videoData = getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      
+      console.log(videoData);
+      // {
+      //   id: "dQw4w9WgXcQ",
+      //   thumbnail: {
+      //     default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
+      //     hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      //     mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+      //     sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+      //     maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+      //   },
+      //   url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      //   embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      // }
+      ```
+   
+   * Invalid YouTube URL
+      ```javascript
+      const videoData = getYoutubeVideoData("https://example.com/video");
+      
+      console.log(videoData); // null
+      // ⚠️ Alert: "Invalid YouTube URL"
+   ```
+
+* ## Supported Youtube URL Formats
+   | Format Type | Example |
+   | --- | --- |
+   | Standard URL | https://www.youtube.com/watch?v=VIDEO_ID |
+   | Shortened URL | https://youtu.be/VIDEO_ID |
+   | Embed URL | https://www.youtube.com/embed/VIDEO_ID |
+   | Other Variants | https://www.youtube.com/v/VIDEO_ID, https://www.youtube.com/watch?v=VIDEO_ID&feature=share |
 
 # eo.createElements(tag, attributes = {}, children)
 `@param {string} tag - The HTML tag name for the element to be created.
