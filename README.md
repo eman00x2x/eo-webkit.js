@@ -66,15 +66,15 @@ if (!validator.validate(data)) {
 ### Methods
 #### 1. `validate(data, rules)`
 Validates the given data object against rules and collects errors.  
-**Parameters:**
-* `data` (Object) – The object to validate.
-* `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+... **Parameters:**
+... * `data` (Object) – The object to validate.
+... * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
 
-**Returns:**
-* `true` if validation passes.
-* `false` if validation fails (errors can be retrieved using getErrors()).
+... **Returns:**
+... * `true` if validation passes.
+... * `false` if validation fails (errors can be retrieved using getErrors()).
 
-**Example:**
+... **Example:**
 ```javascript
 const isValid = validator.validate({ name: "Alice" });
 console.log(isValid); // true or false
