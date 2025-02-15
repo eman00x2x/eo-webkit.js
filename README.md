@@ -64,7 +64,7 @@ if (!validator.validate(data)) {
 }
 ```
 ### Methods
-#### `validate(data, rules)`
+#### 1. `validate(data, rules)`
 Validates the given data object against rules and collects errors.  
 **Parameters:**
 * `data` (Object) – The object to validate.
@@ -79,7 +79,7 @@ Validates the given data object against rules and collects errors.
 const isValid = validator.validate({ name: "Alice" });
 console.log(isValid); // true or false
 ```
-#### `getErrors()`
+#### 2. `getErrors()`
 Retrieves an array of validation errors from the last `validate()` call.
 
 **Returns:**
