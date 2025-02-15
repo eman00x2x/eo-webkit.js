@@ -624,8 +624,8 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
             * A delete button is provided to remove a video entry.
 
    * ## eo.component.alert
-   To use the `eo.commponent.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
-   
+      To use the `eo.commponent.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
+
       * ### Required HTML Structure
          ```html
          <div class="response"></div>
