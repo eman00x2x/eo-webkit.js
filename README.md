@@ -64,7 +64,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
    }
    ```
 * ## Methods
-   1. ### `validate(data, rules)`
+   * ### `validate(data, rules)`
    
       Validates the given data object against rules and collects errors.  
       **Parameters:**
@@ -80,7 +80,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       const isValid = validator.validate({ name: "Alice" });
       console.log(isValid); // true or false
       ```
-   2. ### `getErrors()`
+   * ### `getErrors()`
    
       Retrieves an array of validation errors from the last `validate()` call.  
       **Returns:**
@@ -91,7 +91,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       console.log(validator.getErrors());
       // Output: [ "Email is not a valid email address." ]
       ```
-   3. ### `setConstraints(rules)`
+   * ### `setConstraints(rules)`
       Sets default validation rules to be used for all future validations.
       
       **Parameters:**
@@ -101,7 +101,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       ```javascript
       validator.setConstraints({ username: { required: true } });
       ```
-   4. ### `resetConstraints()`
+   * ### `resetConstraints()`
    
       Clears all previously set validation rules.
       
