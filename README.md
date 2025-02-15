@@ -261,32 +261,73 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
 
 * ## Example Usage
    ```javascript
-   console.log(getRandomNum(1, 10)); 
+   console.log(eo.getRandomNum(1, 10)); 
    // Output: Random number between 1 and 10
    ```
 
 
 # eo.convertCurrency(amount)
-`@param {number} amount - The number to convert to a human-readable format
-@returns {string} A human-readable string representation of the given number`
+`eo.convertCurrency(amount)` formats large numbers into a more readable currency notation using suffixes like K (thousand), M (million), B (billion), T (trillion), and beyond, up to Googol (1e100).
 
-Converts a given number to a human-readable currency format.  
-The function will return a string that represents the given number in a  
-human-readable format. The format will be one of the following:  
-\- Billions: 1,234,567,890,000 -> 1.23B  
-\- Millions: 1,234,567 -> 1.23M  
-\- Thousands: 1,234 -> 1.23K  
-\- Default: 1234 -> 1234
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `amount` | `Number` \| `String` | The numeric value to be formatted. Can be a number or a string that represents a number. |
+
+* ## Returns
+   `String` A formatted string representing the number with an appropriate suffix (e.g., "1.5M", "2B").
+
+* ## Example Usage
+   ```javascript
+   console.log(convertCurrency(1500));      // "1.5K"
+   console.log(convertCurrency(1000000));   // "1M"
+   console.log(convertCurrency(2500000000)); // "2.5B"
+   console.log(convertCurrency(1e100));     // "1V"  (Googol)
+   console.log(convertCurrency(999));       // "999"
+   ```
 
 # eo.serializeFormData(formData)
-`@param {FormData|Array|object} formData - The input to serialize
-@returns {object} A plain JavaScript object containing the serialized data`
+`eo.serializeFormData(formData)` converts form data into a plain JavaScript object. It supports different input types, including:
+* **FormData** (browser API)
+* **Array of object**s (e.g., { name: "email", value: "test@example.com" })
+* **Plain JavaScript objects**
 
-Serializes a given input into a plain JavaScript object.  
-This function accepts either a native FormData object, an array of objects with 'name' and 'value' properties, or a regular object. It processes the input to produce a plain JavaScript object with key-value pairs.  
-\- If the input is a FormData object, it converts the entries to an object.  
-\- If the input is an array, it reduces the array to an object using the 'name' and 'value' properties of each item.  
-\- If the input is already a regular object, it is returned as is.
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `formData` | `FormData` \| `Array` \| `Object` | The data to be converted into a plain object. |
+
+* ## Returns
+   `Object` A JavaScript object where keys represent form field names and values represent user input.
+
+* ## Example Usage
+   * **Handling FormData**
+      ```javascript
+      const formElement = document.querySelector("form");
+      const formData = new FormData(formElement);
+      
+      console.log(serializeFormData(formData));
+      // { name: "John", email: "john@example.com", password: "123456" }
+      ```
+   
+   * **Handling an Array of Objects**
+      ```javascript
+      const formArray = [
+          { name: "username", value: "johndoe" },
+          { name: "email", value: "john@example.com" }
+      ];
+      
+      console.log(serializeFormData(formArray));
+      // { username: "johndoe", email: "john@example.com" }
+      ```
+   
+   * **Handling a Plain Object**
+      ```javascript
+      const formObject = { age: 25, country: "USA" };
+      
+      console.log(serializeFormData(formObject));
+      // { age: 25, country: "USA" }
+      ```
 
 # eo.getYoutubeVideoData(url)
 `@param {string} url - The YouTube video URL to parse
