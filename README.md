@@ -1,4 +1,40 @@
 
+### eo.userClient
+The userClient module collects and manages client-related data, including:
+
+* User Agent: The client's browser user agent string.
+* Geo Information: The client's location data (retrieved from ipinfo.io).
+* Browser Detection: Determines the browser name based on the user agent.
+
+This information is cached in localStorage to avoid redundant API calls.
+
+## Usage Example
+```javascript
+console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
+console.log(userClient.browser); // e.g., "Google Chrome"
+```
+
+## Properties
+userClient **Object**
+| Property | Type | Description |
+| --- | --- | --- |
+| userAgent | string | The browser's user agent string. |
+| geo | Object | null |
+| browser | string | string |
+
+## Implementation Details
+**Fetching Geolocation Data**
+* If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
+* The response is cached in localStorage for future use.
+**Browser Detection**
+* Uses navigator.userAgent to determine the browser name.
+* Compares the user agent string against common browser signatures.
+
+## Error Handling
+* Geo Fetch Failure: Logs an error (Error getting geo info:).
+* Unknown Browser: Defaults to "Unknown Browser" if no match is found.
+
 ### eo.redirect(url)
 
 `@param {string} url - The URL to redirect to`

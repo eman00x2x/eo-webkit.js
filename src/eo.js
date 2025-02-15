@@ -446,21 +446,13 @@ import validate from 'validate.js'; */
 
 		try {
 			const response = await fetch(url);
-			if (!response.ok) {
-				const errorMessage = await response.text(); /* Get error message from server if possible */
-				throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`); /* Include message in error */
-			}
-
 			const contentType = response.headers.get('Content-Type');
+			const responseData = contentType?.includes('application/json') 
+				? await response.json()
+				: await response.text();
 
-			let responseData;
-
-			if (contentType && contentType.includes('application/json')) {
-				responseData = await response.json();
-			} else if (contentType && contentType.includes('text/html')) {
-				responseData = await response.text();
-			} else {
-				responseData = await response.text();
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}, Message: ${responseData}`);
 			}
 
 			onSuccess?.(responseData);
@@ -468,12 +460,10 @@ import validate from 'validate.js'; */
 			return responseData;
 
 		} catch (error) {
-			onError?.(null, 'error', error); /* Pass the error object itself */
-			alert.error(error); /* Display error message to the user */
+			onError?.(null, 'error', error);
+			alert.error(error);
+			console.error('Fetch Error:', error);
 			button.enable();
-
-			console.error('Fetch Error:', error); /* Log the error object for debugging (no need for isInDevelopment check) */
-			/* No need to re-throw the error, let the caller handle it if needed */
 		}
 	};
 
@@ -484,92 +474,45 @@ import validate from 'validate.js'; */
 	   * - `geo`: The geo information from IPInfo
 	   * - `browser`: The browser name
 	   */
-	const userClient = function() {
-		return function() {
-			const clientInfo = {
-				userAgent: null,
-				geo: null,
-				browser: null
+	const userClient = (() => {
+		const clientInfo = JSON.parse(localStorage.getItem('EOclient')) || {
+			userAgent: navigator.userAgent,
+			geo: null,
+			browser: null
+		};
+
+		const getGeoInfo = async () => {
+			try {
+				clientInfo.geo = await get('https://ipinfo.io/json');
+				localStorage.setItem('EOclient', JSON.stringify(clientInfo));
+			} catch (error) {
+				console.error('Error getting geo info:', error);
+			}
+		};
+
+		const detectBrowser = () => {
+			const browsers = {
+				'Opera|Opr': 'Opera',
+				'Edg': 'Microsoft Edge',
+				'EdgA': 'Microsoft Edge (Chromium)',
+				'MSIE|Trident': 'Microsoft IE',
+				'Chrome': 'Google Chrome',
+				'Safari': 'Apple Safari',
+				'Firefox': 'Mozilla Firefox'
 			};
 
-			/**
-				   * Gets the user's geo information from IPInfo and stores it in the user client information.
-				   * @private
-				   * @throws {Error} If there is an error getting the geo information
-				   */
-			const _getGeoInfo = async() => {
-				try {
-					const response = await get('https://ipinfo.io/json');
-					clientInfo.geo = response;
-					localStorage.setItem('EOclient', JSON.stringify(clientInfo));
-				} catch (error) {
-					console.error('Error getting geo info:', error);
-				}
-			};
+			clientInfo.browser = Object.entries(browsers).find(([key]) => 
+				new RegExp(key).test(navigator.userAgent)
+			)?.[1] || 'Unknown Browser';
+		};
 
-			/**
-				   * Determines the browser name from the user agent string.
-				   * @private
-				   * @returns {void}
-				   */
-			const _determineBrowser = () => {
-				const browserNames = {
-					opera: 'Opera',
-					firefox: 'Mozilla Firefox',
-					safari: 'Apple Safari',
-					ie: 'Microsoft IE',
-					edge: 'Microsoft Edge',
-					chrome: 'Google Chrome',
-					blink: 'Blink'
-				};
+		if (!localStorage.getItem('EOclient')) {
+			getGeoInfo();
+			detectBrowser();
+		}
 
-				const isOpera = navigator.userAgent.includes('Opera') || navigator.userAgent.includes('Opr');
-				const isEdge = navigator.userAgent.includes('Edg');
-				const isEdgeChromium = navigator.userAgent.includes('EdgA');
-				const isIE = /MSIE|Trident/.test(navigator.userAgent);
-				const isChrome = navigator.userAgent.indexOf('Chrome');
-				const isSafari = navigator.userAgent.includes('Safari');
-				const isFirefox = navigator.userAgent.includes('Firefox');
-				const isBlink = (isChrome || isOpera) && !!window.CSS;
-
-				clientInfo.browser = browserNames[
-					isOpera ? 'opera' :
-						isEdge ? 'edge' :
-							isEdgeChromium ? 'edge' :
-								isIE ? 'ie' :
-									isChrome ? 'chrome' :
-										isSafari ? 'safari' :
-											isFirefox ? 'firefox' :
-												isBlink ? 'blink' :
-													'Unknown Browser'
-				];
-			};
-
-			/**
-				   * Retrieves the client info from local storage, if it exists.
-				   * If no data is found, it will gather the user agent, geo info, and browser name.
-				   * @returns {void}
-				   */
-			const _getClientFromLocalStorage = () => {
-				const storedClient = localStorage.getItem('EOclient');
-
-				if (storedClient === null) {
-					clientInfo.userAgent = navigator.userAgent;
-					_getGeoInfo();
-					_determineBrowser();
-				} else {
-					const { userAgent, geo, browser } = JSON.parse(storedClient);
-
-					clientInfo.userAgent = userAgent;
-					clientInfo.geo = geo;
-					clientInfo.browser = browser;
-				}
-			};
-
-			_getClientFromLocalStorage();
-			return clientInfo;
-		}();
-	}();
+		return clientInfo;
+	})();
 
 	const _slider = function() {
 
@@ -2044,34 +1987,34 @@ import validate from 'validate.js'; */
 			return errors.length === 0;
 		};
 
-		const getValue = (data, field) => 
+		const getValue = (data, field) =>
 			field.split('.').reduce((obj, key) => obj?.[key], data);
 
-		const formatField = (name) => 
-			name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+		const formatField = (name) =>
+			name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 		const errorMessages = {
-			required: () => "is required.",
+			required: () => 'is required.',
 			length: ({ min, max }) => `must be between ${min} and ${max} characters.`,
-			number: ({ min, max }) => `must be a number${min ? ` greater than ${min}` : ""}${max ? ` and less than ${max}` : ""}.`,
-			url: () => "is not a valid URL.",
-			email: () => "is not a valid email address.",
-			date: () => "is not a valid date.",
-			datetime: () => "is not a valid datetime.",
+			number: ({ min, max }) => `must be a number${min ? ` greater than ${min}` : ''}${max ? ` and less than ${max}` : ''}.`,
+			url: () => 'is not a valid URL.',
+			email: () => 'is not a valid email address.',
+			date: () => 'is not a valid date.',
+			datetime: () => 'is not a valid datetime.',
 			equality: (param) => `must be equal to ${param}.`,
 			type: (param) => `must be of type ${param}.`
 		};
 
 		const validators = {
-			required: (value, param) => param && (value !== null && value !== undefined && value !== ""),
-			length: (value, { min, max }) => typeof value === "string" && value.length >= min && value.length <= max,
+			required: (value, param) => param && (value !== null && value !== undefined && value !== ''),
+			length: (value, { min, max }) => typeof value === 'string' && value.length >= min && value.length <= max,
 			number: (value, { min, max }) => {
 				if (isNaN(value)) return false;
 				const num = parseFloat(value);
 				return (min === undefined || num > min) && (max === undefined || num < max);
 			},
-			url: (value) => typeof value === "string" && /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value),
-			email: (value) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+			url: (value) => typeof value === 'string' && /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value),
+			email: (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
 			date: (value) => !isNaN(Date.parse(value)),
 			datetime: (value) => !isNaN(new Date(value).getTime()),
 			equality: (value, param) => value === param,
@@ -2087,10 +2030,10 @@ import validate from 'validate.js'; */
 
 	}();
 
-	const arrayToDotNotation = (obj, prefix = "") => 
+	const arrayToDotNotation = (obj, prefix = '') =>
 		Object.keys(obj).reduce((res, key) => {
 			const prop = prefix ? `${prefix}.${key}` : key;
-			if (typeof obj[key] === "object" && obj[key] !== null) {
+			if (typeof obj[key] === 'object' && obj[key] !== null) {
 				Object.assign(res, arrayToDotNotation(obj[key], prop));
 			} else {
 				res[prop] = obj[key];
@@ -2101,7 +2044,7 @@ import validate from 'validate.js'; */
 	const dotNotationToArray = (obj) => {
 		let result = {};
 		Object.keys(obj).forEach(key => {
-			key.split('.').reduce((res, part, index, arr) => 
+			key.split('.').reduce((res, part, index, arr) =>
 				res[part] || (res[part] = arr.length - 1 === index ? obj[key] : {}), result);
 		});
 		return result;
@@ -2155,6 +2098,8 @@ import validate from 'validate.js'; */
 		redirect,
 		submitForm,
 		validator,
+		arrayToDotNotation,
+		dotNotationToArray,
 
 		component: {
 			tinymce,
