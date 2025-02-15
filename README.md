@@ -7,14 +7,14 @@ The eo.userClient collects and manages client-related data, including:
 
 This information is cached in localStorage to avoid redundant API calls.
 
-### Usage Example
+## Usage Example
 ```javascript
 console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
 console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
 console.log(userClient.browser); // e.g., "Google Chrome"
 ```
 
-### Properties
+## Properties
 userClient **Object**
 | Property | Type | Description |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ userClient **Object**
 | `geo` | `Object` | null |
 | `browser` | `string` | string |
 
-### Implementation Details
+## Implementation Details
 **Fetching Geolocation Data**
 * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
 * The response is cached in localStorage for future use.
@@ -30,14 +30,14 @@ userClient **Object**
 * Uses navigator.userAgent to determine the browser name.
 * Compares the user agent string against common browser signatures.
 
-### Error Handling
+## Error Handling
 * Geo Fetch Failure: Logs an error (Error getting geo info:).
 * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
 # eo.validator
 The eo.validator is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
 
-### Usage Example
+## Usage Example
 ```javascript
 const rules = {
   name: { required: true, length: { min: 3, max: 50 } },
@@ -63,8 +63,8 @@ if (!validator.validate(data)) {
   // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
 }
 ```
-### Methods
-#### 1. `validate(data, rules)`
+## Methods
+### 1. `validate(data, rules)`
 Validates the given data object against rules and collects errors.  
 **Parameters:**
 * `data` (Object) – The object to validate.
@@ -79,7 +79,7 @@ Validates the given data object against rules and collects errors.
 const isValid = validator.validate({ name: "Alice" });
 console.log(isValid); // true or false
 ```
-#### 2. `getErrors()`
+### 2. `getErrors()`
 Retrieves an array of validation errors from the last `validate()` call.
 
 **Returns:**
@@ -90,7 +90,7 @@ Retrieves an array of validation errors from the last `validate()` call.
 console.log(validator.getErrors());
 // Output: [ "Email is not a valid email address." ]
 ```
-#### 3. `setConstraints(rules)`
+### 3. `setConstraints(rules)`
 Sets default validation rules to be used for all future validations.
 
 **Parameters:**
@@ -101,7 +101,7 @@ Sets default validation rules to be used for all future validations.
 validator.setConstraints({ username: { required: true } });
 ```
 
-#### 4. `resetConstraints()`
+### 4. `resetConstraints()`
 Clears all previously set validation rules.
 
 **Example:**
