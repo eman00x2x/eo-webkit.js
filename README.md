@@ -66,9 +66,9 @@ if (!validator.validate(data)) {
 ### Methods
 #### 1. `validate(data, rules)`
 Validates the given data object against rules and collects errors.  
-...**Parameters:**
-...* `data` (Object) – The object to validate.
-...* `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+ ...**Parameters:**
+ ...* `data` (Object) – The object to validate.
+ ...* `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
 
 ...**Returns:**
 ...* `true` if validation passes.
