@@ -37,103 +37,103 @@ userClient **Object**
 # eo.validator
 The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
 
-## Usage Example
-```javascript
-const rules = {
-  name: { required: true, length: { min: 3, max: 50 } },
-  email: { required: true, email: true },
-  age: { number: { min: 18, max: 99 } },
-  address: { 
-    street: { required: true }, 
-    city: { required: true }
-  }
-};
-
-validator.setConstraints(rules);
-
-const data = {
-  name: "John",
-  email: "invalid-email",
-  age: 17,
-  address: { street: "123 Main St" }
-};
-
-if (!validator.validate(data)) {
-  console.log(validator.getErrors()); 
-  // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
-}
-```
-## Methods
-1. ### `validate(data, rules)`
-
-   Validates the given data object against rules and collects errors.  
-   **Parameters:**
-   * `data` (Object) – The object to validate.
-   * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
-   
-   **Returns:**
-   * `true` if validation passes.
-   * `false` if validation fails (errors can be retrieved using getErrors()).
-   
-   **Example:**
+* ## Usage Example
    ```javascript
-   const isValid = validator.validate({ name: "Alice" });
-   console.log(isValid); // true or false
-   ```
-2. ### `getErrors()`
-
-   Retrieves an array of validation errors from the last `validate()` call.  
-   **Returns:**
-   * `Array<String>` – A list of human-readable error messages.
+   const rules = {
+     name: { required: true, length: { min: 3, max: 50 } },
+     email: { required: true, email: true },
+     age: { number: { min: 18, max: 99 } },
+     address: { 
+       street: { required: true }, 
+       city: { required: true }
+     }
+   };
    
-   **Example:**
+   validator.setConstraints(rules);
+   
+   const data = {
+     name: "John",
+     email: "invalid-email",
+     age: 17,
+     address: { street: "123 Main St" }
+   };
+   
+   if (!validator.validate(data)) {
+     console.log(validator.getErrors()); 
+     // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
+   }
+   ```
+* ## Methods
+   1. ### `validate(data, rules)`
+   
+      Validates the given data object against rules and collects errors.  
+      **Parameters:**
+      * `data` (Object) – The object to validate.
+      * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+      
+      **Returns:**
+      * `true` if validation passes.
+      * `false` if validation fails (errors can be retrieved using getErrors()).
+      
+      **Example:**
+      ```javascript
+      const isValid = validator.validate({ name: "Alice" });
+      console.log(isValid); // true or false
+      ```
+   2. ### `getErrors()`
+   
+      Retrieves an array of validation errors from the last `validate()` call.  
+      **Returns:**
+      * `Array<String>` – A list of human-readable error messages.
+      
+      **Example:**
+      ```javascript
+      console.log(validator.getErrors());
+      // Output: [ "Email is not a valid email address." ]
+      ```
+   3. ### `setConstraints(rules)`
+      Sets default validation rules to be used for all future validations.
+      
+      **Parameters:**
+      * `rules (Object)` – The validation rules object.
+      
+      **Example:**
+      ```javascript
+      validator.setConstraints({ username: { required: true } });
+      ```
+   4. ### `resetConstraints()`
+   
+      Clears all previously set validation rules.
+      
+      **Example:**
+      ```javascript
+      validator.resetConstraints();
+      ```
+* ## Validation Rules
+   The validator supports various rules that can be applied to fields.
+   
+   | Rule | Parrameter Type | Description |
+   | --- | --- | --- |
+   | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
+   | `length` | `{ min, max }` | Enforces string length constraints. |
+   | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
+   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
+   | `email` | `Boolean` | Ensures a valid email format. |
+   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
+   | `datetime` | `Boolean` | Ensures a valid datetime format. |
+   | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
+   | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+   
+   **Example Rule Definition:**
    ```javascript
-   console.log(validator.getErrors());
-   // Output: [ "Email is not a valid email address." ]
+   const rules = {
+     username: { required: true, length: { min: 5, max: 20 } },
+     password: { required: true },
+     birthdate: { date: true },
+     email: { email: true },
+     age: { number: { min: 18, max: 65 } }
+   };
    ```
-3. ### `setConstraints(rules)`
-   Sets default validation rules to be used for all future validations.
-   
-   **Parameters:**
-   * `rules (Object)` – The validation rules object.
-   
-   **Example:**
-   ```javascript
-   validator.setConstraints({ username: { required: true } });
-   ```
-4. ### `resetConstraints()`
-
-   Clears all previously set validation rules.
-   
-   **Example:**
-   ```javascript
-   validator.resetConstraints();
-   ```
-## Validation Rules
-The validator supports various rules that can be applied to fields.
-
-| Rule | Parrameter Type | Description |
-| --- | --- | --- |
-| `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
-| `length` | `{ min, max }` | Enforces string length constraints. |
-| `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
-| `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
-| `email` | `Boolean` | Ensures a valid email format. |
-| `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
-| `datetime` | `Boolean` | Ensures a valid datetime format. |
-| `equality` | `Any` | Ensures the value matches the given parameter exactly. |
-| `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
-
-**Example Rule Definition:**
-```javascript
-const rules = {
-  username: { required: true, length: { min: 5, max: 20 } },
-  password: { required: true },
-  birthdate: { date: true },
-  email: { email: true },
-  age: { number: { min: 18, max: 65 } }
-};
-```
 
 
 
