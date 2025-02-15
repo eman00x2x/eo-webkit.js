@@ -874,37 +874,23 @@ import validate from 'validate.js'; */
 		};
 	}();
 
-	const button = function() {
-		/**
-			 * Disable all buttons on the page, visually and interactively
-			 */
-		const disable = (element = '.btn') => {
-			const elements = document.querySelectorAll(element);
-
-			elements.forEach(el => {
-				el.style.cursor = 'wait';
-				el.style.pointerEvents = 'none';
-				el.style.opacity = 0.5;
-				el.disabled = true;
-			});
-		};
-
-		const enable = (element = '.btn') => {
-			const elements = document.querySelectorAll(element);
-
-			elements.forEach(el => {
-				el.style.cursor = 'pointer';
-				el.style.pointerEvents = 'auto';
-				el.style.opacity = 1;
-				el.disabled = false;
+	const button = (() => {
+		const setState = (selector, disabled) => {
+			document.querySelectorAll(selector).forEach(el => {
+				Object.assign(el.style, {
+					cursor: disabled ? 'wait' : '',
+					pointerEvents: disabled ? 'none' : '',
+					opacity: disabled ? 0.5 : '',
+				});
+				el.disabled = disabled;
 			});
 		};
 
 		return {
-			disable,
-			enable
+			disable: (selector = '.btn') => setState(selector, true),
+			enable: (selector = '.btn') => setState(selector, false)
 		};
-	}();
+	})();
 
 	/**
 	   * Submits the given form id, handles validation, redirects, and callbacks

@@ -681,18 +681,58 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
                | Parameter | Type | Default | Description |
                | --- | --- | --- | --- |
                | `id` | `String` | *required* | The unique ID of the modal. |
-               | `size` | `String` | *required* | Modal size (xs, sm, md, lg, xl, fullscreen). |
+               | `size` | `String` | *required* | Modal size (`xs`, `sm`, `md`, `lg`, `xl`, `fullscreen`). |
                | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
                | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
-               | `destroyable` | `Boolean`, | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
+               | `destroyable` | `Boolean` | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
             
             * ##### Example Usage
                ```javascript
-               modal.create({
+               eo.commponent.modal.create({
                  id: 'exampleModal',
                  size: 'md',
                  callback: () => '<p>This is a dynamic modal!</p>',
                  status: 'success',
                  destroyable: true
                });
+               ```
+
+   * ## eo.component.button
+      The `eo.component.button` provides utility functions to enable or disable buttons (or any clickable elements) dynamically. It ensures a smooth user experience by preventing interactions when necessary (e.g., during form submission or loading states).
+      
+      * ### Methods
+         * #### disable(selector = '.btn')
+            Disables all buttons (or specified elements) by:
+            * Changing the cursor to "wait".
+            * Disabling pointer events.
+            * Reducing opacity to indicate inactivity.
+            * Disabling the button element.
+            
+            * ##### Parameters
+               | Parameter | Type | Default | Description |
+               | --- | --- | --- | --- |
+               | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to disable.|
+            
+            * ##### Example Usage
+               ```javascript
+               eo.component.button.disable(); // Disables all buttons with class '.btn'
+               eo.component.button.disable('.custom-button'); // Disables elements with class '.custom-button'
+               ```
+         
+         * #### enable(selector = '.btn')
+            Re-enables previously disabled buttons (or elements) by:
+            * Resetting the cursor to default.
+            * Restoring pointer events.
+            * Restoring opacity.
+            * Enabling the button element.
+            
+            * ##### Parameters
+               | Parameter | Type | Default | Description |
+               | --- | --- | --- | --- |
+               | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to enable.|
+            
+            * ##### Example Usage
+               ```javascript
+               button.enable(); // Enables all buttons with class '.btn'
+               button.enable('.custom-button'); // Enables elements with class '.custom-button'
                ```
