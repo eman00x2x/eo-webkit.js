@@ -144,7 +144,81 @@ function iterateObject(obj, indent = 2) {
 	return result;
 }
 
-window.addEventListener('load', function() {
+const testCase = () => {
+
+	// Sample test cases for eo.validator
+	const testCases = [
+		{
+			description: "✅ Valid Data - Should return an empty array",
+			data: {
+				name: "John Doe",
+				email: "johndoe@example.com",
+				age: 25,
+				website: "https://example.com",
+				address: {
+					street: "123 Main St",
+					city: "New York",
+					zipcode: "10001"
+				},
+				created_at: "2025-02-15",
+			},
+			constraints: {
+				name: { presence: true },
+				email: { presence: true, email: true },
+				age: { presence: true, number: { min: 18, max: 60 } },
+				website: { url: true },
+				"address.street": { presence: true },
+				"address.city": { presence: true },
+				"address.zipcode": { presence: true, length: { min: 5, max: 5 } },
+				created_at: { date: true }
+			},
+			expected: []
+		},
+		{
+			description: "❌ Invalid Email, Missing Name - Should return errors",
+			data: {
+				email: "invalid-email",
+				age: 17,
+				address: {
+					street: "",
+					city: "Los Angeles",
+					zipcode: "1234"
+				},
+				created_at: "invalid-date"
+			},
+			constraints: {
+				name: { presence: true },
+				email: { presence: true, email: true },
+				age: { presence: true, number: { min: 18, max: 60 } },
+				website: { url: true },
+				"address.street": { presence: true },
+				"address.city": { presence: true },
+				"address.zipcode": { presence: true, length: { min: 5, max: 5 } },
+				created_at: { date: true }
+			},
+			expected: [
+				"Name is required.",
+				"Email is not a valid email address.",
+				"Age must be at least 18.",
+				"Address Street is required.",
+				"Address Zipcode must be at least 5 characters long.",
+				"Created At must be a valid date."
+			]
+		}
+	];
+
+	// Run tests
+	testCases.forEach(({ description, data, constraints, expected }) => {
+		const errors = eo.validator.validate(data, constraints);
+		console.log(description);
+		console.log(!errors ? eo.validator.getErrors() : "✅ Passed!");
+		console.log("--------------------");
+	});
+	
+};
+
+window.addEventListener('load', function () {
+	testCase();
 	epochToTime();
 	uuidv4();
 	getRandomChar();

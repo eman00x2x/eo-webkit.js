@@ -2027,7 +2027,87 @@ import validate from 'validate.js'; */
 
 	}();
 
-	const eo = {
+	const validator = function() {
+		let constraints = {};
+		let errors = [];
+
+		const validate = (data, rules = constraints) => {
+			errors = []; // Reset errors
+			Object.entries(rules).forEach(([field, ruleset]) => {
+				const value = getValue(data, field);
+				Object.entries(ruleset).forEach(([rule, param]) => {
+					if (validators[rule] && !validators[rule](value, param)) {
+						errors.push(`${formatField(field)} ${errorMessages[rule](param)}`);
+					}
+				});
+			});
+			return errors.length === 0;
+		};
+
+		const getValue = (data, field) => 
+			field.split('.').reduce((obj, key) => obj?.[key], data);
+
+		const formatField = (name) => 
+			name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+		const errorMessages = {
+			required: () => "is required.",
+			length: ({ min, max }) => `must be between ${min} and ${max} characters.`,
+			number: ({ min, max }) => `must be a number${min ? ` greater than ${min}` : ""}${max ? ` and less than ${max}` : ""}.`,
+			url: () => "is not a valid URL.",
+			email: () => "is not a valid email address.",
+			date: () => "is not a valid date.",
+			datetime: () => "is not a valid datetime.",
+			equality: (param) => `must be equal to ${param}.`,
+			type: (param) => `must be of type ${param}.`
+		};
+
+		const validators = {
+			required: (value, param) => param && (value !== null && value !== undefined && value !== ""),
+			length: (value, { min, max }) => typeof value === "string" && value.length >= min && value.length <= max,
+			number: (value, { min, max }) => {
+				if (isNaN(value)) return false;
+				const num = parseFloat(value);
+				return (min === undefined || num > min) && (max === undefined || num < max);
+			},
+			url: (value) => typeof value === "string" && /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value),
+			email: (value) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+			date: (value) => !isNaN(Date.parse(value)),
+			datetime: (value) => !isNaN(new Date(value).getTime()),
+			equality: (value, param) => value === param,
+			type: (value, param) => typeof value === param
+		};
+
+		return {
+			validate,
+			getErrors: () => errors,
+			setConstraints: (rules) => (constraints = rules),
+			resetConstraints: () => (constraints = {})
+		};
+
+	}();
+
+	const arrayToDotNotation = (obj, prefix = "") => 
+		Object.keys(obj).reduce((res, key) => {
+			const prop = prefix ? `${prefix}.${key}` : key;
+			if (typeof obj[key] === "object" && obj[key] !== null) {
+				Object.assign(res, arrayToDotNotation(obj[key], prop));
+			} else {
+				res[prop] = obj[key];
+			}
+			return res;
+		}, {});
+
+	const dotNotationToArray = (obj) => {
+		let result = {};
+		Object.keys(obj).forEach(key => {
+			key.split('.').reduce((res, part, index, arr) => 
+				res[part] || (res[part] = arr.length - 1 === index ? obj[key] : {}), result);
+		});
+		return result;
+	};
+
+	return {
 		initBeforeLoad: function() {
 			/* Address.initBeforeLoad(); */
 			_video._initBeforeLoad();
@@ -2074,6 +2154,7 @@ import validate from 'validate.js'; */
 		get,
 		redirect,
 		submitForm,
+		validator,
 
 		component: {
 			tinymce,
@@ -2087,7 +2168,8 @@ import validate from 'validate.js'; */
 		},
 	};
 
-	return eo;
+	/* return eo; */
+
 });
 
 document.addEventListener('DOMContentLoaded', function() {
