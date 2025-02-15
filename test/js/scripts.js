@@ -226,7 +226,7 @@ const testCase = () => {
 };
 
 window.addEventListener('load', () => {
-	testCase();
+	/* testCase(); */
 	epochToTime();
 	uuidv4();
 	getRandomChar();

@@ -49,8 +49,7 @@ import validate from 'validate.js'; */
 		const token = document.querySelector('meta[name="csrf-token"]')?.content;
 		if (!token) {
 			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
-			alert.error(message);
-			throw new Error(message);
+			/* console.error(message); */
 		}
 		return token;
 	})();
@@ -599,185 +598,145 @@ import validate from 'validate.js'; */
 		return { create: _slider.create };
 	}();
 
-	const _video = function() {
+	const _video = (() => {
+		const _resetForm = (input, btnSpinner, btnText) => {
+			btnSpinner.classList.add('d-none');
+			btnText.classList.remove('d-none');
+			input.disabled = false;
+		};
+
+		const _invalidResponse = (input, btnSpinner, btnText, message) => {
+			input.classList.add('is-invalid');
+			_resetForm(input, btnSpinner, btnText);
+			alert.error(message);
+		};
+
 		const _handleVideoAdd = () => {
-			document.addEventListener('click', function(event) {
-				if (event.target.closest('.btn-add-video')) {
-					const input = document.getElementById('youtubeUrl');
-					const btnSpinner = document.querySelector('.btn-add-video .spinner-border');
-					const btnText = document.querySelector('.btn-add-video .btn-text');
-					const video = getYoutubeVideoData(input.value);
+			document.addEventListener('click', (event) => {
+				const btn = event.target.closest('.btn-add-video');
+				if (!btn) return;
+				
+				const input = document.querySelector('.youtubeUrl');
+				if (!input) return;
+				
+				const btnSpinner = btn.querySelector('.spinner-border');
+				const btnText = btn.querySelector('.btn-text');
+				const videoUrl = input.value.trim();
+				
+				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
+				
+				const videoData = getYoutubeVideoData(videoUrl);
+				
+				btnSpinner.classList.remove('d-none');
+				btnText.classList.add('d-none');
+				input.disabled = true;
+				
+				if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
+				if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
+				
+				const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
+					...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
+					createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
+					createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
+					createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
+					createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
+					createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
+						createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': videoData.id }, [
+							createElements('i', { class: 'ti ti-trash' })
+						])
+					]),
+					createElements('div', {
+						class: 'avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white',
+						'data-id': videoData.id,
+						'data-url': videoData.url,
+						'data-embed': videoData.embed,
+						style: `background-image: url(${videoData.thumbnail?.sd || ''}); height: 120px;`
+					}, [
+						createElements('i', { class: 'ti ti-brand-youtube fs-32' })
+					])
+				]);
 
-					const _resetForm = () => {
-						btnSpinner.classList.add('d-none');
-						btnText.classList.remove('d-none');
-						input.disabled = false;
-					};
-
-					const _invalidResponse = (error) => {
-						input.classList.add('is-invalid');
-						_resetForm();
-						alert.error(error);
-						return false;
-					};
-
-					btnSpinner.classList.remove('d-none');
-					btnText.classList.add('d-none');
-					input.disabled = true;
-
-					if (input.value === '') {
-						return _invalidResponse('Youtube Url is required!');
-					} else if (video.id === undefined) {
-						return _invalidResponse(video.message);
-					} else if (document.querySelector(`.${CSS.escape(video.id)}`)) {
-						return _invalidResponse('Video already added!');
-					} else {
-						const videoContainer = createElements('div', { class: video.id, 'data-id': video.id });
-
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][id]', video.id));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][default]', video.thumbnail.default));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][hq]', video.thumbnail.hq));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][mq]', video.thumbnail.mq));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][sd]', video.thumbnail.sd));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][thumbnail][maxres]', video.thumbnail.maxres));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][url]', video.url));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][embed]', video.embed));
-						videoContainer.appendChild(createHiddenInput('videos[${video.id}][created_at]', Date.now()));
-
-						const btnDeleteContainer = createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
-							createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': video.id }, [
-								createElements('i', { class: 'ti ti-trash' })
-							])
-						]);
-
-						videoContainer.appendChild(btnDeleteContainer);
-
-						const btnPlayback = createElements('div', {
-							class: 'avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white',
-							'data-id': video.id,
-							'data-url': video.url,
-							'data-embed': video.embed,
-							style: `background-image: url(${video.thumbnail.sd}); height: 120px;`
-						}, [
-							createElements('i', { class: 'ti ti-brand-youtube fs-32' })
-						]);
-
-						videoContainer.appendChild(btnPlayback);
-
-						const videoListContainer = document.querySelector('.video-list-container');
-						videoListContainer.prepend(videoContainer);
-
-						input.value = '';
-						input.classList.remove('is-invalid');
-						_resetForm();
-					}
-				}
+				document.querySelector('.video-list-container')?.prepend(videoContainer);
+				input.value = '';
+				input.classList.remove('is-invalid');
+				_resetForm(input, btnSpinner, btnText);
 			});
 		};
 
 		const _handleVideoPlayback = () => {
-			document.addEventListener('click', function(event) {
-				if (event.target.closest('.btn-playback')) {
-					const btn = event.target.closest('.btn-playback');
-					const embed = btn.dataset.embed;
-					const id = btn.dataset.id;
+			document.addEventListener('click', (event) => {
+				const btn = event.target.closest('.btn-playback');
+				if (!btn) return;
 
-					_modal.create({
-						id: id,
-						size: 'fullscreen',
-						callback: function() {
-							return createElements('div', { class: 'row justify-content-center' }, [
-								createElements('div', { class: 'col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12' }, [
-									createElements('iframe', {
-										class: 'w-100',
-										height: '560',
-										src: embed,
-										title: 'YouTube video player',
-										frameborder: '0',
-										allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;',
-										referrerpolicy: 'strict-origin-when-cross-origin',
-										allowfullscreen: ''
-									}),
-									createElements('div', { class: 'text-center' }, [
-										createElements('span', { class: 'btn mt-3', 'data-bs-dismiss': 'modal' }, [
-											createElements('i', { class: 'ti ti-x me-1' }),
-											document.createTextNode(' Close')
-										])
-									])
+				_modal.create({
+					id: btn.dataset.id,
+					size: 'fullscreen',
+					callback: () => createElements('div', { class: 'row justify-content-center' }, [
+						createElements('div', { class: 'col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12' }, [
+							createElements('iframe', {
+								class: 'w-100', height: '560', src: btn.dataset.embed,
+								title: 'YouTube video player', frameborder: '0',
+								allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;',
+								referrerpolicy: 'strict-origin-when-cross-origin', allowfullscreen: ''
+							}),
+							createElements('div', { class: 'text-center' }, [
+								createElements('span', { class: 'btn mt-3', 'data-bs-dismiss': 'modal' }, [
+									createElements('i', { class: 'ti ti-x me-1' }),
+									document.createTextNode(' Close')
 								])
-							]);
-						},
-						status: 'info',
-						destroyable: true
-					});
+							])
+						])
+					]),
+					status: 'info',
+					destroyable: true
+				});
 
-					const modalElement = document.getElementById(id);
-					modalElement.querySelector('.modal-content').style.backgroundColor = 'rgba(0, 0, 0, 1)';
-				}
+				document.getElementById(btn.dataset.id).querySelector('.modal-content').style.backgroundColor = 'rgba(0, 0, 0, 1)';
 			});
 		};
 
 		const _handleVideoDeletion = () => {
-			document.addEventListener('click', function(event) {
-				if (event.target.closest('.btn-remove-video')) {
-					const btn = event.target.closest('.btn-remove-video');
-					const id = btn.dataset.id;
-					const videoElement = document.querySelector(`.${CSS.escape(id)}`);
-					if (videoElement) {
-						videoElement.remove();
-					}
-				}
+			document.addEventListener('click', (event) => {
+				const btn = event.target.closest('.btn-remove-video');
+				if (btn) document.querySelector(`.${CSS.escape(btn.dataset.id)}`)?.remove();
 			});
 		};
 
-		const _createVideoformId = () => {
+		const _createVideoForm = () => {
 			const container = document.getElementById('videoInput');
-			if (!container) {
-				return false;
-			}
+			if (!container) return;
 
-			const formGroup = createElements('div', { class: 'd-flex gap-1' }, [
+			container.appendChild(createElements('div', { class: 'd-flex gap-1' }, [
 				createElements('div', { class: 'form-floating flex-fill' }, [
 					createElements('input', {
-						type: 'text',
-						id: 'youtubeUrl',
-						class: 'form-control',
-						placeholder: '',
-						'aria-label': 'Youtube Url',
-						'aria-describedby': 'basic-addon1'
+						type: 'text', id: 'youtubeUrl', class: 'form-control youtubeUrl',
+						placeholder: '', 'aria-label': 'YouTube URL', 'aria-describedby': 'basic-addon1'
 					}),
 					createElements('label', { for: 'youtubeUrl' }, [
 						createElements('i', { class: 'ti ti-brand-youtube' }),
-						document.createTextNode(' Paste Youtube Url')
+						document.createTextNode(' Paste YouTube URL')
 					])
 				]),
 				createElements('span', { class: 'btn btn-primary btn-add-video' }, [
-					createElements('span', {
-						class: 'spinner-border spinner-border-sm d-none',
-						role: 'status',
-						'aria-hidden': 'true'
-					}),
+					createElements('span', { class: 'spinner-border spinner-border-sm d-none', role: 'status', 'aria-hidden': 'true' }),
 					createElements('span', { class: 'btn-text fs-18' }, [
 						createElements('i', { class: 'ti ti-plus me-1' }),
 						document.createTextNode(' Add Video')
 					])
 				])
-			]);
-
-			container.appendChild(formGroup);
+			]));
 		};
 
 		return {
-			_initAfterLoad: () => {
-				_createVideoformId();
-			},
+			_initAfterLoad: _createVideoForm,
 			_initBeforeLoad: () => {
 				_handleVideoAdd();
 				_handleVideoDeletion();
 				_handleVideoPlayback();
 			}
 		};
-	}();
+	})();
+
 
 	const tinymce = function() {
 		const init = (containerId, options = {}) => {
@@ -2029,7 +1988,7 @@ import validate from 'validate.js'; */
 		return result;
 	};
 
-	return {
+	const eo = {
 		initBeforeLoad: function() {
 			/* Address.initBeforeLoad(); */
 			_video._initBeforeLoad();
@@ -2092,7 +2051,7 @@ import validate from 'validate.js'; */
 		},
 	};
 
-	/* return eo; */
+	return eo;
 
 });
 

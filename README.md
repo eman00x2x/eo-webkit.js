@@ -593,3 +593,28 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
           onSuccess: (data) => console.log('Config Loaded:', data),
       });
       ```
+# Components
+   * ## Video
+      The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
+      * Add a YouTube video by URL.
+      * Play the video in a modal.
+      * Remove added videos.
+      * Create an input form dynamically.
+         * `id`, `url`, `embed`, `thumbnail`, and `created_at`
+      
+      * ### Required HTML Structure
+         To integrate the video module, add the following HTML elements:
+         ```html
+         <div class="response"></div>
+         <div id="videoInput"></div>
+         <div class="video-list-container"></div>
+         ```
+         * #### Description
+            * .response - Displays messages after adding a video.
+            * #videoInput - The container where the input field and add button will be appended.
+            * .video-list-container - The section where added videos will be listed.
+            * Clicking on an added video will play it in a fullscreen modal.
+            * A delete button is provided to remove a video entry.
+
+
+
