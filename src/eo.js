@@ -1917,21 +1917,23 @@ import validate from 'validate.js'; */
 		post,
 		get,
 		redirect,
-		submitForm,
+		
 		validator,
 		arrayToDotNotation,
 		dotNotationToArray,
 
+		video,
+		modal,
+		alert,
+		button,
+
 		component: {
+			submitForm,
 			tinymce,
 			slider,
 			tomSelect,
-			modal,
-			alert,
-			button,
 			uploader,
 			googleChart,
-			video
 		},
 	};
 

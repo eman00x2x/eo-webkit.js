@@ -594,192 +594,187 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
       });
       ```
 
-# eo.submitForm
-The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
+# eo.video
+The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
+* Add a YouTube video by URL.
+* Play the video in a modal.
+* Remove added videos.
+* Create a hidden input dynamically.
+   * `id`, `url`, `embed`, `thumbnail`, and `created_at`
+   
+* ## Usage
+   Call `eo.video.init()` before the page loads.
+   ```javascript
+    window.addEventListener('load', () => {
+       eo.video.init();
+    });
+   ```
+* ## Required HTML Structure
+   To integrate the video module, add the following HTML elements:
+   ```html
+   <div class="response"></div>
+   <div id="videoInput"></div>
+   <div class="video-list-container"></div>
+   ```
+   * ### Description
+      * **.response** - Displays messages after adding a video.
+      * **#videoInput** - The container where the input field and add button will be appended.
+      * **.video-list-container** - The section where added videos will be listed.
+      * Clicking on an added video will play it in a fullscreen modal.
+      * A delete button is provided to remove a video entry.
+
+# eo.alert
+To use the `eo.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
+* ## Required HTML Structure
+   ```html
+   <div class="response"></div>
+   ```
+   This will act as the default container for displaying alerts and loaders.
+* ## Methods
+   * ### success(message, element) and error(message, element)
+      Displays a success alert.
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `message` | `String` | *required* | The success message. |
+      | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+      * #### Example Usage
+         ```javascript
+         eo.alert.success('Operation completed successfully!');
+         eo.alert.error('An error occurred while processing your request.');
+         ```
+   * ### loader(message, element)
+      Displays a processing loader with a message.
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `message` | `String` | *optional*, `default: 'Processing, Please wait...'` | The success message. |
+      | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+      * #### Example Usage
+         ```javascript
+         eo.alert.loader();
+         eo.alert.loader('Uploading file, please wait...');
+         ```
+
+# eo.modal
+The `eo.modal` provides an easy way to create and manage Bootstrap modals dynamically. It supports custom modal sizes, dynamic content injection, and automatic cleanup of destroyable modals.
 
 * **Features**
-   * Validates form data using the `eo.validator` before submission.
-   * Submits form data via AJAX (`post` function).
-   * Displays alerts using the `eo.alert`.
-   * Handles success and error responses.
-   * Disables & enables buttons during the request to prevent multiple submissions.
-   * Redirects users upon success if `redirectUrl` is provided.
+   * Dynamically create modals with custom sizes.
+   * Inject content into the modal using a callback function.
+   * Support for modals with status indicators.
+   * Automatic destruction of modals when closed (if enabled).
+   * Handles modal close events properly.
 
-* **Dependencies**
-   * eo.validator (Read the documentation)
-   * eo.post (Read the documentation)  
+* **Notes**
+   * Ensure Bootstrap is loaded for this to function properly.
+   * The callback function should return a valid HTML string or a DOM element.
+   * Destroyable modals are automatically removed from the DOM upon closing.
 
-* ## Syntax
-   ```javascript
-   eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
-   ```
+* ## Methods
+   * ### create({ id, size, callback, status = false, destroyable = true })
+      Creates and displays a Bootstrap modal.
+      
+      * #### Parameters
+         | Parameter | Type | Default | Description |
+         | --- | --- | --- | --- |
+         | `id` | `String` | *required* | The unique ID of the modal. |
+         | `size` | `String` | *required* | Modal size (`xs`, `sm`, `md`, `lg`, `xl`, `fullscreen`). |
+         | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
+         | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
+         | `destroyable` | `Boolean` | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
+      
+      * #### Example Usage
+         ```javascript
+         eo.commponent.modal.create({
+           id: 'exampleModal',
+           size: 'md',
+           callback: () => '<p>This is a dynamic modal!</p>',
+           status: 'success',
+           destroyable: true
+         });
+         ```
 
-* ## Parameters
-   | Parameter | Type | Description |
-   | --- | --- | --- |
-   | `formId` | `string` | The ID of the form to submit (with or without `#`). |
-   | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
-   | `callback` | `function` | A callback function executed on a successful submission. |
-   | `onBeforeSend` | `function` | A function executed before sending the form data. |
+# eo.button
+The `eo.button` provides utility functions to enable or disable buttons (or any clickable elements) dynamically. It ensures a smooth user experience by preventing interactions when necessary (e.g., during form submission or loading states).
 
-* ## Example Usage
-   ```javascript
-   eo.submitForm('#myForm', {
-       validation: {
-           name: { required: true, min: 3 },
-           email: { required: true, email: true },
-       },
-       callback: (formData, response) => {
-           console.log('Form submitted successfully:', response);
-       },
-       onBeforeSend: (formData) => {
-           console.log('Processing form data:', formData);
-       },
-       redirectUrl: '/dashboard'
-   });
-   ```
+* ## Methods
+   * ### disable(selector = '.btn')
+      Disables all buttons (or specified elements) by:
+      * Changing the cursor to "wait".
+      * Disabling pointer events.
+      * Reducing opacity to indicate inactivity.
+      * Disabling the button element.
+      
+      * #### Parameters
+         | Parameter | Type | Default | Description |
+         | --- | --- | --- | --- |
+         | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to disable.|
+      
+      * #### Example Usage
+         ```javascript
+         eo.button.disable(); // Disables all buttons with class '.btn'
+         eo.button.disable('.custom-button'); // Disables elements with class '.custom-button'
+         ```
+   
+   * ### enable(selector = '.btn')
+      Re-enables previously disabled buttons (or elements) by:
+      * Resetting the cursor to default.
+      * Restoring pointer events.
+      * Restoring opacity.
+      * Enabling the button element.
+      
+      * #### Parameters
+         | Parameter | Type | Default | Description |
+         | --- | --- | --- | --- |
+         | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to enable.|
+      
+      * #### Example Usage
+         ```javascript
+         button.enable(); // Enables all buttons with class '.btn'
+         button.enable('.custom-button'); // Enables elements with class '.custom-button'
+         ```
 
 # EO.js Components
-   * ## eo.component.video
-      The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
-      * Add a YouTube video by URL.
-      * Play the video in a modal.
-      * Remove added videos.
-      * Create a hidden input dynamically.
-         * `id`, `url`, `embed`, `thumbnail`, and `created_at`
-      
-	  * ### Usage
-	     Call `eo.component.video.init()` before the page loads.
-	     ```javascript
-         window.addEventListener('load', () => {
-            eo.component.video.init();
-         });
-		 ```
-      * ### Required HTML Structure
-         To integrate the video module, add the following HTML elements:
-         ```html
-         <div class="response"></div>
-         <div id="videoInput"></div>
-         <div class="video-list-container"></div>
-         ```
-         * #### Description
-            * **.response** - Displays messages after adding a video.
-            * **#videoInput** - The container where the input field and add button will be appended.
-            * **.video-list-container** - The section where added videos will be listed.
-            * Clicking on an added video will play it in a fullscreen modal.
-            * A delete button is provided to remove a video entry.
-
-   * ## eo.component.alert
-      To use the `eo.commponent.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
-
-      * ### Required HTML Structure
-         ```html
-         <div class="response"></div>
-         ```
-
-         This will act as the default container for displaying alerts and loaders.
-
-      * ### Methods
-         * #### success(message, element) and error(message, element)
-            Displays a success alert.
-            | Parameter | Type | Default | Description |
-            | --- | --- | --- | --- |
-            | `message` | `String` | *required* | The success message. |
-            | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
-            * ##### Example Usage
-               ```javascript
-               eo.component.alert.success('Operation completed successfully!');
-               eo.component.alert.error('An error occurred while processing your request.');
-               ```
-
-         * #### loader(message, element)
-            Displays a processing loader with a message.
-            | Parameter | Type | Default | Description |
-            | --- | --- | --- | --- |
-            | `message` | `String` | *optional*, `default: 'Processing, Please wait...'` | The success message. |
-            | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
-            * ##### Example Usage
-               ```javascript
-               eo.component.alert.loader();
-               eo.component.alert.loader('Uploading file, please wait...');
-               ```
-
-   * ## eo.component.modal
-      The `eo.component.modal` provides an easy way to create and manage Bootstrap modals dynamically. It supports custom modal sizes, dynamic    content    injection, and automatic cleanup of destroyable modals.
-      
-      * **Features**
-         * Dynamically create modals with custom sizes.
-         * Inject content into the modal using a callback function.
-         * Support for modals with status indicators.
-         * Automatic destruction of modals when closed (if enabled).
-         * Handles modal close events properly.
-      
-      * **Notes**
-         * Ensure Bootstrap is loaded for this module to function properly.
-         * The callback function should return a valid HTML string or a DOM element.
-         * Destroyable modals are automatically removed from the DOM upon closing.
-      
-      * ### Methods
-         * #### create({ id, size, callback, status = false, destroyable = true })
-            Creates and displays a Bootstrap modal.
-            
-            * ##### Parameters
-               | Parameter | Type | Default | Description |
-               | --- | --- | --- | --- |
-               | `id` | `String` | *required* | The unique ID of the modal. |
-               | `size` | `String` | *required* | Modal size (`xs`, `sm`, `md`, `lg`, `xl`, `fullscreen`). |
-               | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
-               | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
-               | `destroyable` | `Boolean` | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
-            
-            * ##### Example Usage
-               ```javascript
-               eo.commponent.modal.create({
-                 id: 'exampleModal',
-                 size: 'md',
-                 callback: () => '<p>This is a dynamic modal!</p>',
-                 status: 'success',
-                 destroyable: true
-               });
-               ```
-
-   * ## eo.component.button
-      The `eo.component.button` provides utility functions to enable or disable buttons (or any clickable elements) dynamically. It ensures a smooth user experience by preventing interactions when necessary (e.g., during form submission or loading states).
-      
-      * ### Methods
-         * #### disable(selector = '.btn')
-            Disables all buttons (or specified elements) by:
-            * Changing the cursor to "wait".
-            * Disabling pointer events.
-            * Reducing opacity to indicate inactivity.
-            * Disabling the button element.
-            
-            * ##### Parameters
-               | Parameter | Type | Default | Description |
-               | --- | --- | --- | --- |
-               | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to disable.|
-            
-            * ##### Example Usage
-               ```javascript
-               eo.component.button.disable(); // Disables all buttons with class '.btn'
-               eo.component.button.disable('.custom-button'); // Disables elements with class '.custom-button'
-               ```
-         
-         * #### enable(selector = '.btn')
-            Re-enables previously disabled buttons (or elements) by:
-            * Resetting the cursor to default.
-            * Restoring pointer events.
-            * Restoring opacity.
-            * Enabling the button element.
-            
-            * ##### Parameters
-               | Parameter | Type | Default | Description |
-               | --- | --- | --- | --- |
-               | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to enable.|
-            
-            * ##### Example Usage
-               ```javascript
-               button.enable(); // Enables all buttons with class '.btn'
-               button.enable('.custom-button'); // Enables elements with class '.custom-button'
-               ```
-
+* # eo.submitForm
+   The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
+   
+   * **Features**
+      * Validates form data using the `eo.validator` before submission.
+      * Submits form data via AJAX (`post` function).
+      * Displays alerts using the `eo.alert`.
+      * Handles success and error responses.
+      * Disables & enables buttons during the request to prevent multiple submissions.
+      * Redirects users upon success if `redirectUrl` is provided.
+   
+   * **Dependencies**
+      * eo.validator (Read the documentation)
+      * eo.post (Read the documentation)  
+   
+   * ## Syntax
+      ```javascript
+      eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
+      ```
+   
+   * ## Parameters
+      | Parameter | Type | Description |
+      | --- | --- | --- |
+      | `formId` | `string` | The ID of the form to submit (with or without `#`). |
+      | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
+      | `callback` | `function` | A callback function executed on a successful submission. |
+      | `onBeforeSend` | `function` | A function executed before sending the form data. |
+   
+   * ## Example Usage
+      ```javascript
+      eo.submitForm('#myForm', {
+          validation: {
+              name: { required: true, min: 3 },
+              email: { required: true, email: true },
+          },
+          callback: (formData, response) => {
+              console.log('Form submitted successfully:', response);
+          },
+          onBeforeSend: (formData) => {
+              console.log('Processing form data:', formData);
+          },
+          redirectUrl: '/dashboard'
+      });
+      ```
