@@ -279,11 +279,11 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
 
 * ## Example Usage
    ```javascript
-   console.log(convertCurrency(1500));      // "1.5K"
-   console.log(convertCurrency(1000000));   // "1M"
-   console.log(convertCurrency(2500000000)); // "2.5B"
-   console.log(convertCurrency(1e100));     // "1V"  (Googol)
-   console.log(convertCurrency(999));       // "999"
+   console.log(eo.convertCurrency(1500));      // "1.5K"
+   console.log(eo.convertCurrency(1000000));   // "1M"
+   console.log(eo.convertCurrency(2500000000)); // "2.5B"
+   console.log(eo.convertCurrency(1e100));     // "1V"  (Googol)
+   console.log(eo.convertCurrency(999));       // "999"
    ```
 
 # eo.serializeFormData(formData)
@@ -402,7 +402,7 @@ If the URL is invalid, an error alert is triggered.
 * ## Example Usage
    * **Creating a Simple** `<div>`
       ```javascript
-      const div = createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
+      const div = eo.createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
       document.body.appendChild(div);
       ```
       * **Output**
@@ -412,8 +412,8 @@ If the URL is invalid, an error alert is triggered.
    
    * **Creating a Nested Structure**
       ```javascript
-      const button = createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
-      const wrapper = createElements('div', { class: 'wrapper' }, [button]);
+      const button = eo.createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
+      const wrapper = eo.createElements('div', { class: 'wrapper' }, [button]);
       
       document.body.appendChild(wrapper);
       ```
@@ -425,59 +425,171 @@ If the URL is invalid, an error alert is triggered.
          ```
 
 * ## Error Handling
-| Error Condition | Thrown Error |
-| --- | --- |
-| `tag` is **not a string** or empty | `"Invalid tag name"` |
-| `attributes` is not an object | `"Attributes must be an object"` |
-| `children` is not an array | `"Children must be an array"` |
+   | Error Condition | Thrown Error |
+   | --- | --- |
+   | `tag` is **not a string** or empty | `"Invalid tag name"` |
+   | `attributes` is not an object | `"Attributes must be an object"` |
+   | `children` is not an array | `"Children must be an array"` |
 
+# eo.createHiddenInput(name, value)
+`eo.createHiddenInput(name, value)` creates a hidden input field with a specified name and value. This is useful for storing data in forms without displaying it to the user.
 
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `name` | `string` | The **name attribute** of the hidden input. |
+   | `value` | `string` | The **value to be stored** in the hidden input. |
+
+* ## Returns
+   `HTMLElement` A hidden <input> element with the provided name and value.
+
+* ## Example Usage
+   * **Creating a Hidden Input**
+   ```javascript
+   const hiddenInput = createHiddenInput('user_id', '12345');
+   document.body.appendChild(hiddenInput);
+   ```
+   * **Output**
+      ```html
+      <input type="hidden" name="user_id" value="12345">
+      ```
+
+* ## Error Handling
+   | Error Condition | Thrown Error |
+   | --- | --- |
+   | `name` is **not a string** or empty | `"Invalid name"` |
+   | `value` is **not a string** | `"Invalid value"` |
 
 # eo.moveHtmlElement(fromSelector, toSelector)
+`eo.moveHtmlElement(fromSelector, toSelector)` moves the inner HTML from one element to another. This is useful for dynamically repositioning content within a webpage.
 
-`@param {string} fromSelector - The CSS selector for the element to move the content from.
-@param {string} toSelector - The CSS selector for the element to move the content to.`
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `fromSelector` | `string` | **CSS selector** of the element whose content will be moved. |
+   | `toSelector` | `string` | **CSS selector** of the element where the content will be placed. |
 
-Move the innerHTML of the element matching fromSelector to the element matching toSelector.
+* ## Returns
+   `void` Does not return a value. It modifies the DOM directly.
 
-Sample Usage:
-```javascript
-moveHtmlElement('.source', '#destination');
-```
+* ## Example Usage
+   * **Move Content from One Element to Another**
+      ```html
+      <div id="source">
+          <p>Hello, World!</p>
+      </div>
+      
+      <div id="destination">
+          <!-- Content will be moved here -->
+      </div>
+      ```
+      ```javascript
+      eo.moveHtmlElement('#source', '#destination');
+      ```
+      * **Output**
+         ```html
+         <div id="source">
+             <!-- Empty after move -->
+         </div>
+         
+         <div id="destination">
+             <p>Hello, World!</p>
+         </div>
+         ```
 
 # eo.post
-`@param {string} url - The URL to make the request to
-@param {(Array<{name: string, value: string}> | FormData | object)} data - The data to send in the request body
-@param {object} [options] - Options for the request
-@param {function} [onBeforeSend] - Called before the request is sent
-@param {function} [onSuccess] - Called when the request returns a JSON response
-@param {function} [onError] - Called when the request fails
-@param {function} [onComplete] - Called after the request has completed
-@param {string} [contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request`
+The `eo.post` function **performs an HTTP POST request** to a specified `url` using the Fetch API. It supports **different data types** (`FormData`, `JSON`, `array`, or plain objects), **allows custom content types**, and provides **callback hooks** for different stages of the request.
 
-Syntax
-```javascript
-eo.post(url, data, {  
-    onBeforeSend,  
-    onSuccess,  
-    onError,  
-    onComplete,  
-    contentType = 'application/x-www-form-urlencoded; charset=UTF-8'  
-} = {})
-```
+* ## Syntax
+   ```javascript
+   eo.post(url, data, {
+       onBeforeSend,
+       onSuccess,
+       onError,
+       onComplete,
+       contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
+   });
+   ```
 
-Makes a POST request to the given URL with the given data.  
-This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.  
-The beforeSend callback is called before the request is sent.  
-  
-If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.  
-If the request returns an HTML or text response, the onSuccess callback is called with the response text.  
-  
-If the request fails, the onError callback is called with the error message and the actual error object.  
-  
-The onComplete callback is called after the request has completed, regardless of success or failure.
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The API endpoint where the request is sent. |
+   | `data` | `FormData`, `Object`, `Array` | The data to be sent in the request body. |
+   | `options` | `object` | Optional configuration options (see below). |
+   * **Options Object**
+      | Option | Type | Description |
+      | --- | --- | --- |
+      | `onBeforeSend` | `function` | **Callback function** executed before the request is sent. |
+      | `onSuccess` | `function` | **Callback function** executed when the request is successful. |
+      | `onError` | `function` | **Callback function** executed when the request fails. |
+      | `onComplete` | `function` | **Callback function** executed when the request completes (whether successful or not). |
+      | `contentType` | `string` | The `Content-Type` of the request (`application/json`, `application/x-www-form-urlencoded`, etc.). |
 
-Sample Usage:
-```javascript
-eo.post('https://www.domain.com', new FormData(form));
-```
+* ## Returns
+   `void` Does not return a value. Instead, it executes the provided callback functions.
+
+* ## Example Usage
+   * **Send Form Data**
+      ```javascript
+      const formData = new FormData();
+      formData.append('username', 'john_doe');
+      formData.append('password', 'securePass123');
+      
+      eo.post('/login', formData, {
+          onSuccess: (response) => console.log('Login Success:', response),
+          onError: (xhr, status, error) => console.error('Error:', status, error)
+      });
+      ```
+   
+   * **Send JSON Data**
+      ```javascript
+      const userData = { username: 'john_doe', age: 30 };
+      
+      eo.post('/update-profile', userData, {
+          contentType: 'application/json',
+          onSuccess: (response) => console.log('Profile Updated:', response),
+          onError: (xhr, status, error) => console.error('Profile Update Failed:', error)
+      });
+      ```
+# eo.get
+The `eo.get` function **performs an HTTP GET request** to fetch data from a given `url`. It supports **callbacks for request lifecycle events**, including `beforeRequest`, `onSuccess`, and `onError`. The function **automatically detects and processes JSON responses** while handling errors gracefully.
+
+* ## Syntax
+   ```javascript
+   eo.get(url, { beforeRequest, onSuccess, onError });
+   ```
+
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The API endpoint from which data is fetched. |
+   | `options` | `object` | (Optional) An object containing callback functions (see below). |
+   * **Options Object**
+      | Option | Type | Description |
+      | --- | --- | --- |
+      | `beforeRequest` | `function` | **Callback function** executed before the request is made. If it returns `false`, the request is canceled. |
+      | `onSuccess` | `function` | **Callback function** executed when the request is successful. Receives the response data as an argument. |
+      | `onError` | `function` | **Callback function** executed when the request fails. Receives (`null`, `'error'`, `error`) as arguments. |
+
+* ## Returns
+   `Promise<any>` A promise that resolves with the response data or logs an error.
+
+* ## Example Usage
+   * **Basic GET Request**
+      ```javascript
+      get('/api/user', {
+          onSuccess: (data) => console.log('User Data:', data),
+          onError: (xhr, status, error) => console.error('Error:', status, error)
+      });
+      ```
+   * **Cancel Request with** `beforeRequest`
+      ```javascript
+      get('/api/config', {
+          beforeRequest: () => {
+              console.log('Checking before request...');
+              return false; // Request will be canceled
+          },
+          onSuccess: (data) => console.log('Config Loaded:', data),
+      });
+      ```

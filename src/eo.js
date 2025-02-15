@@ -345,7 +345,6 @@ import validate from 'validate.js'; */
 		onSuccess,
 		onError,
 		onComplete,
-		processData = true,
 		contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
 	} = {}) => {
 
@@ -357,7 +356,7 @@ import validate from 'validate.js'; */
 
 		let body = data;
 
-		if (processData && (data instanceof FormData || Array.isArray(data) || (typeof data === 'object' && data !== null))) {
+		if ((data instanceof FormData || Array.isArray(data) || (typeof data === 'object' && data !== null))) {
 			body = serializeFormData(data);
 
 			if (contentType.includes('application/json')) {
