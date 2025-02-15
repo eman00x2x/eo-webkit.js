@@ -1,5 +1,5 @@
 
-### eo.userClient
+# eo.userClient
 The userClient module collects and manages client-related data, including:
 
 * User Agent: The client's browser user agent string.
@@ -8,14 +8,14 @@ The userClient module collects and manages client-related data, including:
 
 This information is cached in localStorage to avoid redundant API calls.
 
-## Usage Example
+### Usage Example
 ```javascript
 console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
 console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
 console.log(userClient.browser); // e.g., "Google Chrome"
 ```
 
-## Properties
+### Properties
 userClient **Object**
 | Property | Type | Description |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ userClient **Object**
 | geo | Object | null |
 | browser | string | string |
 
-## Implementation Details
+### Implementation Details
 **Fetching Geolocation Data**
 * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
 * The response is cached in localStorage for future use.
@@ -31,23 +31,23 @@ userClient **Object**
 * Uses navigator.userAgent to determine the browser name.
 * Compares the user agent string against common browser signatures.
 
-## Error Handling
+### Error Handling
 * Geo Fetch Failure: Logs an error (Error getting geo info:).
 * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
-### eo.redirect(url)
+# eo.redirect(url)
 
 `@param {string} url - The URL to redirect to`
 
 Redirects the browser to a given URL.
 
-### eo.epochToTimeString(epoch)
+# eo.epochToTimeString(epoch)
 `@param {number} epoch - The epoch time, in seconds
 @returns {string} A localized string representation of the date and time`
 
 Converts an epoch time (in seconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
 
-### eo.trim(stringValue, maximumLength)
+# eo.trim(stringValue, maximumLength)
 `@param {string} stringValue - The string to trim
 @param {number} maximumLength - The maximum allowed length of the string
 @returns {string} The trimmed string`
@@ -56,28 +56,28 @@ Trims a given string to a maximum length, appending an ellipsis (...) if the str
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam pretium vel sem sit amet sagittis. Mauris congue et nibh et posuere. Mauris eget velit sed metus porttitor venenatis.
 
-### eo.formatFileSize(bytes, decimalPlaces = 0)
+# eo.formatFileSize(bytes, decimalPlaces = 0)
 `@param {number} bytes - The number of bytes to convert
 @param {number} [decimalPlaces=2] - The number of decimal places to include
 @returns {string} A human-readable string representation of the given number of bytes`
 
 Converts a given number of bytes to a human-readable string, appending the appropriate unit (Bytes, KB, MB, etc.).
 
-### eo.uuidv4()
+# eo.uuidv4()
 `@returns {string} A randomly generated UUID version 4`
 
 Generates a random UUID (Universally Unique Identifier) version 4.  
 This function uses the Web Cryptography API to generate a random UUID.  
 The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
 
-### eo.getRandomChar(length)
+# eo.getRandomChar(length)
 `@param {number} length - The length of the random hexadecimal string to generate
 @returns {string} A random hexadecimal string of the specified length`
 
 Generates a random hexadecimal string of the specified length.  
 The function uses the Web Cryptography API to generate cryptographically secure random values, which are then converted to a hexadecimal string.
 
-### eo.getRandomNum(start, end)
+# eo.getRandomNum(start, end)
 `@param {number} start - The lowest number to generate
 @param {number} end - The highest number to generate
 @returns {number} A randomly generated number between start and end`
@@ -85,7 +85,7 @@ The function uses the Web Cryptography API to generate cryptographically secure 
 Generates a random number between the given start and end.  
 The end number is inclusive, so the function will return a number that is greater than or equal to start, and less than or equal to end.
 
-### eo.convertCurrency(amount)
+# eo.convertCurrency(amount)
 `@param {number} amount - The number to convert to a human-readable format
 @returns {string} A human-readable string representation of the given number`
 
@@ -97,7 +97,7 @@ human-readable format. The format will be one of the following:
 \- Thousands: 1,234 -> 1.23K  
 \- Default: 1234 -> 1234
 
-### eo.serializeFormData(formData)
+# eo.serializeFormData(formData)
 `@param {FormData|Array|object} formData - The input to serialize
 @returns {object} A plain JavaScript object containing the serialized data`
 
@@ -107,7 +107,7 @@ This function accepts either a native FormData object, an array of objects with 
 \- If the input is an array, it reduces the array to an object using the 'name' and 'value' properties of each item.  
 \- If the input is already a regular object, it is returned as is.
 
-### eo.getYoutubeVideoData(url)
+# eo.getYoutubeVideoData(url)
 `@param {string} url - The YouTube video URL to parse
 @returns {object} The parsed YouTube video object, or an error alert if the given URL is invalid`
 
@@ -124,7 +124,7 @@ The supported YouTube URL formats are:
 \- http://www.youtube.com/embed/VIDEO\_ID?rel=0  
 \- http://youtu.be/VIDEO\_ID
 
-### eo.createElements(tag, attributes = {}, children)
+# eo.createElements(tag, attributes = {}, children)
 `@param {string} tag - The HTML tag name for the element to be created.
 @param {object} [attributes={}] - An object representing key-value pairs of attributes for the element.
 @param {Array} [children] - An array of children to append to the created element. Children can be strings or DOM nodes.
@@ -144,7 +144,7 @@ const div = eo.createElements('div', { class: 'container', id: 'main' }, [
 document.body.appendChild(div);
 ```
 
-### eo.moveHtmlElement(fromSelector, toSelector)
+# eo.moveHtmlElement(fromSelector, toSelector)
 
 `@param {string} fromSelector - The CSS selector for the element to move the content from.
 @param {string} toSelector - The CSS selector for the element to move the content to.`
@@ -156,7 +156,7 @@ Sample Usage:
 moveHtmlElement('.source', '#destination');
 ```
 
-### eo.post
+# eo.post
 `@param {string} url - The URL to make the request to
 @param {(Array<{name: string, value: string}> | FormData | object)} data - The data to send in the request body
 @param {object} [options] - Options for the request
