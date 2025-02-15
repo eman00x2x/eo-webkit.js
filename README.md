@@ -66,15 +66,15 @@ if (!validator.validate(data)) {
 ### Methods
 #### 1. `validate(data, rules)`
 Validates the given data object against rules and collects errors.  
- ...**Parameters:**
- ...* `data` (Object) – The object to validate.
- ...* `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+**Parameters:**
+* `data` (Object) – The object to validate.
+* `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
 
-...**Returns:**
-...* `true` if validation passes.
-...* `false` if validation fails (errors can be retrieved using getErrors()).
+**Returns:**
+* `true` if validation passes.
+* `false` if validation fails (errors can be retrieved using getErrors()).
 
-...**Example:**
+**Example:**
 ```javascript
 const isValid = validator.validate({ name: "Alice" });
 console.log(isValid); // true or false
@@ -90,6 +90,55 @@ Retrieves an array of validation errors from the last `validate()` call.
 console.log(validator.getErrors());
 // Output: [ "Email is not a valid email address." ]
 ```
+#### 3. `setConstraints(rules)`
+Sets default validation rules to be used for all future validations.
+
+**Parameters:**
+* `rules (Object)` – The validation rules object.
+
+**Example:**
+```javascript
+validator.setConstraints({ username: { required: true } });
+```
+
+#### 4. `resetConstraints()`
+Clears all previously set validation rules.
+
+**Example:**
+```javascript
+validator.resetConstraints();
+```
+
+## Validation Rules
+The validator supports various rules that can be applied to fields.
+
+| Rule | Parrameter Type | Description |
+| --- | --- | --- |
+| `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
+| `length` | `{ min, max }` | Enforces string length constraints. |
+| `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
+| `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
+| `email` | `Boolean` | Ensures a valid email format. |
+| `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
+| `datetime` | `Boolean` | Ensures a valid datetime format. |
+| `equality` | `Any` | Ensures the value matches the given parameter exactly. |
+| `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+
+**Example Rule Definition:**
+```javascript
+const rules = {
+  username: { required: true, length: { min: 5, max: 20 } },
+  password: { required: true },
+  birthdate: { date: true },
+  email: { email: true },
+  age: { number: { min: 18, max: 65 } }
+};
+```
+
+
+
+
+
 
 # eo.redirect(url)
 
