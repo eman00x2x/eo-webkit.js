@@ -7,32 +7,32 @@ The `eo.userClient` collects and manages client-related data, including:
 
 This information is cached in localStorage to avoid redundant API calls.
 
-## Usage Example
-```javascript
-console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
-console.log(userClient.browser); // e.g., "Google Chrome"
-```
+* ## Usage Example
+   ```javascript
+   console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+   console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
+   console.log(userClient.browser); // e.g., "Google Chrome"
+   ```
 
-## Properties
-userClient **Object**
-| Property | Type | Description |
-| --- | --- | --- |
-| `userAgent` | `string` | The browser's user agent string. |
-| `geo` | `Object` | null |
-| `browser` | `string` | string |
+* ## Properties
+   userClient **Object**
+   | Property | Type | Description |
+   | --- | --- | --- |
+   | `userAgent` | `string` | The browser's user agent string. |
+   | `geo` | `Object` | null |
+   | `browser` | `string` | string |
 
-## Implementation Details
-**Fetching Geolocation Data**
-* If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
-* The response is cached in localStorage for future use.
-**Browser Detection**
-* Uses navigator.userAgent to determine the browser name.
-* Compares the user agent string against common browser signatures.
+* ## Implementation Details
+   **Fetching Geolocation Data**
+   * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
+   * The response is cached in localStorage for future use.  
+   **Browser Detection**
+   * Uses navigator.userAgent to determine the browser name.
+   * Compares the user agent string against common browser signatures.
 
-## Error Handling
-* Geo Fetch Failure: Logs an error (Error getting geo info:).
-* Unknown Browser: Defaults to "Unknown Browser" if no match is found.
+* ## Error Handling
+   * Geo Fetch Failure: Logs an error (Error getting geo info:).
+   * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
 # eo.validator
 The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
