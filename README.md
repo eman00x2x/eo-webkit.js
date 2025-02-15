@@ -599,14 +599,14 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
       * Add a YouTube video by URL.
       * Play the video in a modal.
       * Remove added videos.
-      * Create an input form dynamically.
+      * Create a hidden input dynamically.
          * `id`, `url`, `embed`, `thumbnail`, and `created_at`
       
 	  * ### Usage
-	     Call eo.component.video.init() before the page loads.
+	     Call `eo.component.video.init()` before the page loads.
 	     ```javascript
          window.addEventListener('load', () => {
-         	eo.component.video.init();
+            eo.component.video.init();
          });
 		 ```
       * ### Required HTML Structure
@@ -630,6 +630,7 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
          <div class="response"></div>
          ```
          This will act as the default container for displaying alerts and loaders.
+
       * ### Methods
          * #### success(message, element) and error(message, element)
             Displays a success alert.
@@ -642,6 +643,7 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
                eo.component.alert.success('Operation completed successfully!');
                eo.component.alert.error('An error occurred while processing your request.');
                ```
+
          * #### loader(message, element)
             Displays a processing loader with a message.
             | Parameter | Type | Default | Description |
