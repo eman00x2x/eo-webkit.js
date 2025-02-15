@@ -737,93 +737,6 @@ import validate from 'validate.js'; */
 		};
 	})();
 
-
-	const tinymce = function() {
-		const init = (containerId, options = {}) => {
-			const textarea = document.querySelector(containerId);
-			if (textarea === null || textarea === undefined) {
-				return;
-			}
-
-			if (typeof tinyMCE !== 'object') {
-				throw new Error(`tinymce script is not inlcuded in head. ${CDN}/vendor/tinymce/tinymce.min.js`);
-			}
-
-			const defaultOptions = {
-				selector: 'textarea' + containerId,
-				height: 500,
-				menubar: false,
-				plugins: [
-					'advlist lists link anchor',
-					'media table paste code'
-				],
-				toolbar: '',
-				content_css: [
-					'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
-					CDN + '/css/global.style.css'
-				]
-			};
-
-			const mergedOptions = { ...defaultOptions, ...options };
-
-			tinyMCE.remove();
-			tinyMCE.init(mergedOptions);
-		};
-
-		return {
-			init
-		};
-
-	}();
-
-	const tomSelect = function() {
-		const init = (containerId) => {
-			if (window.TomSelect) {
-				new TomSelect(document.querySelector(containerId), {
-					copyClassesToDropdown: false,
-					dropdownParent: 'body',
-					controlInput: '<input>',
-					render: {
-						item: function(data, escape) {
-							if (data.customProperties) {
-								return createElements('div', {}, [
-									createElements('span', { class: 'dropdown-item-indicator' }, [
-										document.createTextNode(data.customProperties)
-									]),
-									document.createTextNode(escape(data.text))
-								]);
-							} else {
-								return createElements('div', {}, [
-									document.createTextNode(escape(data.text))
-								]);
-							}
-						},
-						option: function(data, escape) {
-							if (data.customProperties) {
-								return createElements('div', {}, [
-									createElements('span', { class: 'dropdown-item-indicator' }, [
-										document.createTextNode(data.customProperties)
-									]),
-									document.createTextNode(escape(data.text))
-								]);
-							} else {
-								return createElements('div', {}, [
-									document.createTextNode(escape(data.text))
-								]);
-							}
-						},
-					},
-				});
-			} else {
-				throw new Error(`TomSelect script is not inlcuded in head. ${CDN}/vendor/tom-select/tom-select.min.js`);
-			}
-		};
-
-		return {
-			init
-		};
-	}();
-
 	const alert = function() {
 		const _display = (message, element) => {
 			const messageContainer = document.querySelector(element);
@@ -1426,188 +1339,115 @@ import validate from 'validate.js'; */
 
 	}();
 
-	const googleChart = function() {
+	const tinymce = function() {
+		const init = (containerId, options = {}) => {
+			const textarea = document.querySelector(containerId);
+			if (!textarea) return;
 
-		const bar = ({ containerId, data = null, options = {} } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
+			if (typeof tinyMCE !== 'object') {
+				throw new Error('TinyMCE script is not inlcuded in head.');
 			}
 
-			google.charts.load('current', { packages: ['bar'] });
-			google.charts.setOnLoadCallback(drawChart);
+			const defaultOptions = {
+				selector: 'textarea' + containerId,
+				height: 500,
+				menubar: false,
+				plugins: [
+					'advlist lists link anchor',
+					'media table paste code'
+				],
+				toolbar: '',
+				content_css: [
+					'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+				]
+			};
 
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
+			const mergedOptions = { ...defaultOptions, ...options };
 
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.charts.Bar(container);
-				chart.draw(dataTable, google.charts.Bar.convertOptions(options));
-			}
-
-			return drawChart;
+			tinyMCE.remove();
+			tinyMCE.init(mergedOptions);
 		};
 
-		const calendar = ({ containerId, data, options = {} } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
+		return { init };
+
+	}();
+
+	const tomSelect = (() => {
+		const init = (containerId) => {
+			if (!window.TomSelect) {
+				throw new Error('TomSelect script is not included in head.');
 			}
 
-			google.charts.load('current', { packages: ['calendar'] });
-			google.charts.setOnLoadCallback(drawChart);
+			const element = document.querySelector(containerId);
+			if (!element) return;
 
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
+			new TomSelect(element, {
+				copyClassesToDropdown: false,
+				dropdownParent: 'body',
+				controlInput: '<input>',
+				render: {
+					item: _renderOption,
+					option: _renderOption,
 				}
+			});
+		};
+
+		const _renderOption = (data, escape) => {
+			return createElements('div', {}, [
+				...(data.customProperties ? [
+					createElements('span', { class: 'dropdown-item-indicator' }, [
+						document.createTextNode(data.customProperties)
+					])
+				] : []),
+				document.createTextNode(escape(data.text))
+			]);
+		};
+
+		return { init };
+	})();
+
+	const googleChart = (() => {
+		const _createChart = ({ containerId, data, options = {}, packageType, chartType, apiKey }) => {
+			const container = document.getElementById(containerId);
+			if (!container) return false;
+
+			google.charts.load('current', { packages: [packageType], mapsApiKey: apiKey });
+			google.charts.setOnLoadCallback(() => {
+				if (!data) throw new Error('Set the data in table property');
 
 				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.visualization.Calendar(container);
+				const chart = new chartType(container);
 				chart.draw(dataTable, options);
-			}
+			});
 
-			return drawChart;
-		};
-
-		const geo = ({ containerId, data, options = {}, apiKey = null } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
-			}
-
-			google.charts.load('current', { packages: ['corechart'], mapsApiKey: apiKey });
-			google.charts.setOnLoadCallback(drawChart);
-
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
-
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.visualization.GeoChart(container);
-
-				if (options.displayMode !== undefined && options.displayMode == 'markers') {
-					if (apiKey === null) {
-						throw new Error('Markers require geocoding, you\'ll need a ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
-					}
-				}
-
-				chart.draw(dataTable, options);
-			}
-
-			return drawChart;
-		};
-
-		const pie = ({ containerId, data, options = {} } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
-			}
-
-			google.charts.load('current', { packages: ['corechart'] });
-			google.charts.setOnLoadCallback(drawChart);
-
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
-
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.visualization.PieChart(container);
-				chart.draw(dataTable, options);
-			}
-
-			return drawChart;
-		};
-
-		const line = ({ containerId, data, options = {} } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
-			}
-
-			google.charts.load('current', { packages: ['line'] });
-			google.charts.setOnLoadCallback(drawChart);
-
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
-
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.charts.Line(container);
-				chart.draw(dataTable, google.charts.Line.convertOptions(options));
-			}
-
-			return drawChart;
-		};
-
-		const map = ({ containerId, data, options = {}, apiKey = null } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
-			}
-
-			google.charts.load('current', { packages: ['map'], mapsApiKey: apiKey });
-			google.charts.setOnLoadCallback(drawChart);
-
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
-
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.visualization.Map(container);
-
-				if (apiKey === null) {
-					throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
-				}
-
-				chart.draw(dataTable, options);
-			}
-
-			return drawChart;
-		};
-
-		const trendLine = ({ containerId, data, options = {} } = {}) => {
-			const container = document.getElementById(containerId);
-			if (container === null || container === undefined) {
-				return false;
-			}
-
-			google.charts.load('current', { packages: ['corechart'] });
-			google.charts.setOnLoadCallback(drawChart);
-
-			function drawChart() {
-				if (data === null) {
-					throw new Error('Set the data in table property');
-				}
-
-				const dataTable = data(new google.visualization.DataTable());
-				const chart = new google.visualization.ScatterChart(container);
-
-				const defaultOptions = { trendlines: { 0: {} } };
-				const mergeOptions = { ...defaultOptions, ...options };
-
-				chart.draw(dataTable, mergeOptions);
-			}
-
-			return drawChart;
+			return true;
 		};
 
 		return {
-			bar,
-			calendar,
-			geo,
-			pie,
-			line,
-			map,
-			trendLine
+			bar: (params) => _createChart({ ...params, packageType: 'bar', chartType: google.charts.Bar, options: google.charts.Bar.convertOptions(params.options) }),
+			calendar: (params) => _createChart({ ...params, packageType: 'calendar', chartType: google.visualization.Calendar }),
+			geo: (params) => {
+				if (params.options?.displayMode === 'markers' && !params.apiKey) {
+					throw new Error('Markers require geocoding, you\'ll need an ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
+				}
+				return _createChart({ ...params, packageType: 'corechart', chartType: google.visualization.GeoChart });
+			},
+			pie: (params) => _createChart({ ...params, packageType: 'corechart', chartType: google.visualization.PieChart }),
+			line: (params) => _createChart({ ...params, packageType: 'line', chartType: google.charts.Line, options: google.charts.Line.convertOptions(params.options) }),
+			map: (params) => {
+				if (!params.apiKey) {
+					throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
+				}
+				return _createChart({ ...params, packageType: 'map', chartType: google.visualization.Map });
+			},
+			trendLine: (params) => _createChart({
+				...params,
+				packageType: 'corechart',
+				chartType: google.visualization.ScatterChart,
+				options: { trendlines: { 0: {} }, ...params.options }
+			})
 		};
-	}();
+	})();
 
 	const _mortgageCalculator = function() {
 
@@ -1917,24 +1757,24 @@ import validate from 'validate.js'; */
 		post,
 		get,
 		redirect,
-		
-		validator,
 		arrayToDotNotation,
 		dotNotationToArray,
-
+		validator,
 		video,
 		modal,
 		alert,
 		button,
+		tinymce,
+		slider,
+		tomSelect,
+		uploader,
+		googleChart,
 
-		component: {
-			submitForm,
-			tinymce,
-			slider,
-			tomSelect,
-			uploader,
-			googleChart,
-		},
+		/** COMPONENTS */
+		submitForm,
+
+		
+
 	};
 
 	return eo;

@@ -732,9 +732,215 @@ The `eo.button` provides utility functions to enable or disable buttons (or any 
          button.enable(); // Enables all buttons with class '.btn'
          button.enable('.custom-button'); // Enables elements with class '.custom-button'
          ```
+# eo.tinymce
+The TinyMCE Module provides an easy way to initialize and configure TinyMCE, a popular WYSIWYG editor, on a specified container. It ensures the script is included and allows overriding default settings.
+
+* **Features**
+* **Initialize TinyMCE** on a specified `<textarea>` element.
+* **Merge default options** with custom options for flexibility.
+* **Ensure TinyMCE is removed before initialization** to prevent duplicates.
+
+* ## Required Setup
+   Ensure that the TinyMCE script is included in your project. If missing, an error will be thrown.
+   ```html
+   <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
+   ```
+   > for more information about TinyMCE, please visit their [website](https://www.tiny.cloud/docs/tinymce/latest/)
+   
+   * ## Method
+      * ### init(containerId, options)
+         Initializes TinyMCE on the specified textarea.
+         
+         * #### Parameters
+            | Parameter | Type | Description |
+            | --- | --- | --- |
+            | `containerId` | `string` | The ID or class selector of the textarea (e.g., `#editor`). |
+            | `options` | `object` | (Optional) Custom TinyMCE configuration options. |
+            
+            * ##### Default Options
+               The module applies the following default configuration:
+               ```javascript
+               {
+                   selector: `textarea${containerId}`,
+                   height: 500,
+                   menubar: false,
+                   plugins: ['advlist lists link anchor', 'media table paste code'],
+                   content_css: [
+                       'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i's
+                   ]
+               }
+               ```
+               If you need to customize the options, pass an object to override specific settings.
+
+* ## Example Usage
+   * **Basic Initialization**
+      ```javascript
+      tinymce.init('#editor');
+      ```
+   * **Custom Configuration**
+      ```javascript
+      tinymce.init('#editor', {
+          height: 300,
+          plugins: ['lists', 'table', 'code'],
+          toolbar: 'bold italic | alignleft aligncenter alignright'
+      });
+      ```
+
+# eo.googleChart
+This `eo.googleChart` simplifies the integration of Google Charts by providing methods for various chart types.
+
+* ## Required Setup
+   Ensure you have included the Google Charts script in your HTML:
+   ```html
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+   ```
+
+* ## Common Parameters
+   All chart functions accept the following parameters:
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `containerId` | `string` | The ID of the HTML element where the chart will be rendered. |
+   | `data` | `function(DataTable)` | A function that returns a populated `google.visualization.DataTable` object. |
+   | `options` | `object` | (Optional) Chart-specific configuration options. |
+   | `apiKey` | `string` | (Optional, required for Geo and Map charts) Google API key for maps/geolocation features. |
+
+* ## Available Methods
+   1. ### `googleChart.bar(params)`
+      Renders a bar chart.
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.bar({
+             containerId: 'barChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('string', 'Year');
+                 dataTable.addColumn('number', 'Sales');
+                 dataTable.addRows([ ['2020', 1000], ['2021', 1500] ]);
+                 return dataTable;
+             },
+             options: { title: 'Annual Sales' }
+         });
+         ```
+   
+   2. ### `googleChart.calendar(params)`
+      Renders a calendar heatmap chart.
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.calendar({
+             containerId: 'calendarChart',
+             data: (dataTable) => {
+                 dataTable.addColumn({ type: 'date', id: 'Date' });
+                 dataTable.addColumn({ type: 'number', id: 'Sales' });
+                 dataTable.addRows([ [new Date(2024, 0, 1), 100], [new Date(2024, 1, 14), 200] ]);
+                 return dataTable;
+             }
+         });
+         ```
+   
+   3. ### `googleChart.geo(params)`
+      Renders a geographical map chart.
+      > ⚠️ **Requires an API key for** `displayMode: 'markers'`.
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.geo({
+             containerId: 'geoChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('string', 'Country');
+                 dataTable.addColumn('number', 'Population');
+                 dataTable.addRows([ ['Germany', 83000000], ['France', 67000000] ]);
+                 return dataTable;
+             },
+             options: { displayMode: 'markers' },
+             apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
+         });
+         ```
+   
+   4. ### `googleChart.pie(params)`
+      Renders a pie chart.
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.pie({
+             containerId: 'pieChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('string', 'Category');
+                 dataTable.addColumn('number', 'Value');
+                 dataTable.addRows([ ['Electronics', 40], ['Clothing', 25], ['Groceries', 35] ]);
+                 return dataTable;
+             },
+             options: { title: 'Sales Breakdown' }
+         });
+         ```
+   
+   5. ### `googleChart.line(params)`
+      Renders a line chart.
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.line({
+             containerId: 'lineChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('string', 'Month');
+                 dataTable.addColumn('number', 'Revenue');
+                 dataTable.addRows([ ['Jan', 5000], ['Feb', 7000], ['Mar', 6000] ]);
+                 return dataTable;
+             },
+             options: { title: 'Monthly Revenue' }
+         });
+         ```
+   
+   6. ### `googleChart.map(params)`
+      Renders a Google Maps visualization.
+      > ⚠️ **Requires an API key.**
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.map({
+             containerId: 'mapChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('number', 'Lat');
+                 dataTable.addColumn('number', 'Lng');
+                 dataTable.addColumn('string', 'Label');
+                 dataTable.addRows([ [37.7749, -122.4194, 'San Francisco'], [40.7128, -74.0060, 'New York'] ]);
+                 return dataTable;
+             },
+             options: { showTooltip: true, showInfoWindow: true },
+             apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
+         });
+         ```
+   
+   7. ### `googleChart.trendLine(params)`
+      Renders a scatter plot with a trend line.s
+      
+      * #### Example Usage
+         ```javascript
+         googleChart.trendLine({
+             containerId: 'trendChart',
+             data: (dataTable) => {
+                 dataTable.addColumn('number', 'X');
+                 dataTable.addColumn('number', 'Y');
+                 dataTable.addRows([ [1, 2], [2, 4], [3, 6], [4, 8] ]);
+                 return dataTable;
+             },
+             options: { trendlines: { 0: {} } }
+         });
+         ```
+
+* ## Error Handling
+   * If the `containerId` is invalid, the function will return `false`.
+   * If `data` is missing, an error will be thrown:
+      ```javascript
+      Error: Set the data in table property
+      ```
+   * For geo and map charts, an API key is required. If missing, an error will be thrown
+      ```javascript
+      Error: Maps require a mapsApiKey.
+      ```
 
 # EO.js Components
-* # eo.submitForm
+* ## eo.submitForm
    The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
    
    * **Features**
@@ -747,14 +953,20 @@ The `eo.button` provides utility functions to enable or disable buttons (or any 
    
    * **Dependencies**
       * eo.validator (Read the documentation)
-      * eo.post (Read the documentation)  
+      * eo.post (Read the documentation)
+	  * eo.alert (Read the documentation)
+	  * eo.button (Read the documentation)
+	  * csrf-token in meta tag
+	     ```html
+		 <meta name="csrf-token" content="{{ csrf_token() }}">
+		 ```
    
-   * ## Syntax
+   * ### Syntax
       ```javascript
       eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
       ```
    
-   * ## Parameters
+   * ### Parameters
       | Parameter | Type | Description |
       | --- | --- | --- |
       | `formId` | `string` | The ID of the form to submit (with or without `#`). |
@@ -762,7 +974,7 @@ The `eo.button` provides utility functions to enable or disable buttons (or any 
       | `callback` | `function` | A callback function executed on a successful submission. |
       | `onBeforeSend` | `function` | A function executed before sending the form data. |
    
-   * ## Example Usage
+   * ### Example Usage
       ```javascript
       eo.submitForm('#myForm', {
           validation: {
