@@ -49,7 +49,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
      }
    };
    
-   validator.setConstraints(rules);
+   eo.validator.setConstraints(rules);
    
    const data = {
      name: "John",
@@ -58,8 +58,8 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
      address: { street: "123 Main St" }
    };
    
-   if (!validator.validate(data)) {
-     console.log(validator.getErrors()); 
+   if (!eo.validator.validate(data)) {
+     console.log(eo.validator.getErrors()); 
      // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
    }
    ```
@@ -77,7 +77,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       
       **Example:**
       ```javascript
-      const isValid = validator.validate({ name: "Alice" });
+      const isValid = eo.validator.validate({ name: "Alice" });
       console.log(isValid); // true or false
       ```
    * ### `getErrors()`
@@ -88,7 +88,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       
       **Example:**
       ```javascript
-      console.log(validator.getErrors());
+      console.log(eo.validator.getErrors());
       // Output: [ "Email is not a valid email address." ]
       ```
    * ### `setConstraints(rules)`
@@ -99,7 +99,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       
       **Example:**
       ```javascript
-      validator.setConstraints({ username: { required: true } });
+      eo.validator.setConstraints({ username: { required: true } });
       ```
    * ### `resetConstraints()`
    
@@ -107,7 +107,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
       
       **Example:**
       ```javascript
-      validator.resetConstraints();
+      eo.validator.resetConstraints();
       ```
 * ## Validation Rules
    The validator supports various rules that can be applied to fields.
@@ -134,61 +134,137 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
      age: { number: { min: 18, max: 65 } }
    };
    ```
-
-
-
-
-
-
 # eo.redirect(url)
+`eo.redirect(url)` navigates the browser to the specified URL by setting window.location.
 
-`@param {string} url - The URL to redirect to`
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `String` | The URL to which the browser should be redirected. |
 
-Redirects the browser to a given URL.
+* ## Returns
+   `void` This function does not return anything. It redirects the user immediately.
+* ## Example Usage
+   ```javascript
+   eo.redirect("https://example.com");
+   // The browser navigates to "https://example.com"
+   ```
 
 # eo.epochToTimeString(epoch)
-`@param {number} epoch - The epoch time, in seconds
-@returns {string} A localized string representation of the date and time`
-
+`eo.epochToTimeString(epoch)` converts a Unix epoch timestamp (seconds since 1970-01-01 UTC) into a human-readable date string formatted in US English.
 Converts an epoch time (in seconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
 
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `epoch` | `Number` | A **Unix timestamp** in **seconds** (not milliseconds). |
+
+* ## Returns
+   `String` A formatted date string in English (US locale).
+
+* ## Example Usage
+   ```javascript
+   console.log(eo.epochToTimeString(1700000000)); 
+   // Output: "Sunday, November 12, 2023, 12:26 PM"
+   ```
+
 # eo.trim(stringValue, maximumLength)
-`@param {string} stringValue - The string to trim
-@param {number} maximumLength - The maximum allowed length of the string
-@returns {string} The trimmed string`
+`eo.trim(stringValue, maxLength)` truncates a string if it exceeds the specified maxLength and appends "...". If the string is within the limit, it remains unchanged.
 
-Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `stringValue` | `String` | The input string to be trimmed. |
+   | `maxLength` | `Number` | The maximum allowed length of the string (including ... if truncated). |
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam pretium vel sem sit amet sagittis. Mauris congue et nibh et posuere. Mauris eget velit sed metus porttitor venenatis.
+* ## Returns
+   `String` The original string if within maxLength, otherwise a truncated version with "..." appended.
+
+* ## Example Usage
+   ```javascript
+   console.log(eo.trim("Hello, world!", 10)); 
+   // Output: "Hello, w..."
+   
+   console.log(eo.trim("Short", 10)); 
+   // Output: "Short" (unchanged)
+   ```
 
 # eo.formatFileSize(bytes, decimalPlaces = 0)
-`@param {number} bytes - The number of bytes to convert
-@param {number} [decimalPlaces=2] - The number of decimal places to include
-@returns {string} A human-readable string representation of the given number of bytes`
+`eo.formatFileSize(bytes, decimalPlaces = 0)` converts a file size in bytes into a human-readable format (e.g., KB, MB, GB). It supports up to Yottabytes (YB) and allows formatting with a specified number of decimal places.
 
-Converts a given number of bytes to a human-readable string, appending the appropriate unit (Bytes, KB, MB, etc.).
+* ## Parameters
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- |
+   | `bytes` | `Number` | Required | The file size in **bytes**. |
+   | `decimalPlaces` | `Number` | `0` (optional) | The **number of decimal places** for formatting. |
+
+* ## Returns
+   `String` A human-readable file size with units (e.g., "1.5 MB", "500 KB").
+
+* ## Example Usage
+   ```javascript
+   console.log(eo.formatFileSize(1024));       
+   // Output: "1 KB"
+   
+   console.log(eo.formatFileSize(1048576));    
+   // Output: "1 MB"
+   
+   console.log(eo.formatFileSize(1500000, 2)); 
+   // Output: "1.50 MB"
+   
+   console.log(eo.formatFileSize(0));          
+   // Output: "0 Bytes"
+   ```
 
 # eo.uuidv4()
-`@returns {string} A randomly generated UUID version 4`
+`eo.uuidv4()` generates a random UUID (Universally Unique Identifier) Version 4 in the standard format:  
+`xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`  
+where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4 specification).
 
-Generates a random UUID (Universally Unique Identifier) version 4.  
-This function uses the Web Cryptography API to generate a random UUID.  
-The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+* ## Returns
+   `String` A randomly generated UUID v4 in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
+
+* ## Example Usage
+   ```javascript
+   console.log(eo.uuidv4()); 
+   // Output: "3f94a8a7-1d2b-4c19-9b2f-6de8f0ea6df0" (random each time)
+   ```
 
 # eo.getRandomChar(length)
-`@param {number} length - The length of the random hexadecimal string to generate
-@returns {string} A random hexadecimal string of the specified length`
+`eo.getRandomChar(length)` generates a random hexadecimal string of the specified length using the Web Crypto API for cryptographic security.
 
-Generates a random hexadecimal string of the specified length.  
-The function uses the Web Cryptography API to generate cryptographically secure random values, which are then converted to a hexadecimal string.
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `length` | `Number` | The desired length of the output string. |
+
+* ## Returns
+   `String` A random hexadecimal string of the given length.
+
+* ## Example Usage
+   ```javascript
+   console.log(eo.getRandomChar(10)); 
+   // Output: "f3a9c2b4d1" (random each time)
+   ```
 
 # eo.getRandomNum(start, end)
-`@param {number} start - The lowest number to generate
-@param {number} end - The highest number to generate
-@returns {number} A randomly generated number between start and end`
+`eo.getRandomNum(start, end)` generates a random integer between start and end (inclusive).
 
-Generates a random number between the given start and end.  
-The end number is inclusive, so the function will return a number that is greater than or equal to start, and less than or equal to end.
+* ## Parameters
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `start` | `Number` | Required | The minimum value (inclusive). |
+   | `end` | `Number` | Required | The maximum value (inclusive). |
+
+* ## Returns
+   `Number` A random integer between start and end (both inclusive).
+
+* ## Example Usage
+   ```javascript
+   console.log(getRandomNum(1, 10)); 
+   // Output: Random number between 1 and 10
+   ```
+
 
 # eo.convertCurrency(amount)
 `@param {number} amount - The number to convert to a human-readable format

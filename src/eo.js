@@ -43,24 +43,17 @@ import validate from 'validate.js'; */
 	   *
 	   * @returns {boolean} True if the application is in development mode, false otherwise.
 	   */
-	const isInDevelopment = () => {
-		const inDevelopmentMetaTag = document.querySelector('meta[name="inDevelopment"]');
-		if (inDevelopmentMetaTag.content == 1) {
-			return true;
-		}
+	const isInDevelopment = () => document.querySelector('meta[name="inDevelopment"]')?.content === '1';
 
-		return false;
-	};
-
-	const _CSRFToken = function() {
-		const metaTagToken = document.querySelector('meta[name="csrf-token"]');
-		if (metaTagToken === null) {
+	const _CSRFToken = (() => {
+		const token = document.querySelector('meta[name="csrf-token"]')?.content;
+		if (!token) {
 			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
 			alert.error(message);
 			throw new Error(message);
 		}
-		return metaTagToken.content;
-	}();
+		return token;
+	})();
 
 	const _sanitize = str => new Option(str).innerHTML;
 
@@ -69,9 +62,7 @@ import validate from 'validate.js'; */
 	   *
 	   * @param {string} url - The URL to redirect to
 	   */
-	const redirect = (url) => {
-		window.location = url;
-	};
+	const redirect = (url) => window.location = url;
 
 	/**
 	   * Converts an epoch time (in seconds) to a localized string in the format:
@@ -80,18 +71,14 @@ import validate from 'validate.js'; */
 	   * @param {number} epoch - The epoch time, in seconds
 	   * @returns {string} A localized string representation of the date and time
 	   */
-	const epochToTimeString = (epoch) => {
-		const date = new Date(0);
-		date.setUTCSeconds(epoch);
-		return date.toLocaleString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-		});
-	};
+	const epochToTimeString = (epoch) => new Date(epoch * 1000).toLocaleString('en-US', {
+		weekday: 'long',
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
 
 	/**
 	   * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
@@ -100,13 +87,8 @@ import validate from 'validate.js'; */
 	   * @param {number} maximumLength - The maximum allowed length of the string
 	   * @returns {string} The trimmed string
 	   */
-	const trim = (stringValue, maximumLength) => {
-		if (stringValue.length <= maximumLength) {
-			return stringValue;
-		}
-
-		return `${stringValue.slice(0, maximumLength - 3)}...`;
-	};
+	const trim = (stringValue, maxLength) => 
+    	stringValue.length > maxLength ? `${stringValue.slice(0, maxLength - 3)}...` : stringValue;
 
 	/**
 	   * Converts a given number of bytes to a human-readable string,
@@ -166,12 +148,10 @@ import validate from 'validate.js'; */
 	   * @returns {number} A randomly generated number between start and end
 	   */
 	const getRandomNum = (start, end) => {
-		if (start > end) {
-			throw new Error('Start must be less than or equal to End');
-		}
-
-		return Math.floor(Math.random() * (end - start + 1)) + start;
+    if (start > end) throw new Error('Start must be ≤ End');
+		return start + Math.floor(Math.random() * (end - start + 1));
 	};
+
 
 	/**
 	   * Converts a given number to a human-readable currency format.
