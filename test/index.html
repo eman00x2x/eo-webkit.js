@@ -490,6 +490,79 @@ document.body.appendChild(div);</pre>
 						</div>
 					</div>
 
+					<div name="#mortgageCalculator" class="mb-3 border-bottom">
+						<h3>eo.mortgageCalculator</h3>
+						<code class="">
+					
+						</code>
+						<p class="mt-2">
+						</p>
+					
+						<div class="mb-4">
+							<div class="mortgage-calculator-form mt-5 p-3 border"><input type="hidden" id="sellingPrice" value="17200000">
+								<h5 class="mb-2 "><i class="ti ti-calculator"></i> Mortgage Calculator</h5>
+								<p class="mb-2 ">With the current price of <b>17,200,000</b> and mortgage rates as stated below, expect to have a monthly payment of:</p>
+								<div class="p-4 border bg-primary-lt">
+									<div class="row align-items-center justify-content-center">
+										<div class="col-12 col-lg-6 col-md-12">
+											<div class="text-center text-highlight mb-3"><span class="d-block mb-2">Monthly Payment of</span>
+												<h1><span id="result" class="fw-bold monthly_dp"></span></h1>
+											</div>
+										</div>
+										<div class="col-12 col-lg-6 col-md-12">
+											<div class="d-flex gap-2 justify-content-center">
+												<div class="form-floating flex-fill">
+													<div id="dpSelection"></div>
+													<label for="dpSelection">Down Payment</label>
+												</div>
+												
+												<div class="form-floating flex-fill">
+													<div id="interestSelection"></div>
+													<label for="mortgageInterest">Interest Rate</label>
+												</div>
+
+												<div class="form-floating flex-fill">
+													<div id="yearSelection"></div>
+													<label for="mortgageYear">Years</label>
+												</div>
+											</div>
+											<p class="fs-12 text-muted m-0 mt-2 small">You can use the mortgage calculator to estimate the monthly payment with different values.</p>
+										</div>
+									</div>
+								</div>
+								<p class="mt-2 mb-0 p-0 text-muted fs-12">* The accuracy and applicability of this calculator are not guaranteed.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div name="#getYoutubeVideoData" class="mb-3 border-bottom">
+						<h3>eo.uploader</h3>
+						<code class=""><pre>
+eo.uploader.create('.upload-container', '/', {
+	previewSelector: '.uploaded-photo',
+	multiple: false,
+	uploadType: 'image',
+	onSuccess: (data, files) => {
+		files.forEach((file, index) => {
+			file.url = eo.getRandomChar(20);
+		});
+	}
+});
+						</pre></code>
+						<p class="mt-2">
+						</p>
+					
+						<div class="mb-4">
+							<div class="response"></div>
+							
+							<div class="upload-container"></div>
+
+							<div class="uploaded-photo p-3 mt-2 border "></div>
+						</div>
+					</div>
+					
+
 				</main>
 			</div>
 			

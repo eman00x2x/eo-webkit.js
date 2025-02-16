@@ -228,7 +228,21 @@ const testCase = () => {
 
 
 window.addEventListener('load', () => {
+
+	eo.uploader.create('.upload-container', '/', {
+		previewSelector: '.uploaded-photo',
+		multiple: false,
+		uploadType: 'document',
+		onSuccess: (data, files) => {
+			files.forEach((file, index) => {
+				file.url = eo.getRandomChar(20);
+			});
+		}
+	});
+	
+	eo.mortgageCalculator.init();
 	eo.video.init();
+
 	/* testCase(); */
 	epochToTime();
 	uuidv4();

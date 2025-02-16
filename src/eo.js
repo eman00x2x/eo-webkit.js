@@ -122,18 +122,29 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Generates a random hexadecimal string of the specified length.
-	   *
-	   * The function uses the Web Cryptography API to generate cryptographically
-	   * secure random values, which are then converted to a hexadecimal string.
-	   *
-	   * @param {number} length - The length of the random hexadecimal string to generate
-	   * @returns {string} A random hexadecimal string of the specified length
-	   */
+	 * Generates a random alphanumeric string of the specified length.
+	 *
+	 * This function uses the Web Cryptography API to generate cryptographically
+	 * secure random values, which are then used to select characters from a
+	 * set of uppercase and lowercase letters and digits.
+	 *
+	 * @param {number} length - The length of the random alphanumeric string to generate
+	 * @returns {string} A random alphanumeric string of the specified length
+	 */
 	const getRandomChar = (length) => {
-		const array = new Uint8Array(length - 3);
-		window.crypto.getRandomValues(array);
-		return Array.from(array, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		const charactersLength = characters.length;
+		let result = '';
+		const randomValues = new Uint8Array(length);
+
+		window.crypto.getRandomValues(randomValues);
+
+		for (let i = 0; i < length; i++) {
+			const randomIndex = randomValues[i] % charactersLength;
+			result += characters.charAt(randomIndex);
+		}
+
+		return result;
 	};
 
 	/**
@@ -728,11 +739,13 @@ import validate from 'validate.js'; */
 		};
 
 		return {
-			init: () => {
+			_initBeforeLoad: () => {
 				_handleVideoAdd();
 				_handleVideoDeletion();
 				_handleVideoPlayback();
-				document.addEventListener('DOMContentLoaded', _createVideoForm());
+			},
+			init: () => {
+				_createVideoForm();
 			}
 		};
 	})();
@@ -935,406 +948,164 @@ import validate from 'validate.js'; */
 		};
 	})();
 
-	const uploader = function() {
+	const uploader = function () {
 
-		/**
-			 * Creates a new file uploader.
-			 * @param {Object} options - Options to configure the uploader.
-			 * @param {string} [options.uploadContainerSelector] - The CSS selector of the container element to create the uploader in.
-			 * @param {string} options.url - The URL to send the upload to.
-			 * @param {string} [options.inputId] - The ID of the input element to use as the file input.
-			 * @param {string} [options.uploadType] - The type of upload. Either "image" or "document". Default is "image".
-			 * @param {string} [options.accept] - The MIME type of the file to accept. Default is "image/*".
-			 * @param {boolean} [options.multiple] - Whether to allow multiple files to be uploaded. Default is true.
-			 * @param {function} [options.success] - A callback to call when the upload is successful.
-			 * @param {function} [options.error] - A callback to call when the upload fails.
-			 * @returns {void}
-			 */
-		const _create = ({ uploadContainerSelector, url, inputId = 'browseFile', uploadType = 'image', accept = 'image/*', multiple = true, success = false, error = false }) => {
+		let defaultUploadType = 'image';
+		const defaultImageSingleUploadIcon = 'https://static.vecteezy.com/system/resources/previews/020/213/738/non_2x/add-profile-picture-icon-upload-photo-of-social-media-user-vector.jpg';
+		const defaultDocumentSingleUploadIcon = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiqCCMGSzWTOHM5Cs4eQXx6nPL_fWBuPprhw&s';
+		const defaultDocumentIcon = 'https://cdn-icons-png.flaticon.com/512/4726/4726010.png';
 
-			if (uploadType !== 'image' && uploadType !== 'document') {
-				throw new Error('Invalid upload type. Must be "image" or "document"');
-			}
+		const create = (uploadSelector = '.upload-container', url, options = {}) => {
+			const {
+				previewSelector = '.uploaded-photo',
+				disablePreview = false,
+				uploadType = 'image',
+				accept = uploadType === 'document' ? 'application/pdf' : 'image/*',
+				multiple = true,
+				onBeforeSend,
+				onSuccess,
+				onError
+			} = options;
 
-			const containerSelector = uploadContainerSelector || '.upload-container';
-			const input = inputId;
-			const onSuccessCallback = success;
-			const onErrorCallback = error;
+			if (!['image', 'document'].includes(uploadType)) throw new Error('Invalid upload type.');
 
-			if (uploadType == 'document') {
-				accept = 'application/pdf';
-				_initFileUploaderEvents();
-			} else {
-				_initImageUploaderEvents();
-			}
+			defaultUploadType = uploadType;
+			const inputId = 'a' + getRandomChar(6);
 
-			_createUploadContainer(containerSelector);
-			_createUploadForm(url, input, accept, multiple, containerSelector);
-			_initUploaderEvents(containerSelector, input, onSuccessCallback, onErrorCallback);
+			_createUI(uploadSelector, previewSelector, inputId, accept, multiple);
+			_handleEvents(uploadSelector, previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
 		};
 
-		const _createUploadContainer = (uploadContainerSelector) => {
-			let container = document.querySelector(uploadContainerSelector);
-
-			if (!container) {
-				container = createElements('div', { class: 'upload-container' });
-				document.body.prepend(container);
-				uploadContainerSelector = '.upload-container';
+		const _createUI = (selector, previewSelector, inputId, accept, multiple) => {
+			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
+			
+			if (multiple) {
+				container.innerHTML = `
+					<span class="btn btn-dark btn-eo-uploader-browse">
+						<i class="ti ti-upload me-2"></i> Upload
+					</span>
+				`;
 			}
 
-			const uploadButton = createElements('span', { class: 'btn btn-dark btn-browse' }, [
-				createElements('i', { class: 'ti ti-upload me-2' }),
-				document.createTextNode(' Upload')
-			]);
-
-			container.innerHTML = '';
-			container.appendChild(uploadButton);
-		};
-
-		const _createUploadForm = (url, inputId, accept, multiple, containerSelector) => {
-			const containerDiv = createElements('div', {
-				class: containerSelector.replace('.', '') // Remove the .
+			document.body.prepend(createElements('form', {
+				id: `uploadForm_${inputId}`,
+				class: 'd-none',
+				enctype: 'multipart/form-data'
 			}, [
-				createElements('form', {
-					id: 'uploadForm_' + inputId,
-					class: 'd-none',
-					action: url,
-					method: 'POST',
-					enctype: 'multipart/form-data'
-				}, [
-					createElements('center', {}, [
-						createElements('input', {
-							type: 'file',
-							id: inputId,
-							accept: accept,
-							name: multiple ? `${inputId}[]` : inputId, // Conditional name
-							...(multiple ? { multiple: true } : { value: '' }) // Conditional multiple/value
-						})
-					])
-				])
-			]);
+				createElements('input', {
+					type: 'file',
+					id: inputId,
+					accept,
+					name: multiple ? `${inputId}[]` : inputId,
+					...(multiple ? { multiple: true } : {})
+				})
+			]));
 
-			document.body.prepend(containerDiv);
+			const bg = defaultUploadType == 'image' ? defaultImageSingleUploadIcon : defaultDocumentSingleUploadIcon;
+			const previewElement = document.querySelector(previewSelector);
+			previewElement.innerHTML = multiple
+				? '<div class="multiple-preview d-flex flex-wrap gap-2"></div>'
+				: '<div class="photo-preview position-relative" style="width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(' + bg + ');"></div>';
+			
+			if (!multiple) document.querySelector('.photo-preview').classList.add('btn-eo-uploader-browse');
 		};
 
-		/**
-			 * Generates HTML elements for displaying and manipulating image uploads.
-			 *
-			 * @param {Object} image - An objects containing image upload information.
-			 * @param {string} [uploader="properties"] - The uploader from which the images are being uploaded.
-			 * @param {Object} [settings] - Additional settings for the image elements.
-			 * @return {string} - The HTML elements as a string.
-			 */
-		const _setMultipleImageUploadContainer = (image, uploadedContainerSelector = 'images-container') => {
-			const container = document.querySelector(uploadedContainerSelector);
+		const _createPreviewUI = (previewSelector, multiple, files) => {
+			const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
+			if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
 
-			if (!container) {
-				console.log(`Container with selector '${uploadedContainerSelector}' not found.`);
-				return;
-			}
+			files.forEach((file) => {
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					const id = getRandomChar(11);
+					const bg = defaultUploadType == 'image' ? e.target.result : defaultDocumentIcon;
+					let container;
 
-			let div = createElements('div', {
-				class: `${image.id} image_${image.id} me-2 mb-3 flex-grow-1`
-			}, [
-				createHiddenInput(`upload[${image.id}][image_id]`, image.id),
-				createHiddenInput(`upload[${image.id}][height]`, image.height),
-				createHiddenInput(`upload[${image.id}][width]`, image.width),
-				createHiddenInput(`upload[${image.id}][filename]`, image.filename),
-				createHiddenInput(`upload[${image.id}][url]`, image.final_url),
-
-				createElements('div', {}, [
-					createElements('span', {
-						class: 'avatar avatar-xxxl',
-						style: `background-image: url('${image.temp_url}')`
-					})
-				]),
-				createElements('div', { class: 'btn-list mt-2 text-center' }, [
-					createElements('span', {
-						class: 'btn btn-md btn-outline-secondary btn-remove-image',
-						title: 'Remove image',
-						'data-container': image.id,
-						'data-filename': image.filename,
-						'data-url': `${DOMAIN}/properties/images/${image.id}/delete`
-					}, [
-						createElements('i', { class: 'ti ti-trash' })
-					]),
-					createElements('span', {
-						class: 'btn btn-md btn-outline-primary btn-set-thumbnail',
-						title: 'Set image as thumbnail',
-						'data-container': image.id,
-						'data-final-url': image.final_url
-					}, [
-						createElements('i', { class: 'ti ti-click me-2' }),
-						document.createTextNode(' Thumbnail')
-					])
-				]),
-
-				...(image.status == 2 ? [
-					createElements('div', { class: 'alert alert-danger alert-dismissible' }, [
-						createElements('i', { class: 'ti ti-alert-triangle me-2', 'aria-hidden': 'true' }),
-						createElements('span', { class: 'p-0 m-0' }, [document.createTextNode(image.message)]),
-						createElements('button', {
-							type: 'button',
-							class: 'btn-close',
-							'data-bs-dismiss': 'alert'
-						})
-					])
-				] : [])
-
-			]);
-
-			if (container) {
-				container.prepend(div);
-			} else {
-				console.error('Container element not found.');
-			}
-		};
-
-		const _setSingleUploadContainer = (image, uploadedContainerSelector = '.photo-preview') => {
-			const containerSelector = uploadedContainerSelector.replace('.', '');
-			const previewElement = document.querySelector(containerSelector);
-
-			if (!previewElement) {
-				console.error(`Element with selector '${uploadedContainerSelector}' not found.`);
-				return;
-			}
-
-			if (image.status == 1) {
-				previewElement.style.backgroundImage = `url(${image.temp_url})`;
-				alert.message('');
-
-				const photoInput = document.getElementById('photo');
-				if (photoInput) {
-					photoInput.value = image.final_url;
-				} else {
-					console.error('Element with ID \'photo\' not found.');
-				}
-
-			} else {
-				alert.message(image.message);
-			}
-
-			const browseButton = document.querySelector(`${uploadedContainerSelector} .btn-browse`);
-			if (browseButton) {
-				browseButton.style.display = 'block';
-			} else {
-				console.error(`Element with selector '${uploadedContainerSelector} .btn-browse' not found.`);
-			}
-		};
-
-		const _setMultipleFileUploadContainer = (file, uploadedContainerSelector = '.files-container') => {
-			const container = document.querySelector(uploadedContainerSelector);
-			if (!container) {
-				console.error(`Container with selector '${uploadedContainerSelector}' not found.`);
-				return;
-			}
-
-			let fileElement = createElements('div', { class: 'flex-grow-1' }, [
-
-				createHiddenInput(`documents[${file.id}][id]`, file.id),
-				createHiddenInput(`documents[${file.id}][filename]`, file.filename),
-				createHiddenInput(`documents[${file.id}][size]`, file.size),
-				createHiddenInput(`documents[${file.id}][finalUrl]`, file.final_url),
-
-				createElements('div', { class: 'd-flex p-y align-items-center' }, [
-					createElements('span', { class: 'avatar me-2' }, [
-						createElements('i', { class: 'ti ti-pdf fs-18' })
-					]),
-					createElements('div', { class: 'flex-fill' }, [
-						createElements('div', { class: 'font-weight-medium' }, [
-							createElements('input', {
-								type: 'text',
-								name: `documents[${file.id}][alias]`,
-								value: file.alias,
-								class: 'border-0 w-100'
-							})
-						]),
-						createElements('div', { class: 'text-secondary small' }, [
-							document.createTextNode(file.size)
-						])
-					])
-				]),
-				/* createElements('div', { class: 'btn-list' }, [
+					if (multiple) {
+						container = createElements('div', {
+							class: 'file-container position-relative',
+							id,
+							style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg});`
+						}, [
 							createElements('span', {
-								class: 'btn-remove-document cursor-pointer p-2',
-								'data-id': file.id,
-								'data-filename': file.filename
-							}, [
-								createElements('i', { class: 'ti ti-trash me-1' }),
-								document.createTextNode(" Remove")
-							])
-						]) */
-			]);
+								class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2',
+								'data-id': id
+							}, ['X']),
+							createElements('span', {
+								class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
+							}, [file.name])
+						]);
+					} else {
 
-			let listItem;
-			if (file.status == 2) {
-				listItem = createElements('div', { class: 'alert alert-danger alert-dismissible', id: file.id }, [
-					createElements('i', { class: 'ti ti-alert-triangle me-2', 'aria-hidden': 'true' }),
-					createElements('span', { class: 'p-0 m-0' }, [document.createTextNode(file.message)]),
-					createElements('button', { type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert' })
-				]);
-			} else {
-				listItem = createElements('li', {
-					class: `list-group-item d-flex gap-3 justify-content-between align-items-center py-3 file_${file.id}`
-				}, [fileElement]); // Append fileElement to the list item
-			}
+						previewContainer.style.backgroundImage = `url(${bg})`;
+						container = previewContainer;
+						container.innerHTML = '';
 
-			container.prepend(listItem);
-		};
+						previewContainer.appendChild(
+							createElements('div', {
+								class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
+							}, [file.name])
+						);
+					}
 
-		const _initFileUploaderEvents = () => {
-			document.addEventListener('click', function(event) {
-				if (event.target.closest('.btn-remove-document')) {
-					const btn = event.target.closest('.btn-remove-document');
-					const id = btn.dataset.id;
-					/* const filename = btn.dataset.filename;
-							  const property_id = btn.dataset.property_id; */
+					const hiddenInputsContainer = multiple ? container : previewContainer;
+					hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][id]`, id.toString()));
 
-					const remove_url = btn.dataset.remove_url;
+					if (defaultUploadType === 'image') {
+						const img = new Image();
+						img.src = e.target.result;
+						img.onload = () => {
+							hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][width]`, img.width.toString()));
+							hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][height]`, img.height.toString()));
+						};
+					}
 
-					get(remove_url, {
-						onSuccess: function(response) {
-							if (response.status == 2) {
-								alert.error(response.message);
-							}
-							const fileElement = document.querySelector(`.file_${id}`);
-							if (fileElement) {
-								fileElement.remove();
-							} else {
-								console.error(`File element with class 'file_${id}' not found.`);
-							}
-						}
+					['name', 'size', 'type', 'lastModified'].forEach((prop) => {
+						hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][${prop}]`, file[prop].toString()));
 					});
-				}
+
+					if (multiple) previewContainer.appendChild(container);
+				};
+				reader.readAsDataURL(file);
 			});
 		};
 
-		const _initImageUploaderEvents = () => {
-			document.addEventListener('click', function(event) {
-
-				if (event.target.closest('.btn-set-thumbnail')) {
-					const btn = event.target.closest('.btn-set-thumbnail');
-					const finalUrl = btn.dataset.finalUrl;
-
-					const thumbnailButtons = document.querySelectorAll('.btn-set-thumbnail');
-					thumbnailButtons.forEach(button => {
-						button.classList.remove('btn-success');
-						button.classList.add('btn-outline-primary');
-						button.innerHTML = '<i class=\'ti ti-click me-2\'></i> Thumbnail';
-					});
-
-					btn.classList.add('btn-success');
-					btn.classList.remove('btn-outline-primary');
-					btn.innerHTML = '<i class=\'ti ti-check me-2\'></i> Thumbnail';
-
-					const thumbImgInput = document.getElementById('thumb_img');
-					if (thumbImgInput) {
-						thumbImgInput.value = finalUrl;
-					} else {
-						console.error('Element with ID \'thumb_img\' not found.');
-					}
-				} else if (event.target.closest('.btn-remove-image')) {
-					const btn = event.target.closest('.btn-remove-image');
-					const container = btn.dataset.container;
-					const filename = btn.dataset.filename;
-					const url = btn.dataset.url;
-
-					post(url, {
-						csrf_token: _CSRFToken,
-						filename: filename
-					}, {
-						onSuccess: function(response) {
-							if (response.status == 1) {
-								const elementToRemove = document.querySelector(container);
-								if (elementToRemove) {
-									elementToRemove.remove();
-								} else {
-									console.error(`Element with selector '${container}' not found.`);
-								}
-							}
-							alert.message(response.message);
-							console.log(response);
-						}
-					});
-				}
-			});
-		};
-
-		const _initUploaderEvents = (containerSelector, input, success, error) => {
-
-			document.addEventListener('click', function(event) {
-				if (event.target.closest(`${containerSelector} .btn-browse`)) {
-					const inputElement = document.querySelector(`${containerSelector} #${input}`);
-					if (inputElement) {
-						inputElement.click();
-					} else {
-						console.error(`Input element with selector '${containerSelector} #${input}' not found.`);
-					}
-				}
+		const _handleEvents = (selector, previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
+			document.addEventListener('click', (e) => {
+				if (e.target.closest('.btn-eo-uploader-browse')) document.getElementById(inputId).click();
 			});
 
-			document.addEventListener('change', function(event) {
-				if (event.target.matches(`${containerSelector} #${input}`)) {
-					const form = document.querySelector(`${containerSelector} #uploadForm_${input}`);
+			document.addEventListener('change', (e) => {
+				if (!e.target.matches(`#${inputId}`)) return;
 
-					if (!form) {
-						console.error(`Form element with selector '${containerSelector} #uploadForm_${input}' not found.`);
-						return;
-					}
+				const files = [...e.target.files];
+				const formData = new FormData();
+				files.forEach((file) => formData.append(inputId, file));
+				formData.append('csrf_token', _CSRFToken);
 
-					const formData = new FormData(form);
-					formData.append('csrf_token', _CSRFToken);
+				post(url, formData, {
+					beforeSend: () => {
+						alert.loader('Uploading...');
+						if (onBeforeSend?.() === false) return false;
+					},
+					onSuccess: (response) => {
+						onSuccess?.(response, files);
+						if (!disablePreview) _createPreviewUI(previewSelector, multiple, files);
+					},
+					onError
+				});
 
-					const urlElement = document.querySelector(`${containerSelector} #uploadForm_${input}`);
-					if (!urlElement) {
-						console.error(`Form element with selector '${containerSelector} #uploadForm_${input}' not found.`);
-						return;
-					}
-					const url = urlElement.action;
+				e.target.value = '';
+			});
 
-					post(url, formData, {
-						processData: false,
-						contentType: false,
-						beforeSend: () => {
-							alert.loader('Please wait while you are uploading...');
-							button.disable();
-						},
-						onSuccess: (response) => {
-							alert.message('');
-							button.enable();
-							if (response.status == 2) {
-								alert.error(response.message);
-								return;
-							}
-
-							if (success) {
-								return success(response);
-							}
-						},
-						onError: (args) => {
-							if (error) {
-								return error(args);
-							}
-						}
-					});
-
-					const inputElementToClear = document.querySelector(`${containerSelector} #${input}`);
-					if (inputElementToClear) {
-						inputElementToClear.value = '';
-					} else {
-						console.error(`Input element with selector '${containerSelector} #${input}' not found.`);
-					}
-				}
+			document.addEventListener('click', (e) => {
+				const removeBtn = e.target.closest(`${previewSelector} .remove-btn`);
+				if (removeBtn) document.getElementById(removeBtn.getAttribute('data-id')).remove();
 			});
 		};
 
 		return {
-			create: _create,
-			setMultipleImageUploadContainer: _setMultipleImageUploadContainer,
-			setSingleUploadContainer: _setSingleUploadContainer,
-			setMultipleFileUploadContainer: _setMultipleFileUploadContainer,
-			initFileUploaderEvents: _initFileUploaderEvents,
-			initImageUploaderEvents: _initImageUploaderEvents
+			create
 		};
 
 	}();
@@ -1373,7 +1144,7 @@ import validate from 'validate.js'; */
 	}();
 
 	const tomSelect = (() => {
-		const init = (containerId) => {
+		const init = (containerId, options = {}) => {
 			if (!window.TomSelect) {
 				throw new Error('TomSelect script is not included in head.');
 			}
@@ -1381,7 +1152,7 @@ import validate from 'validate.js'; */
 			const element = document.querySelector(containerId);
 			if (!element) return;
 
-			new TomSelect(element, {
+			const defaultOptions = {
 				copyClassesToDropdown: false,
 				dropdownParent: 'body',
 				controlInput: '<input>',
@@ -1389,7 +1160,10 @@ import validate from 'validate.js'; */
 					item: _renderOption,
 					option: _renderOption,
 				}
-			});
+			};
+
+			const mergedOptions = { ...defaultOptions, ...options };
+			new TomSelect(element, mergedOptions);
 		};
 
 		const _renderOption = (data, escape) => {
@@ -1449,90 +1223,69 @@ import validate from 'validate.js'; */
 		};
 	})();
 
-	const _mortgageCalculator = function() {
-
+	const mortgageCalculator = (() => {
 		const _calculateMortgage = () => {
 			const resultContainer = document.querySelector('.mortgage-calculator-form #result');
-			if (!resultContainer) {
-				return;
-			}
+			if (!resultContainer) return;
 
-			const result = _getAmortization();
+			const { monthlyPayment, formattedMonthlyPayment } = _getAmortization();
 
-			resultContainer.setAttribute('monthlyPayment', result.monthlyPayment);
-			resultContainer.innerHTML = `&#8369;${result.formattedMonthlyPayment}`;
+			resultContainer.setAttribute('monthlyPayment', monthlyPayment);
+			resultContainer.innerHTML = `&#8369;${formattedMonthlyPayment}`;
 		};
 
 		const _calculateMortgageOnChange = () => {
-			document.addEventListener('change', function(event) {
-				if (event.target.matches('.mortgage-calculator-form #mortgageDownpayment') ||
-					event.target.matches('.mortgage-calculator-form #mortgageInterest') ||
-					event.target.matches('.mortgage-calculator-form #mortgageYear')) {
+			document.addEventListener('change', (event) => {
+				const targets = ['#mortgageDownpayment', '#mortgageInterest', '#mortgageYear'];
+				if (targets.some(selector => event.target.matches(`.mortgage-calculator-form ${selector}`))) {
 					_calculateMortgage();
+
+					
 				}
 			});
 		};
 
-		const _createDownPaymentSelection = () => {
-			const container = document.querySelector('.mortgage-calculator-form #dpSelection');
-			if (!container) {
-				return;
-			}
-
-			const downPaymentOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90];
-			const select = createElements('select', { id: 'mortgageDownpayment', class: 'form-select' },
-				downPaymentOptions.map(option =>
-					createElements('option', { value: option, ...(option === 20 ? { selected: true } : {}) }, [
-						document.createTextNode(`${option}%`)
-					])
+		const _createSelectElement = (id, options, selectedValue) => {
+			return createElements('select', { id, class: 'form-select' }, 
+				options.map(option =>
+					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}%`)])
 				)
 			);
+		};
 
-			container.insertAdjacentElement('afterend', select);
-			container.remove();
+		const _createDownPaymentSelection = () => {
+			const container = document.querySelector('.mortgage-calculator-form #dpSelection');
+			if (container) {
+				const downPaymentOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+				const select = _createSelectElement('mortgageDownpayment', downPaymentOptions, 20);
+				container.insertAdjacentElement('afterend', select);
+				container.remove();
+			}
 		};
 
 		const _createInterestSelection = () => {
 			const container = document.querySelector('.mortgage-calculator-form #interestSelection');
-			if (!container) {
-				return;
+			if (container) {
+				const interestOptions = Array.from({ length: 81 }, (_, i) => (i * 0.25).toFixed(2));
+				const select = _createSelectElement('mortgageInterest', interestOptions, '3.75');
+				container.insertAdjacentElement('afterend', select);
+				container.remove();
 			}
-
-			const select = createElements('select', { id: 'mortgageInterest', class: 'form-select' },
-				Array.from({ length: 81 }, (_, i) => i * 0.25).map(rate => // More efficient way to generate the array
-					createElements('option', { value: rate, ...(rate === 3.75 ? { selected: true } : {}) }, [
-						document.createTextNode(`${rate}%`)
-					])
-				)
-			);
-
-			container.insertAdjacentElement('afterend', select);
-			container.remove();
 		};
 
 		const _createYearsSelection = () => {
 			const container = document.querySelector('.mortgage-calculator-form #yearSelection');
-			if (!container) {
-				return;
+			if (container) {
+				const yearsOptions = Array.from({ length: 30 }, (_, i) => i + 1);
+				const select = _createSelectElement('mortgageYear', yearsOptions, 3);
+				container.insertAdjacentElement('afterend', select);
+				container.remove();
 			}
-
-			const yearsOptions = Array.from({ length: 30 }, (_, i) => i + 1);
-			const select = createElements('select', { id: 'mortgageYear', class: 'form-select' },
-				yearsOptions.map(year =>
-					createElements('option', { value: year, ...(year === 3 ? { selected: true } : {}) }, [
-						document.createTextNode(`${year} Years`)
-					])
-				)
-			);
-
-			container.insertAdjacentElement('afterend', select);
-			container.remove();
 		};
 
 		const _pmt = ({ rate, nper, presentValue }) => {
 			const presentValueInterestFactor = Math.pow(1 + rate, nper);
 			const payment = rate / (presentValueInterestFactor - 1) * -(presentValue * presentValueInterestFactor);
-
 			return payment;
 		};
 
@@ -1544,11 +1297,7 @@ import validate from 'validate.js'; */
 			for (let i = 0; i <= numberOfPayments; i++) {
 				const interest = remaining * (interestRate / 100 / paymentsPerYear);
 				const principle = monthlyPayment - interest;
-				const row = [i, principle > 0 ?
-					(principle < monthlyPayment ?
-						principle : monthlyPayment) : 0, interest > 0 ?
-						interest : 0, remaining > 0 ? remaining : 0];
-				schedule.push(row);
+				schedule.push([i, Math.max(0, principle), Math.max(0, interest), Math.max(0, remaining)]);
 				remaining -= principle;
 			}
 
@@ -1556,78 +1305,46 @@ import validate from 'validate.js'; */
 		};
 
 		const _getAmortization = () => {
-			const sellingPriceElement = document.getElementById('sellingPrice');
-			if (!sellingPriceElement) {
-				console.error('Selling price element not found.');
-				return;
-			}
+			const getValue = selector => document.querySelector(selector)?.value;
 
-			const sellingPrice = parseInt(sellingPriceElement.value, 10);
-
-			const downPaymentPercentElement = document.querySelector('#mortgageDownpayment option:checked');
-			if (!downPaymentPercentElement) {
-				console.error('Down payment percentage element not found.');
-				return;
-			}
-
-			const downPaymentPercent = parseInt(downPaymentPercentElement.value, 10);
+			const sellingPrice = parseInt(getValue('#sellingPrice'), 10);
+			const downPaymentPercent = parseInt(getValue('#mortgageDownpayment option:checked'), 10);
 			const downPayment = sellingPrice * (downPaymentPercent / 100);
 			const loanAmount = sellingPrice - downPayment;
 
-			const interestRateElement = document.querySelector('#mortgageInterest option:checked');
-			if (!interestRateElement) {
-				console.error('Interest rate element not found.');
-				return;
-			}
-
-			const interestRate = parseFloat(interestRateElement.value);
-			const yearsElement = document.querySelector('#mortgageYear option:checked');
-
-			if (!yearsElement) {
-				console.error('Loan term element not found.');
-				return;
-			}
-
-			const years = parseInt(yearsElement.value, 10) + 1;
+			const interestRate = parseFloat(getValue('#mortgageInterest option:checked'));
+			const years = parseInt(getValue('#mortgageYear option:checked'), 10);
 			const paymentsPerYear = 12;
 
 			const monthlyPayment = _pmt({
 				rate: (interestRate / 100) / paymentsPerYear,
-				nper: paymentsPerYear * years,
-				presentValue: - loanAmount
-			});
-
-			const formattedMonthlyPayment = parseFloat(monthlyPayment.toFixed(2)).toLocaleString();
-
-			const schedule = _computeSchedule({
-				loanAmount: loanAmount,
-				interestRate: interestRate,
-				paymentsPerYear: paymentsPerYear,
-				years: years,
-				monthlyPayment: monthlyPayment
+				nper: paymentsPerYear * (years + 1),
+				presentValue: -loanAmount
 			});
 
 			return {
 				monthlyPayment,
-				formattedMonthlyPayment,
-				schedule
+				formattedMonthlyPayment: parseFloat(monthlyPayment.toFixed(2)).toLocaleString(),
+				schedule: _computeSchedule({
+					loanAmount,
+					interestRate,
+					paymentsPerYear,
+					years,
+					monthlyPayment
+				})
 			};
 		};
 
 		return {
-			_initBeforeLoad: () => {
-				_calculateMortgageOnChange();
-			},
-
-			_initAfterLoad: () => {
+			_initBeforeLoad: _calculateMortgageOnChange,
+			init: () => {
 				_createDownPaymentSelection();
 				_createInterestSelection();
 				_createYearsSelection();
 				_calculateMortgage();
 			}
 		};
-
-	}();
+	})();
 
 	const validator = function() {
 		let constraints = {};
@@ -1714,17 +1431,15 @@ import validate from 'validate.js'; */
 	const eo = {
 		initBeforeLoad: function() {
 			/* Address.initBeforeLoad(); */
-			/* _video._initBeforeLoad(); */
+			video._initBeforeLoad();
 			_slider._initBeforeLoad();
-			_mortgageCalculator._initBeforeLoad();
+			mortgageCalculator._initBeforeLoad();
 		},
 
 		initAfterLoad: () => {
 			/* Address.initAfterLoad(); */
-			/* _video._initAfterLoad(); */
 			_slider._initAfterLoad();
 			modal._initAfterLoad();
-			_mortgageCalculator._initAfterLoad();
 
 			let resizeTO;
 
@@ -1765,13 +1480,14 @@ import validate from 'validate.js'; */
 		alert,
 		button,
 		tinymce,
+		googleChart,
 		slider,
 		tomSelect,
 		uploader,
-		googleChart,
 
 		/** COMPONENTS */
 		submitForm,
+		mortgageCalculator,
 
 		
 

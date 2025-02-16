@@ -794,6 +794,8 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
    ```html
    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
    ```
+   * **Documentation**
+      For DataTable and Chart Configuration please read [Google Chart Documentation](https://developers.google.com/chart/interactive/docs/quick_start)
 
 * ## Common Parameters
    All chart functions accept the following parameters:
@@ -990,3 +992,31 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
           redirectUrl: '/dashboard'
       });
       ```
+
+   * ## eo.mortgageCalculator
+      The `eo.mortgageCalculator` provides functionalities to calculate monthly mortgage payments, create selection elements for down payment    interest rates, and loan years, and display the results. It is designed to be embedded into a mortgage calculator form on a web page.
+      
+      * **Notes**
+         * Ensure that the form elements (#sellingPrice, #dpSelection, #interestSelection, #yearSelection, and #result) exist in your HTML.
+         * The script should be included and initialized correctly to work as expected.
+         * Customize the form and style as needed to fit your design.
+         
+         * ### Required Setup
+            Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
+
+            * #### JavaScript
+               ```javascript
+               window.addEventListener('load', () => {
+                   eo.mortgageCalculator.init();
+               });
+               ```
+            * #### Html
+               ```html
+               <div class="mortgage-calculator-form">
+                   <input type="text" id="sellingPrice" placeholder="Enter Selling Price"> /* you can change the type to hidden */
+                   <div id="dpSelection"></div>
+                   <div id="interestSelection"></div>
+                   <div id="yearSelection"></div>
+                   <div id="result"></div>
+               </div>
+               ```
