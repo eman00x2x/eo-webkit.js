@@ -1179,6 +1179,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
          4. **Access the File on the Server Side:**
             ```php
+            // upload.php
             header('Content-Type: application/json; charset=utf-8');
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                // if multiple file upload was used, the $_FILES array has a different structure,
@@ -1233,6 +1234,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          7. **Access the Hidden Input on the Server Side:**
 		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
             ```php
+            // save_uploaded_image.php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Loop through each uploaded file's information
                 foreach ($_POST['upload'] as $file_id => $file_info) {
@@ -1278,6 +1280,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
          4. **Access the File on the Server Side:**
             ```php
+            // upload.php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                // if multiple file upload was used, the $_FILES array has a different structure,
                // so you need first to re-structure it so it can be looped through
