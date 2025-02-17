@@ -539,15 +539,21 @@ document.body.appendChild(div);</pre>
 					<div name="#getYoutubeVideoData" class="mb-3 border-bottom">
 						<h3>eo.uploader</h3>
 						<code class=""><pre>
-eo.uploader.create('.upload-container', '/', {
+uploader.create('.upload-container', '/upload-file-url', {
+	inputName = 'eoFileUpload',
 	previewSelector: '.uploaded-photo',
-	multiple: false,
+	disablePreview: false,
 	uploadType: 'image',
-	onSuccess: (data, files) => {
+	accept: 'image/*',
+	multiple: true,
+	onBeforeSend: () => { console.log('Before sending the request'); },
+	onSuccess: (response, files) => {
 		files.forEach((file, index) => {
-			file.url = eo.getRandomChar(20);
+			// Manipulate hidden input value
+			file.url = response[index].url; // Assuming response contains URLs for each file
 		});
-	}
+	},
+	onError: (error) => { console.error('Upload failed!', error); }
 });
 						</pre></code>
 						<p class="mt-2">

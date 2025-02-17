@@ -947,6 +947,7 @@
 
 		const create = (uploadSelector = '.upload-container', url, options = {}) => {
 			const {
+				inputName = 'eoFileUpload',
 				previewSelector = '.uploaded-photo',
 				disablePreview = false,
 				uploadType = 'image',
@@ -962,11 +963,11 @@
 			defaultUploadType = uploadType;
 			const inputId = 'a' + getRandomChar(6);
 
-			_createUI(uploadSelector, previewSelector, inputId, accept, multiple);
+			_createUI(uploadSelector, previewSelector, inputName, inputId, accept, multiple);
 			_handleEvents(uploadSelector, previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
 		};
 
-		const _createUI = (selector, previewSelector, inputId, accept, multiple) => {
+		const _createUI = (selector, previewSelector, inputName, inputId, accept, multiple) => {
 			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
 			
 			if (multiple) {
@@ -986,7 +987,7 @@
 					type: 'file',
 					id: inputId,
 					accept,
-					name: multiple ? `${inputId}[]` : inputId,
+					name: multiple ? `${inputName}[]` : inputName,
 					...(multiple ? { multiple: true } : {})
 				})
 			]));
@@ -1348,7 +1349,8 @@
 				const value = getValue(data, field);
 				Object.entries(ruleset).forEach(([rule, param]) => {
 					if (validators[rule] && !validators[rule](value, param)) {
-						errors.push(`${formatField(field)} ${errorMessages[rule](param)}`);
+						const customMessage = param.message || errorMessages[rule](param);
+						errors.push(`${formatField(field)} ${customMessage}`);
 					}
 				});
 			});
