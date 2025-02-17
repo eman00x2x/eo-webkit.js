@@ -4,16 +4,6 @@
 /* global module */ // For CommonJS
 /* global exports */ // For CommonJS
 
-/* import tinyMCE from '../node_modules/tinymce/tinymce.js';
-import '../node_modules/tinymce/themes/silver/theme'; // And plugins
-import google from 'google-charts'; // Google Charts usually attaches to the window object
-import noUiSlider from 'nouislider';
-import 'nouislider/dist/nouislider.css'; // Import noUiSlider CSS
-import TomSelect from 'tom-select';
-import 'tom-select/dist/css/tom-select.css'; // Import Tom Select CSS
-import wNumb from 'wnumb';
-import validate from 'validate.js'; */
-
 ; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
 		define([], factory); // Use AMD define
@@ -57,19 +47,19 @@ import validate from 'validate.js'; */
 	const _sanitize = str => new Option(str).innerHTML;
 
 	/**
-	   * Redirects the browser to a given URL.
-	   *
-	   * @param {string} url - The URL to redirect to
-	   */
+     * Redirects the browser to a given URL.
+     *
+     * @param {string} url - The URL to redirect to
+     */
 	const redirect = (url) => window.location = url;
 
 	/**
-	   * Converts an epoch time (in seconds) to a localized string in the format:
-	   * "Weekday, Month Day, Year, HH:MM AM/PM"
-	   *
-	   * @param {number} epoch - The epoch time, in seconds
-	   * @returns {string} A localized string representation of the date and time
-	   */
+	 * Converts an epoch time (in seconds) to a localized string in the format:
+	 * "Weekday, Month Day, Year, HH:MM AM/PM"
+	 *
+	 * @param {number} epoch - The epoch time, in seconds
+	 * @returns {string} A localized string representation of the date and time
+	 */
 	const epochToTimeString = (epoch) => new Date(epoch * 1000).toLocaleString('en-US', {
 		weekday: 'long',
 		year: 'numeric',
@@ -80,23 +70,23 @@ import validate from 'validate.js'; */
 	});
 
 	/**
-	   * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
-	   *
-	   * @param {string} stringValue - The string to trim
-	   * @param {number} maximumLength - The maximum allowed length of the string
-	   * @returns {string} The trimmed string
-	   */
+	 * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
+	 *
+	 * @param {string} stringValue - The string to trim
+	 * @param {number} maximumLength - The maximum allowed length of the string
+	 * @returns {string} The trimmed string
+	 */
 	const trim = (stringValue, maxLength) => 
     	stringValue.length > maxLength ? `${stringValue.slice(0, maxLength - 3)}...` : stringValue;
 
 	/**
-	   * Converts a given number of bytes to a human-readable string,
-	   * appending the appropriate unit (Bytes, KB, MB, etc.).
-	   *
-	   * @param {number} bytes - The number of bytes to convert
-	   * @param {number} [decimalPlaces=2] - The number of decimal places to include
-	   * @returns {string} A human-readable string representation of the given number of bytes
-	   */
+	 * Converts a given number of bytes to a human-readable string,
+	 * appending the appropriate unit (Bytes, KB, MB, etc.).
+	 *
+	 * @param {number} bytes - The number of bytes to convert
+	 * @param {number} [decimalPlaces=2] - The number of decimal places to include
+	 * @returns {string} A human-readable string representation of the given number of bytes
+	 */
 	const formatFileSize = (bytes, decimalPlaces = 0) => {
 		if (bytes === 0) return '0 Bytes';
 
@@ -108,13 +98,13 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Generates a random UUID (Universally Unique Identifier) version 4.
-	   *
-	   * This function uses the Web Cryptography API to generate a random UUID.
-	   * The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
-	   *
-	   * @returns {string} A randomly generated UUID version 4
-	   */
+	 * Generates a random UUID (Universally Unique Identifier) version 4.
+	 *
+	 * This function uses the Web Cryptography API to generate a random UUID.
+	 * The UUID is in the standard format of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+	 *
+	 * @returns {string} A randomly generated UUID version 4
+	 */
 	const uuidv4 = () => {
 		return '00000000-0000-0000-0000-000000000000'.replace(/[018]/g, c =>
 			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
@@ -148,15 +138,15 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Generates a random number between the given start and end.
-	   *
-	   * The end number is inclusive, so the function will return a number that is
-	   * greater than or equal to start, and less than or equal to end.
-	   *
-	   * @param {number} start - The lowest number to generate
-	   * @param {number} end - The highest number to generate
-	   * @returns {number} A randomly generated number between start and end
-	   */
+	 * Generates a random number between the given start and end.
+	 *
+	 * The end number is inclusive, so the function will return a number that is
+	 * greater than or equal to start, and less than or equal to end.
+	 *
+	 * @param {number} start - The lowest number to generate
+	 * @param {number} end - The highest number to generate
+	 * @returns {number} A randomly generated number between start and end
+	 */
 	const getRandomNum = (start, end) => {
     if (start > end) throw new Error('Start must be ≤ End');
 		return start + Math.floor(Math.random() * (end - start + 1));
@@ -164,19 +154,19 @@ import validate from 'validate.js'; */
 
 
 	/**
-	   * Converts a given number to a human-readable currency format.
-	   *
-	   * The function will return a string that represents the given number in a
-	   * human-readable format. The format will be one of the following:
-	   *
-	   * - Billions: 1,234,567,890,000 -> 1.23B
-	   * - Millions: 1,234,567 -> 1.23M
-	   * - Thousands: 1,234 -> 1.23K
-	   * - Default: 1234 -> 1234
-	   *
-	   * @param {number} amount - The number to convert to a human-readable format
-	   * @returns {string} A human-readable string representation of the given number
-	   */
+	 * Converts a given number to a human-readable currency format.
+	 *
+	 * The function will return a string that represents the given number in a
+	 * human-readable format. The format will be one of the following:
+	 *
+	 * - Billions: 1,234,567,890,000 -> 1.23B
+	 * - Millions: 1,234,567 -> 1.23M
+	 * - Thousands: 1,234 -> 1.23K
+	 * - Default: 1234 -> 1234
+	 *
+	 * @param {number} amount - The number to convert to a human-readable format
+	 * @returns {string} A human-readable string representation of the given number
+	 */
 	const convertCurrency = (amount) => {
 		const num = Math.abs(Number(amount));
 		const suffixes = ['', 'K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'Nn', 'Dc', 'Ud', 'Dd', 'Td', 'Qdd', 'Qnd', 'Sxd', 'Spd', 'Od', 'Nd', 'V']; // Added suffixes for larger numbers up to Googol
@@ -329,27 +319,27 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Makes a POST request to the given URL with the given data.
-	   * This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
-	   * The beforeSend callback is called before the request is sent.
-	   *
-	   * If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
-	   * If the request returns an HTML or text response, the onSuccess callback is called with the response text.
-	   *
-	   * If the request fails, the onError callback is called with the error message and the actual error object.
-	   *
-	   * The onComplete callback is called after the request has completed, regardless of success or failure.
-	   *
-	   * @param {string} url - The URL to make the request to
-	   * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
-	   * @param {object} [options] - Options for the request
-	   * @param {function} [options.onBeforeSend] - Called before the request is sent
-	   * @param {function} [options.onSuccess] - Called when the request returns a JSON response
-	   * @param {function} [options.onError] - Called when the request fails
-	   * @param {function} [options.onComplete] - Called after the request has completed
-	   * @param {boolean} [options.processData=true] - Whether to process the data before sending it
-	   * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
-	   */
+	 * Makes a POST request to the given URL with the given data.
+	 * This function automatically sets the X-Requested-With header to 'XMLHttpRequest' and handles JSON responses.
+	 * The beforeSend callback is called before the request is sent.
+	 *
+	 * If the request returns a JSON response, the onSuccess callback is called with the parsed JSON.
+	 * If the request returns an HTML or text response, the onSuccess callback is called with the response text.
+	 *
+	 * If the request fails, the onError callback is called with the error message and the actual error object.
+	 *
+	 * The onComplete callback is called after the request has completed, regardless of success or failure.
+	 *
+	 * @param {string} url - The URL to make the request to
+	 * @param {(Array<{name: string, value: string}> | FormData | object | string)} data - The data to send in the request body
+	 * @param {object} [options] - Options for the request
+	 * @param {function} [options.onBeforeSend] - Called before the request is sent
+	 * @param {function} [options.onSuccess] - Called when the request returns a JSON response
+	 * @param {function} [options.onError] - Called when the request fails
+	 * @param {function} [options.onComplete] - Called after the request has completed
+	 * @param {boolean} [options.processData=true] - Whether to process the data before sending it
+	 * @param {string} [options.contentType='application/x-www-form-urlencoded; charset=UTF-8'] - The content type of the request
+	 */
 	const post = (url, data, {
 		onBeforeSend,
 		onSuccess,
@@ -416,20 +406,20 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Send a GET request to the given URL.
-	   *
-	   * This function returns a promise object that resolves to the response from the server.
-	   *
-	   * The function takes an optional object with the following properties as its last argument:
-	   *
-	   * - `beforeRequest`: a function called before the request is sent.
-	   * - `onSuccess`: a function called when the request is successful.
-	   * - `onError`: a function called when the request fails.
-	   *
-	   * @param {string} url - The URL to send the request to
-	   * @param {object} [options] - The options object
-	   * @returns {Promise} The promise object
-	   */
+	 * Send a GET request to the given URL.
+	 *
+	 * This function returns a promise object that resolves to the response from the server.
+	 *
+	 * The function takes an optional object with the following properties as its last argument:
+	 *
+	 * - `beforeRequest`: a function called before the request is sent.
+	 * - `onSuccess`: a function called when the request is successful.
+	 * - `onError`: a function called when the request fails.
+	 *
+	 * @param {string} url - The URL to send the request to
+	 * @param {object} [options] - The options object
+	 * @returns {Promise} The promise object
+	 */
 	const get = async (url, { beforeRequest, onSuccess, onError } = {}) => {
 		if (beforeRequest?.() === false) return;
 
@@ -457,12 +447,12 @@ import validate from 'validate.js'; */
 	};
 
 	/**
-	   * Gets the user client information from local storage or fetches it from IPInfo and determines the browser.
-	   * @returns {object} The client information, with the following properties:
-	   * - `userAgent`: The user agent string
-	   * - `geo`: The geo information from IPInfo
-	   * - `browser`: The browser name
-	   */
+	 * Gets the user client information from local storage or fetches it from IPInfo and determines the browser.
+	 * @returns {object} The client information, with the following properties:
+	 * - `userAgent`: The user agent string
+	 * - `geo`: The geo information from IPInfo
+	 * - `browser`: The browser name
+	 */
 	const userClient = (() => {
 		const clientInfo = JSON.parse(localStorage.getItem('EOclient')) || {
 			userAgent: navigator.userAgent,
@@ -819,16 +809,16 @@ import validate from 'validate.js'; */
 	})();
 
 	/**
-	   * Submits the given form id, handles validation, redirects, and callbacks
-	   *
-	   * @param {String} formId - the form id to submit
-	   * @param {{ validation: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
-	   * @param {{ validation: Object }} [options.validation] - the validation object, see https://validatejs.org/#validatejs-validators
-	   * @param {Function} [options.callback] - the callback function to call on success
-	   * @param {Function} [options.onBeforeSend] - the callback function to call before sending
-	   * @param {String} [options.redirectUrl] - the url to redirect to on success
-	   * @returns {JQueryPromise} - the promise returned by $.post
-	   */
+	 * Submits the given form id, handles validation, redirects, and callbacks
+	 *
+	 * @param {String} formId - the form id to submit
+	 * @param {{ validation: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
+	 * @param {{ validation: Object }} [options.validation] - the validation object, see https://validatejs.org/#validatejs-validators
+	 * @param {Function} [options.callback] - the callback function to call on success
+	 * @param {Function} [options.onBeforeSend] - the callback function to call before sending
+	 * @param {String} [options.redirectUrl] - the url to redirect to on success
+	 * @returns {JQueryPromise} - the promise returned by $.post
+	 */
 	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
 		formId = formId.replace('#', '');
 		const form = document.getElementById(formId);
@@ -1353,7 +1343,7 @@ import validate from 'validate.js'; */
 		const validate = (data, rules = constraints) => {
 			if (typeof rules !== 'object') throw new Error('rules must be an object.');
 			if (typeof data !== 'object' || data instanceof FormData) throw new Error('data must be an object. Use eo.serializeFormData(data) instead.');
-			errors = []; // Reset errors
+			errors = [];
 			Object.entries(rules).forEach(([field, ruleset]) => {
 				const value = getValue(data, field);
 				Object.entries(ruleset).forEach(([rule, param]) => {
@@ -1368,8 +1358,11 @@ import validate from 'validate.js'; */
 		const getValue = (data, field) =>
 			field.split('.').reduce((obj, key) => obj?.[key], data);
 
-		const formatField = (name) =>
-			name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+		const formatField = (name) => {
+			const parts = name.split('.');
+			const fieldName = parts.pop();
+			return fieldName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+		};
 
 		const errorMessages = {
 			required: () => 'is required.',
@@ -1451,7 +1444,6 @@ import validate from 'validate.js'; */
 					window.dispatchEvent(new Event('resizeEnd'));
 				}, 500);
 			});
-
 		},
 
 		userClient,
@@ -1483,13 +1475,11 @@ import validate from 'validate.js'; */
 		googleChart,
 		slider,
 		tomSelect,
-		uploader,
 
 		/** COMPONENTS */
 		submitForm,
+		uploader,
 		mortgageCalculator,
-
-		
 
 	};
 

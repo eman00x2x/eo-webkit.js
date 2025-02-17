@@ -34,106 +34,6 @@ This information is cached in localStorage to avoid redundant API calls.
    * Geo Fetch Failure: Logs an error (Error getting geo info:).
    * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
-# **eo.validator**
-The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
-
-* ## Usage Example
-   ```javascript
-   const rules = {
-     name: { required: true, length: { min: 3, max: 50 } },
-     email: { required: true, email: true },
-     age: { number: { min: 18, max: 99 } },
-     address: { 
-       street: { required: true }, 
-       city: { required: true }
-     }
-   };
-   
-   eo.validator.setConstraints(rules);
-   
-   const data = {
-     name: "John",
-     email: "invalid-email",
-     age: 17,
-     address: { street: "123 Main St" }
-   };
-   
-   if (!eo.validator.validate(data)) {
-     console.log(eo.validator.getErrors()); 
-     // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
-   }
-   ```
-* ## Methods
-   * ### `validate(data, rules)`
-   
-      Validates the given data object against rules and collects errors.  
-      **Parameters:**
-      * `data` (Object) – The object to validate.
-      * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
-      
-      **Returns:**
-      * `true` if validation passes.
-      * `false` if validation fails (errors can be retrieved using getErrors()).
-      
-      **Example:**
-      ```javascript
-      const isValid = eo.validator.validate({ name: "Alice" });
-      console.log(isValid); // true or false
-      ```
-   * ### `getErrors()`
-   
-      Retrieves an array of validation errors from the last `validate()` call.  
-      **Returns:**
-      * `Array<String>` – A list of human-readable error messages.
-      
-      **Example:**
-      ```javascript
-      console.log(eo.validator.getErrors());
-      // Output: [ "Email is not a valid email address." ]
-      ```
-   * ### `setConstraints(rules)`
-      Sets default validation rules to be used for all future validations.
-      
-      **Parameters:**
-      * `rules (Object)` – The validation rules object.
-      
-      **Example:**
-      ```javascript
-      eo.validator.setConstraints({ username: { required: true } });
-      ```
-   * ### `resetConstraints()`
-   
-      Clears all previously set validation rules.
-      
-      **Example:**
-      ```javascript
-      eo.validator.resetConstraints();
-      ```
-* ## Validation Rules
-   The validator supports various rules that can be applied to fields.
-   
-   | Rule | Parrameter Type | Description |
-   | --- | --- | --- |
-   | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
-   | `length` | `{ min, max }` | Enforces string length constraints. |
-   | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
-   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
-   | `email` | `Boolean` | Ensures a valid email format. |
-   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
-   | `datetime` | `Boolean` | Ensures a valid datetime format. |
-   | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
-   | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
-   
-   **Example Rule Definition:**
-   ```javascript
-   const rules = {
-     username: { required: true, length: { min: 5, max: 20 } },
-     password: { required: true },
-     birthdate: { date: true },
-     email: { email: true },
-     age: { number: { min: 18, max: 65 } }
-   };
-   ```
 # eo.redirect(url)
 `eo.redirect(url)` navigates the browser to the specified URL by setting window.location.
 
@@ -329,108 +229,6 @@ where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4
       // { age: 25, country: "USA" }
       ```
 
-# eo.getYoutubeVideoData(url)
-`eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
-It retrieves:  
-**The video ID**  
-**Thumbnail URLs** in various resolutions  
-The **direct watch URL**  
-The **embed URL**  
-
-If the URL is invalid, an error alert is triggered.
-
-* ## Parameters
-   | Parameter | Type | Description |
-   | --- | --- | --- |
-   | `url` | `string` | The YouTube video URL to extract details from. |
-
-* ## Returns
-   | Type	| Description |
-   | --- | --- |
-   | `Object`	| Returns an object with video details (**if the URL is valid**). |
-   | `null`	| Returns null and triggers an alert if the URL is invalid. |
-
-* ## Example Usage
-   * **Valid Youtube URL**
-      ```javascript
-      const videoData = eo.getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-      
-      console.log(videoData);
-      /* {
-        id: "dQw4w9WgXcQ",
-        thumbnail: {
-          default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
-          hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-          mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-          sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
-          maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-        },
-        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-      } */
-      ```
-   
-   * **Invalid YouTube URL**
-      ```javascript
-      const videoData = eo.getYoutubeVideoData("https://example.com/video");
-      
-      console.log(videoData); // null
-      // ⚠️ Alert: "Invalid YouTube URL"
-   ```
-
-* ## Supported Youtube URL Formats
-   | Format Type | Example |
-   | --- | --- |
-   | Standard URL | https://www.youtube.com/watch?v=**VIDEO_ID** |
-   | Shortened URL | https://youtu.be/**VIDEO_ID** |
-   | Embed URL | https://www.youtube.com/embed/**VIDEO_ID** |
-   | Other Variants | https://www.youtube.com/v/**VIDEO_ID**, https://www.youtube.com/watch?v=**VIDEO_ID**&feature=share |
-
-# eo.createElements(tag, attributes = {}, children)
-`eo.createElements(tag, attributes, children)` dynamically creates an HTML element, applies attributes, and appends child elements or text nodes. Ensures data sanitization before inserting into the DOM.
-
-* ## Parameters
-   | Parameter | Type | Description |
-   | --- | --- | --- |
-   | `tag` | `string` | The **HTML tag name** (e.g., `'div'`, `'span'`). |
-   | `attributes` | `object` (optional) | An object containing **attribute key-value pairs** (e.g., `{ class: 'btn', id: 'my-button' }`). |
-   | `children` | `array` (optional) | An array of **child elements or strings** (text content). |
-
-* ## Returns
-   `HTMLElement` Returns a newly created DOM element with the specified attributes and children.
-
-* ## Example Usage
-   * **Creating a Simple** `<div>`
-      ```javascript
-      const div = eo.createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
-      document.body.appendChild(div);
-      ```
-      * **Output**
-         ```html
-         <div class="container" id="main">Hello, world!</div>
-         ```
-   
-   * **Creating a Nested Structure**
-      ```javascript
-      const button = eo.createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
-      const wrapper = eo.createElements('div', { class: 'wrapper' }, [button]);
-      
-      document.body.appendChild(wrapper);
-      ```
-      * **Output**
-         ```html
-         <div class="wrapper">
-             <button class="btn" type="button">Click Me</button>
-         </div>
-         ```
-
-* ## Error Handling
-   | Error Condition | Thrown Error |
-   | --- | --- |
-   | `tag` is **not a string** or empty | `"Invalid tag name"` |
-   | `attributes` is not an object | `"Attributes must be an object"` |
-   | `children` is not an array | `"Children must be an array"` |
-
 # eo.createHiddenInput(name, value)
 `eo.createHiddenInput(name, value)` creates a hidden input field with a specified name and value. This is useful for storing data in forms without displaying it to the user.
 
@@ -552,6 +350,7 @@ The `eo.post` function **performs an HTTP POST request** to a specified `url` us
           onError: (xhr, status, error) => console.error('Profile Update Failed:', error)
       });
       ```
+
 # eo.get
 The `eo.get` function **performs an HTTP GET request** to fetch data from a given `url`. It supports **callbacks for request lifecycle events**, including `beforeRequest`, `onSuccess`, and `onError`. The function **automatically detects and processes JSON responses** while handling errors gracefully.
 
@@ -593,35 +392,50 @@ The `eo.get` function **performs an HTTP GET request** to fetch data from a give
           onSuccess: (data) => console.log('Config Loaded:', data),
       });
       ```
+# eo.createElements(tag, attributes = {}, children)
+`eo.createElements(tag, attributes, children)` dynamically creates an HTML element, applies attributes, and appends child elements or text nodes. Ensures data sanitization before inserting into the DOM.
 
-# eo.video
-The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
-* Add a YouTube video by URL.
-* Play the video in a modal.
-* Remove added videos.
-* Create a hidden input dynamically.
-   * `id`, `url`, `embed`, `thumbnail`, and `created_at`
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `tag` | `string` | The **HTML tag name** (e.g., `'div'`, `'span'`). |
+   | `attributes` | `object` (optional) | An object containing **attribute key-value pairs** (e.g., `{ class: 'btn', id: 'my-button' }`). |
+   | `children` | `array` (optional) | An array of **child elements or strings** (text content). |
+
+* ## Returns
+   `HTMLElement` Returns a newly created DOM element with the specified attributes and children.
+
+* ## Example Usage
+   * **Creating a Simple** `<div>`
+      ```javascript
+      const div = eo.createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
+      document.body.appendChild(div);
+      ```
+      * **Output**
+         ```html
+         <div class="container" id="main">Hello, world!</div>
+         ```
    
-* ## Usage
-   Call `eo.video.init()` before the page loads.
-   ```javascript
-    window.addEventListener('load', () => {
-       eo.video.init();
-    });
-   ```
-* ## Required HTML Structure
-   To integrate the video module, add the following HTML elements:
-   ```html
-   <div class="response"></div>
-   <div id="videoInput"></div>
-   <div class="video-list-container"></div>
-   ```
-   * ### Description
-      * **.response** - Displays messages after adding a video.
-      * **#videoInput** - The container where the input field and add button will be appended.
-      * **.video-list-container** - The section where added videos will be listed.
-      * Clicking on an added video will play it in a fullscreen modal.
-      * A delete button is provided to remove a video entry.
+   * **Creating a Nested Structure**
+      ```javascript
+      const button = eo.createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
+      const wrapper = eo.createElements('div', { class: 'wrapper' }, [button]);
+      
+      document.body.appendChild(wrapper);
+      ```
+      * **Output**
+         ```html
+         <div class="wrapper">
+             <button class="btn" type="button">Click Me</button>
+         </div>
+         ```
+
+* ## Error Handling
+   | Error Condition | Thrown Error |
+   | --- | --- |
+   | `tag` is **not a string** or empty | `"Invalid tag name"` |
+   | `attributes` is not an object | `"Attributes must be an object"` |
+   | `children` is not an array | `"Children must be an array"` |
 
 # eo.alert
 To use the `eo.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
@@ -732,6 +546,197 @@ The `eo.button` provides utility functions to enable or disable buttons (or any 
          button.enable(); // Enables all buttons with class '.btn'
          button.enable('.custom-button'); // Enables elements with class '.custom-button'
          ```
+         
+# eo.getYoutubeVideoData(url)
+`eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
+It retrieves:  
+* **The video ID**
+* **Thumbnail URLs** in various resolutions
+* The **direct watch URL**
+* The **embed URL**
+
+If the URL is invalid, an error alert is triggered.
+
+* ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The YouTube video URL to extract details from. |
+
+* ## Returns
+   | Type	| Description |
+   | --- | --- |
+   | `Object`	| Returns an object with video details (**if the URL is valid**). |
+   | `null`	| Returns null and triggers an alert if the URL is invalid. |
+
+* ## Example Usage
+   * **Valid Youtube URL**
+      ```javascript
+      const videoData = eo.getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      
+      console.log(videoData);
+      /* {
+        id: "dQw4w9WgXcQ",
+        thumbnail: {
+          default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
+          hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+          mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+          sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+          maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+        },
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      } */
+      ```
+   
+   * **Invalid YouTube URL**
+      ```javascript
+      const videoData = eo.getYoutubeVideoData("https://example.com/video");
+      
+      console.log(videoData); // null
+      // ⚠️ Alert: "Invalid YouTube URL"
+   ```
+
+* ## Supported Youtube URL Formats
+   | Format Type | Example |
+   | --- | --- |
+   | Standard URL | https://www.youtube.com/watch?v=**VIDEO_ID** |
+   | Shortened URL | https://youtu.be/**VIDEO_ID** |
+   | Embed URL | https://www.youtube.com/embed/**VIDEO_ID** |
+   | Other Variants | https://www.youtube.com/v/**VIDEO_ID**, https://www.youtube.com/watch?v=**VIDEO_ID**&feature=share |
+
+# eo.video
+The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
+* Add a YouTube video by URL.
+* Play the video in a modal.
+* Remove added videos.
+* Create a hidden input dynamically.
+   * `id`, `url`, `embed`, `thumbnail`, and `created_at`
+   
+* ## Usage
+   Call `eo.video.init()` before the page loads.
+   ```javascript
+    window.addEventListener('load', () => {
+       eo.video.init();
+    });
+   ```
+* ## Required HTML Structure
+   To integrate the video module, add the following HTML elements:
+   ```html
+   <div class="response"></div>
+   <div id="videoInput"></div>
+   <div class="video-list-container"></div>
+   ```
+   * ### Description
+      * **.response** - Displays messages after adding a video.
+      * **#videoInput** - The container where the input field and add button will be appended.
+      * **.video-list-container** - The section where added videos will be listed.
+      * Clicking on an added video will play it in a fullscreen modal.
+      * A delete button is provided to remove a video entry.
+
+# **eo.validator**
+The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules.
+
+* ## Usage Example
+   ```javascript
+   const rules = {
+     name: { required: true, length: { min: 3, max: 50 } },
+     email: { required: true, email: true },
+     age: { number: { min: 18, max: 99 } },
+     address: { 
+       street: { required: true }, 
+       city: { required: true }
+     }
+   };
+   
+   eo.validator.setConstraints(rules);
+   
+   const data = {
+     name: "John",
+     email: "invalid-email",
+     age: 17,
+     address: { street: "123 Main St" }
+   };
+   
+   if (!eo.validator.validate(data)) {
+     console.log(eo.validator.getErrors()); 
+     // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
+   }
+   ```
+* ## Methods
+   * ### `validate(data, rules)`
+   
+      Validates the given data object against rules and collects errors.  
+      **Parameters:**
+      * `data` (Object) – The object to validate.
+      * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+      
+      **Returns:**
+      * `true` if validation passes.
+      * `false` if validation fails (errors can be retrieved using getErrors()).
+      
+      **Example:**
+      ```javascript
+      const isValid = eo.validator.validate({ name: "Alice" });
+      console.log(isValid); // true or false
+      ```
+   * ### `getErrors()`
+   
+      Retrieves an array of validation errors from the last `validate()` call.  
+      **Returns:**
+      * `Array<String>` – A list of human-readable error messages.
+      
+      **Example:**
+      ```javascript
+      console.log(eo.validator.getErrors());
+      // Output: [ "Email is not a valid email address." ]
+      ```
+   * ### `setConstraints(rules)`
+      Sets default validation rules to be used for all future validations.
+      
+      **Parameters:**
+      * `rules (Object)` – The validation rules object.
+      
+      **Example:**
+      ```javascript
+      eo.validator.setConstraints({ username: { required: true } });
+      ```
+   * ### `resetConstraints()`
+   
+      Clears all previously set validation rules.
+      
+      **Example:**
+      ```javascript
+      eo.validator.resetConstraints();
+      ```
+* ## Validation Rules
+   The validator supports various rules that can be applied to fields.
+   
+   | Rule | Parrameter Type | Description |
+   | --- | --- | --- |
+   | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
+   | `length` | `{ min, max }` | Enforces string length constraints. |
+   | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
+   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
+   | `email` | `Boolean` | Ensures a valid email format. |
+   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
+   | `datetime` | `Boolean` | Ensures a valid datetime format. |
+   | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
+   | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+   
+   **Example Rule Definition:**
+   ```javascript
+   const rules = {
+     name: { required: true, length: { min: 3, max: 50 } },
+     email: { required: true, email: true },
+     age: { number: { min: 18, max: 99 } },
+     brithdate: { date: true }
+     address: { 
+       street: { required: true }, 
+       city: { required: true }
+     }
+   };
+   ```
+
 # eo.tinymce
 The TinyMCE Module provides an easy way to initialize and configure TinyMCE, a popular WYSIWYG editor, on a specified container. It ensures the script is included and allows overriding default settings.
 

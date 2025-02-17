@@ -163,18 +163,18 @@ const testCase = () => {
 				created_at: '2025-02-15',
 			},
 			constraints: {
-				name: { presence: true },
-				email: { presence: true, email: true },
-				age: { presence: true, number: { min: 18, max: 60 } },
+				name: { required: true },
+				email: { required: true, email: true },
+				age: { required: true, number: { min: 18, max: 60 } },
 				website: { url: true },
 				address: {
-					street: { presence: true },
-					city: { presence: true },
-					zipcode: { presence: true, length: { min: 5, max: 5 } }
+					street: { required: true },
+					city: { required: true },
+					zipcode: { required: true, length: { min: 5, max: 5 } }
 				},
-				/* 'address.street': { presence: true },
-				'address.city': { presence: true },
-				'address.zipcode': { presence: true, length: { min: 5, max: 5 } }, */
+				/* 'address.street': { required: true },
+				'address.city': { required: true },
+				'address.zipcode': { required: true, length: { min: 5, max: 5 } }, */
 				created_at: { date: true }
 			},
 			expected: []
@@ -192,19 +192,20 @@ const testCase = () => {
 				created_at: 'invalid-date'
 			},
 			constraints: {
-				name: { presence: true },
-				email: { presence: true, email: true },
-				age: { presence: true, number: { min: 18, max: 60 } },
+				first_name: { required: true },
+				email: { required: true, email: true },
+				age: { required: true, number: { min: 18, max: 60 } },
 				website: { url: true },
-				'address.street': { presence: true },
-				'address.city': { presence: true },
-				'address.zipcode': { presence: true, length: { min: 5, max: 5 } },
+				'address.street': { required: true },
+				'address.city': { required: true },
+				'address.zipcode': { required: true, length: { min: 5, max: 5 } },
 				created_at: { date: true }
 			},
 			expected: [
 				'Name is required.',
 				'Email is not a valid email address.',
 				'Age must be at least 18.',
+				'Website is not a valid URL.',
 				'Address Street is required.',
 				'Address Zipcode must be at least 5 characters long.',
 				'Created At must be a valid date.'
@@ -243,7 +244,7 @@ window.addEventListener('load', () => {
 	eo.mortgageCalculator.init();
 	eo.video.init();
 
-	/* testCase(); */
+	testCase();
 	epochToTime();
 	uuidv4();
 	getRandomChar();
