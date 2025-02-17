@@ -1061,6 +1061,11 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
    
    * ### Setup
       **Required HTML Structure:**
+
+	  Container for the response.
+      ```html
+      <div class="response"></div>
+      ```
       
       Container for the upload button.
       ```html
@@ -1099,7 +1104,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          | --- | --- | --- | --- |
          | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
          | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
-         | `options` | `Object` | `optional` | optional Configuration options for the uploader. |
+         | `options` | `Object` | `optional` | Configuration options for the uploader. |
       
          * #### Options
             | Parameter | Type | Default | Description |
@@ -1137,15 +1142,16 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             **Image-Specific Properties**
             If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
             
-            By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This approach ensures that you have full control over the file objects after a successful upload.
+            By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This ensures that you have full control over the file objects after a successful upload.
    
    * ### Comprehensive Guide
-      * **First Scenario**
+      * **First Scenario**  
          In this scenario, you upload an image, process it, move it to a temporary folder, and return the image data in JSON format. Upon a    successful response, hidden input fields are dynamically created based on the server’s response. Finally, submit your form to save the    image data to the database.
          
          1. **Create a `<form>` Tag**:
             ```html
             <form id="uploadForm" action="/submit-form-url" method="post">
+                <div class="response"></div>
                 <div class="upload-container"></div>
                 <div class="uploaded-photo"></div>
                 <button type="submit">Submit</button>
@@ -1174,10 +1180,25 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          4. **Access the File on the Server Side:**
             ```php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
-                    // Move file to temporary folder or further processing
-                    // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/tmp/' . $name);
-                }
+               // if multiple file upload was used, the $_FILES array has a different structure, so you need first to re-structure it so it can be looped through
+               $files = array(); 
+               foreach ($_FILES['eoFileUpload'] as $k => $l) {
+                  foreach ($l as $i => $v) {
+                     if (!array_key_exists($i, $files)) $files[$i] = array();
+                     $files[$i][$k] = $v;
+                  }
+               }
+
+               foreach ($files as $key => $file) {
+                  // Move file to the desired folder and save in the Database
+                  move_uploaded_file($file[$key]['tmp_name'], '/uploads/' . $name);
+                  // Save file information to the database
+               }
+
+               /**
+                * for single upload
+                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+               */
             }
             ```
          5. **Manipulate Hidden Input Values Based on Response:**
@@ -1228,10 +1249,11 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                 }
             }
             ```
-      * **Second Scenario**
+      * **Second Scenario**  
          In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
          1. **Include Required HTML Tags:**
             ```html
+            <div class="response"></div>
             <div class="upload-container"></div>
             <div class="uploaded-photo"></div>
             ```
@@ -1250,13 +1272,26 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             ```
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
          4. **Access the File on the Server Side:**
-            ```javascript
+            ```php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-               // if multiple file upload was used
-               foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
+               // if multiple file upload was used, the $_FILES array has a different structure, so you need first to re-structure it so it can be looped through
+               $files = array(); 
+               foreach ($_FILES['eoFileUpload'] as $k => $l) {
+                  foreach ($l as $i => $v) {
+                     if (!array_key_exists($i, $files)) $files[$i] = array();
+                     $files[$i][$k] = $v;
+                  }
+               }
+
+               foreach ($files as $key => $file) {
                   // Move file to the desired folder and save in the Database
-                  // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+                  move_uploaded_file($file[$key]['tmp_name'], '/uploads/' . $name);
                   // Save file information to the database
                }
+
+               /**
+                * for single upload
+                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+               */
             }
             ```
