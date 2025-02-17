@@ -1075,7 +1075,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       Initializes the uploader with specified configuration and attaches necessary event listeners.
       ```javascript
       uploader.create('.upload-container', '/upload-url', {
-         inputName = 'eoFileUpload',
+         inputName: 'eoFileUpload',
          previewSelector: '.uploaded-photo',
          disablePreview: false,
          uploadType: 'image',
@@ -1154,7 +1154,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          2. **Initialize the Uploader:**
             ```javascript
             uploader.create('.upload-container', '/upload-file-url', {
-               inputName = 'eoFileUpload',
+               inputName: 'eoFileUpload',
                previewSelector: '.uploaded-photo',
                disablePreview: false,
                uploadType: 'image',
@@ -1238,7 +1238,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          2. **Initialize the Uploader:**
             ```javascript
             uploader.create('.upload-container', '/upload-file-url', {
-               inputName = 'eoFileUpload', // give the input file a name
+               inputName: 'eoFileUpload', // give the input file a name
                previewSelector: '.uploaded-photo',
                disablePreview: false,
                uploadType: 'image',
