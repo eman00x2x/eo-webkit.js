@@ -1181,7 +1181,8 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             ```php
             header('Content-Type: application/json; charset=utf-8');
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-               // if multiple file upload was used, the $_FILES array has a different structure, so you need first to re-structure it so it can be looped through
+               // if multiple file upload was used, the $_FILES array has a different structure,
+               // so you need first to re-structure it so it can be looped through
                $files = array(); 
                foreach ($_FILES['eoFileUpload'] as $k => $l) {
                   foreach ($l as $i => $v) {
@@ -1230,7 +1231,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             ```
          6. **Submit Your Form**
          7. **Access the Hidden Input on the Server Side:**
-		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server    side using `$_POST['upload']`.
+		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
             ```php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Loop through each uploaded file's information
@@ -1278,7 +1279,8 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          4. **Access the File on the Server Side:**
             ```php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-               // if multiple file upload was used, the $_FILES array has a different structure, so you need first to re-structure it so it can be looped through
+               // if multiple file upload was used, the $_FILES array has a different structure,
+               // so you need first to re-structure it so it can be looped through
                $files = array(); 
                foreach ($_FILES['eoFileUpload'] as $k => $l) {
                   foreach ($l as $i => $v) {
