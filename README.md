@@ -1292,13 +1292,13 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                   $file_data['name'] = basename($file[$key]['name']);
                   $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
                   $file_data['size'] = $file[$key]['size'];
-                  move_uploaded_file($file[$key]['tmp_name'], '/temporary/' . $file_data['name']);
+                  move_uploaded_file($file[$key]['tmp_name'], '/upload/' . $file_data['name']);
                   // INSERT into Database 
                }
 
                /**
                 * for single upload
-                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/temporary/' . $file_data['name']);
+                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/upload/' . $file_data['name']);
                */
             }
             ```
