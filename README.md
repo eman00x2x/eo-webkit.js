@@ -1179,6 +1179,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
          4. **Access the File on the Server Side:**
             ```php
+            header('Content-Type: application/json; charset=utf-8');
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                // if multiple file upload was used, the $_FILES array has a different structure, so you need first to re-structure it so it can be looped through
                $files = array(); 
@@ -1190,14 +1191,17 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                }
 
                foreach ($files as $key => $file) {
-                  // Move file to the desired folder and save in the Database
-                  move_uploaded_file($file[$key]['tmp_name'], '/uploads/' . $name);
-                  // Save file information to the database
+                  // Move file to the desired folder
+                  $file_data['name'] = basename($file[$key]['name']);
+                  $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
+                  move_uploaded_file($file[$key]['tmp_name'], '/temporary/' . $file_data['name']);
                }
+
+               echo json_encode($file_data);
 
                /**
                 * for single upload
-                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/temporary/' . $file_data['name']);
                */
             }
             ```
@@ -1285,13 +1289,16 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
 
                foreach ($files as $key => $file) {
                   // Move file to the desired folder and save in the Database
-                  move_uploaded_file($file[$key]['tmp_name'], '/uploads/' . $name);
-                  // Save file information to the database
+                  $file_data['name'] = basename($file[$key]['name']);
+                  $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
+                  $file_data['size'] = $file[$key]['size'];
+                  move_uploaded_file($file[$key]['tmp_name'], '/temporary/' . $file_data['name']);
+                  // INSERT into Database 
                }
 
                /**
                 * for single upload
-                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/temporary/' . $file_data['name']);
                */
             }
             ```
