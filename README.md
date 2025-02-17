@@ -1154,20 +1154,20 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          2. **Initialize the Uploader:**
             ```javascript
             uploader.create('.upload-container', '/upload-file-url', {
-            	inputName = 'eoFileUpload',
-                previewSelector: '.uploaded-photo',
-                disablePreview: false,
-                uploadType: 'image',
-                accept: 'image/*',
-                multiple: true,
-                onBeforeSend: () => { console.log('Before sending the request'); },
-                onSuccess: (response, files) => {
-                    files.forEach((file, index) => {
-                        // Manipulate hidden input value
-                       file.url = response[index].url; // Assuming response contains URLs for each file
-                    });
-                },
-                onError: (error) => { console.error('Upload failed!', error); }
+               inputName = 'eoFileUpload',
+               previewSelector: '.uploaded-photo',
+               disablePreview: false,
+               uploadType: 'image',
+               accept: 'image/*',
+               multiple: true,
+               onBeforeSend: () => { console.log('Before sending the request'); },
+               onSuccess: (response, files) => {
+                   files.forEach((file, index) => {
+                       // Manipulate hidden input value
+                      file.url = response[index].url; // Assuming response contains URLs for each file
+                   });
+               },
+               onError: (error) => { console.error('Upload failed!', error); }
             });
             ```
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
@@ -1238,25 +1238,25 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          2. **Initialize the Uploader:**
             ```javascript
             uploader.create('.upload-container', '/upload-file-url', {
-            	inputName = 'eoFileUpload', // give the input file a name
-                previewSelector: '.uploaded-photo',
-                disablePreview: false,
-                uploadType: 'image',
-                accept: 'image/*',
-                multiple: true,
-                onBeforeSend: () => { console.log('Before sending the request'); }
-                onError: (error) => { console.error('Upload failed!', error); }
+               inputName = 'eoFileUpload', // give the input file a name
+               previewSelector: '.uploaded-photo',
+               disablePreview: false,
+               uploadType: 'image',
+               accept: 'image/*',
+               multiple: true,
+               onBeforeSend: () => { console.log('Before sending the request'); }
+               onError: (error) => { console.error('Upload failed!', error); }
             });
             ```
          3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
          4. **Access the File on the Server Side:**
             ```javascript
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            	// if multiple file upload was used
-                foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
-                    // Move file to the desired folder and save in the Database
-                    // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
-                    // Save file information to the database
-                }
+               // if multiple file upload was used
+               foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
+                  // Move file to the desired folder and save in the Database
+                  // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+                  // Save file information to the database
+               }
             }
             ```
