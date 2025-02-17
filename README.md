@@ -1071,7 +1071,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       <div class="uploaded-photo"></div>
       ```
       
-      Initialize the Uploader
+      Initializes the uploader with specified configuration and attaches necessary event listeners.
       ```javascript
       uploader.create('.upload-container', '/upload-url', {
           inputName = 'eoFileUpload',
@@ -1093,18 +1093,14 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       });
       ```
    
-   * ### Method
-      * #### `create(uploadSelector, url, options)`
-      Initializes the uploader with specified configuration and attaches necessary event listeners.
-      
-      * #### Parameters
+      * ### Parameters
          | Parameters | Type | Default | Description |
          | --- | --- | --- | --- |
          | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
          | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
          | `options` | `Object` | `optional` | optional Configuration options for the uploader. |
       
-         * ##### Options
+         * #### Options
             | Parameter | Type | Default | Description |
             | --- | --- | --- | --- |
             | `inputName` | `String` | `eoFileUpload` | The input name. |
@@ -1117,30 +1113,30 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
             | `onError` | `Function` | `optional` | Callback function on upload error. |
       
-      * #### onSuccess Example:
-	     ```javascript
-         onSuccess: (response, files) => {
-             files.forEach((file, index) => {
-                 // Manipulate hidden input value
-                file.url = response[index].url; // Assuming response contains URLs for each file
-             });
-         }
-         ```
-         1. `onSuccess` **Callback**: This function is called when the upload is successful.
-         2. **Iterating through Files**
-            * The `files` array contains the uploaded file objects.
-            * The `forEach` method is used to iterate through each file.
-         3. **Updating File Properties**
-            * Inside the loop, a new property `url` is added to each file object.
-            * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
-            * This URL can be dynamically assigned based on your requirements.
-         
-         **Hidden Input Creation**
-         The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
-         **Image-Specific Properties**
-         If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
-         
-         By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This    approach ensures that you have full control over the file objects after a successful upload.
+         * #### onSuccess Example:
+            ```javascript
+            onSuccess: (response, files) => {
+                files.forEach((file, index) => {
+                    // Manipulate hidden input value
+                   file.url = response[index].url; // Assuming response contains URLs for each file
+                });
+            }
+            ```
+            1. `onSuccess` **Callback**: This function is called when the upload is successful.
+            2. **Iterating through Files**
+               * The `files` array contains the uploaded file objects.
+               * The `forEach` method is used to iterate through each file.
+            3. **Updating File Properties**
+               * Inside the loop, a new property `url` is added to each file object.
+               * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
+               * This URL can be dynamically assigned based on your requirements.
+            
+            **Hidden Input Creation**
+            The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
+            **Image-Specific Properties**
+            If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
+            
+            By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This approach ensures that you have full control over the file objects after a successful upload.
    
    * ### Comprehensive Guide
       * **First Scenario**
