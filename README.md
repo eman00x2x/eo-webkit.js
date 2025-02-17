@@ -1051,6 +1051,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
 
 * ## eo.uploader
    The `eo.uploader` provides an easy-to-use interface for uploading images and documents with preview functionality. It supports both single and multiple file uploads, customizable options, and callback hooks for different stages of the upload process.
+   
    **Features**
    * Supports image and document uploads.
    * Provides preview functionality for uploaded files.
@@ -1074,22 +1075,22 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       Initializes the uploader with specified configuration and attaches necessary event listeners.
       ```javascript
       uploader.create('.upload-container', '/upload-url', {
-          inputName = 'eoFileUpload',
-          previewSelector: '.uploaded-photo',
-          disablePreview: false,
-          uploadType: 'image',
-          accept: 'image/*',
-          multiple: true,
-          onBeforeSend: () => { console.log('Before sending the request'); },
-          onSuccess: (response, files) => {
-              console.log('Upload successful!', response, files);
-              files.forEach((file, index) => {
-                  // Manipulate hidden input value, e.g., add a URL property
-                  file.url = response[index].url; // Assuming response contains URLs for each file
-                  console.log(`File ${index + 1} URL: ${file.url}`);
-              });
-          },
-          onError: (error) => { console.error('Upload failed!', error); }
+         inputName = 'eoFileUpload',
+         previewSelector: '.uploaded-photo',
+         disablePreview: false,
+         uploadType: 'image',
+         accept: 'image/*',
+         multiple: true,
+         onBeforeSend: () => { console.log('Before sending the request'); },
+         onSuccess: (response, files) => {
+             console.log('Upload successful!', response, files);
+             files.forEach((file, index) => {
+                 // Manipulate hidden input value, e.g., add a URL property
+                 file.url = response[index].url; // Assuming response contains URLs for each file
+                 console.log(`File ${index + 1} URL: ${file.url}`);
+             });
+         },
+         onError: (error) => { console.error('Upload failed!', error); }
       });
       ```
    
@@ -1182,14 +1183,14 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          5. **Manipulate Hidden Input Values Based on Response:**
             ```javascript
             onSuccess: (response, files) => {
-                console.log('Upload successful!', response, files);
-                files.forEach((file, index) => {
-                    // Access and manipulate the hidden input values based on the response
-                    // Example: add URL property
-                    file.url = response[index].url; // Assuming response contains URLs for each file
-            		// Example: update NAME property
-                    file.url = response[index].name; // Assuming response contains Name for each file
-                });
+               console.log('Upload successful!', response, files);
+               files.forEach((file, index) => {
+                  // Access and manipulate the hidden input values based on the response
+                  // Example: add URL property
+                  file.url = response[index].url; // Assuming response contains URLs for each file
+                  // Example: update NAME property
+                  file.name = response[index].name; // Assuming response contains Name for each file
+               });
             }
             ```
             Created hidden input after successful upload.
@@ -1199,12 +1200,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             <input type="hidden" name="upload[4CN44n6AAtK][type]" value="image/jpeg">
             <input type="hidden" name="upload[4CN44n6AAtK][lastModified]" value="1633024800000">
             <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
-            <input type="hidden" name="upload[4CN44n6AAtK][height]" value="6">
+            <input type="hidden" name="upload[4CN44n6AAtK][height]" value="600">
             <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
             ```
-         
-         6. **Submit Your Form:**
+         6. **Submit Your Form**
          7. **Access the Hidden Input on the Server Side:**
+		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server    side using `$_POST['upload']`.
             ```php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Loop through each uploaded file's information
@@ -1227,8 +1228,6 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                 }
             }
             ```
-            **Accessing Hidden Inputs:** After submitting the form, the hidden inputs created by the uploader module can be accessed on the server    side using `$_POST['upload']`.
-      
       * **Second Scenario**
          In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
          1. **Include Required HTML Tags:**
