@@ -1050,211 +1050,211 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                </div>
                ```
 
-* ## eo.uploader
-The `eo.uploader` provides an easy-to-use interface for uploading images and documents with preview functionality. It supports both single and multiple file uploads, customizable options, and callback hooks for different stages of the upload process.
-* **Features**
-   * Supports image and document uploads.
-   * Provides preview functionality for uploaded files.
-   * Supports single and multiple file uploads.
-   * Customizable options for upload type, file acceptance, and event callbacks.
-   * Automatically handles UI creation and event binding.
-   
-   * ### Setup
-      **Required HTML Structure:**
+   * ## eo.uploader
+      The `eo.uploader` provides an easy-to-use interface for uploading images and documents with preview functionality. It supports both single and multiple file uploads, customizable options, and callback hooks for different stages of the upload process.
+      * **Features**
+         * Supports image and document uploads.
+         * Provides preview functionality for uploaded files.
+         * Supports single and multiple file uploads.
+         * Customizable options for upload type, file acceptance, and event callbacks.
+         * Automatically handles UI creation and event binding.
       
-      Container for the upload button.
-      ```html
-      <div class="upload-container"></div>
-      ```
+      * ### Setup
+         **Required HTML Structure:**
+         
+         Container for the upload button.
+         ```html
+         <div class="upload-container"></div>
+         ```
+         
+         Container for the preview of uploaded files.
+         ```html
+         <div class="uploaded-photo"></div>
+         ```
+         
+         Initialize the Uploader
+         ```javascript
+         uploader.create('.upload-container', '/upload-url', {
+         	inputName = 'eoFileUpload',
+             previewSelector: '.uploaded-photo',
+             disablePreview: false,
+             uploadType: 'image',
+             accept: 'image/*',
+             multiple: true,
+             onBeforeSend: () => { console.log('Before sending the request'); },
+             onSuccess: (response, files) => {
+                 console.log('Upload successful!', response, files);
+                 files.forEach((file, index) => {
+                     // Manipulate hidden input value, e.g., add a URL property
+                     file.url = response[index].url; // Assuming response contains URLs for each file
+                     console.log(`File ${index + 1} URL: ${file.url}`);
+                 });
+             },
+             onError: (error) => { console.error('Upload failed!', error); }
+         });
+         ```
       
-      Container for the preview of uploaded files.
-      ```html
-      <div class="uploaded-photo"></div>
-      ```
-      
-      Initialize the Uploader
-      ```javascript
-      uploader.create('.upload-container', '/upload-url', {
-      	inputName = 'eoFileUpload',
-          previewSelector: '.uploaded-photo',
-          disablePreview: false,
-          uploadType: 'image',
-          accept: 'image/*',
-          multiple: true,
-          onBeforeSend: () => { console.log('Before sending the request'); },
-          onSuccess: (response, files) => {
-              console.log('Upload successful!', response, files);
-              files.forEach((file, index) => {
-                  // Manipulate hidden input value, e.g., add a URL property
-                  file.url = response[index].url; // Assuming response contains URLs for each file
-                  console.log(`File ${index + 1} URL: ${file.url}`);
-              });
-          },
-          onError: (error) => { console.error('Upload failed!', error); }
-      });
-      ```
-   
-   * ### Methods
-      * #### `create(uploadSelector, url, options)`
-      Initializes the uploader with specified configuration and attaches necessary event listeners.
-      
-      * #### Parameters
-         | Parameters | Type | Default | Description |
-         | --- | --- | --- | --- |
-         | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
-         | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
-         | `options` | `Object` | `optional` | optional Configuration options for the uploader. |
-      
-         * ##### Options
-            | Parameter | Type | Default | Description |
+      * ### Methods
+         * #### `create(uploadSelector, url, options)`
+         Initializes the uploader with specified configuration and attaches necessary event listeners.
+         
+         * #### Parameters
+            | Parameters | Type | Default | Description |
             | --- | --- | --- | --- |
-            | `inputName` | `String` | `.eoFileUpload` | The input name. |
-            | `previewSelector` | `String` | `.uploaded-photo` | CSS selector for the preview container. |
-            | `disablePreview` | `Boolean` | `false` | Whether to disable the preview functionality. |
-            | `uploadType` | `String` | `image` | Type of upload (`image` or `document`). |
-            | `accept` | `String` | `image/*` for images and `application/pdf` for documents | File types to accept. |
-            | `multiple` | `Boolean` | `true` | Whether to allow multiple file uploads. |
-            | `onBeforeSend` | `Function` | `optional` | Callback function before the upload request is sent. |
-            | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
-            | `onError` | `Function` | `optional` | Callback function on upload error. |
-      
-      * #### onSuccess Example:
-         1. `onSuccess` **Callback**: This function is called when the upload is successful.
-         2. **Iterating through Files**
-            * The `files` array contains the uploaded file objects.
-            * The `forEach` method is used to iterate through each file.
-         3. **Updating File Properties**
-            * Inside the loop, a new property `url` is added to each file object.
-            * The `url` property is assigned a value (e.g., `'https://example-url.com'`).
-            * This URL can be dynamically assigned based on your requirements.
+            | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
+            | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
+            | `options` | `Object` | `optional` | optional Configuration options for the uploader. |
          
-         **Hidden Input Creation**
-         The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
-         **Image-Specific Properties**
-         If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
+            * ##### Options
+               | Parameter | Type | Default | Description |
+               | --- | --- | --- | --- |
+               | `inputName` | `String` | `.eoFileUpload` | The input name. |
+               | `previewSelector` | `String` | `.uploaded-photo` | CSS selector for the preview container. |
+               | `disablePreview` | `Boolean` | `false` | Whether to disable the preview functionality. |
+               | `uploadType` | `String` | `image` | Type of upload (`image` or `document`). |
+               | `accept` | `String` | `image/*` for images and `application/pdf` for documents | File types to accept. |
+               | `multiple` | `Boolean` | `true` | Whether to allow multiple file uploads. |
+               | `onBeforeSend` | `Function` | `optional` | Callback function before the upload request is sent. |
+               | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
+               | `onError` | `Function` | `optional` | Callback function on upload error. |
          
-         By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This approach ensures that you have full control over the file objects after a successful upload.
-   
-   * ### Comprehensive Guide
-      * **First Scenario**
-         In this scenario, you upload an image, process it, move it to a temporary folder, and return the image data in JSON format. Upon a successful response, hidden input fields are dynamically created based on the server’s response. Finally, submit your form to save the image data to the database.
-         
-         1. **Create a `<form>` Tag**:
-            ```html
-            <form id="uploadForm" action="/submit-form-url" method="post">
-                <div class="upload-container"></div>
-                <div class="uploaded-photo"></div>
-                <button type="submit">Submit</button>
-            </form>
-            ```
-         2. **Initialize the Uploader:**
-            ```javascript
-            uploader.create('.upload-container', '/upload-file-url', {
-            	inputName = 'eoFileUpload',
-                previewSelector: '.uploaded-photo',
-                disablePreview: false,
-                uploadType: 'image',
-                accept: 'image/*',
-                multiple: true,
-                onBeforeSend: () => { console.log('Before sending the request'); },
-                onSuccess: (response, files) => {
-                    files.forEach((file, index) => {
-                        // Manipulate hidden input value
-                       file.url = response[index].url; // Assuming response contains URLs for each file
-                    });
-                },
-                onError: (error) => { console.error('Upload failed!', error); }
-            });
-            ```
-         3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
-         4. **Access the File on the Server Side:**
-            ```php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
-                    // Move file to temporary folder or further processing
-                    // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/tmp/' . $name);
-                }
-            }
-            ```
-         5. **Manipulate Hidden Input Values Based on Response:**
-            ```javascript
-            onSuccess: (response, files) => {
-                console.log('Upload successful!', response, files);
-                files.forEach((file, index) => {
-                    // Access and manipulate the hidden input values based on the response
-                    // Example: add URL property
-                    file.url = response[index].url; // Assuming response contains URLs for each file
-            		// Example: update NAME property
-                    file.url = response[index].name; // Assuming response contains Name for each file
-                });
-            }
-            ```
-            Created hidden input after successful upload.
-            ```html
-            <input type="hidden" name="upload[4CN44n6AAtK][name]" value="example.jpg">
-            <input type="hidden" name="upload[4CN44n6AAtK][size]" value="102400">
-            <input type="hidden" name="upload[4CN44n6AAtK][type]" value="image/jpeg">
-            <input type="hidden" name="upload[4CN44n6AAtK][lastModified]" value="1633024800000">
-            <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
-            <input type="hidden" name="upload[4CN44n6AAtK][height]" value="6">
-            <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
-            ```
-         
-         6. **Submit Your Form:**
-         7. **Access the Hidden Input on the Server Side:**
-            ```php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                // Loop through each uploaded file's information
-                foreach ($_POST['upload'] as $file_id => $file_info) {
-                    $name = $file_info['name'];
-                    $size = $file_info['size'];
-                    $type = $file_info['type'];
-                    $lastModified = $file_info['lastModified'];
-                    $width = isset($file_info['width']) ? $file_info['width'] : null;
-                    $height = isset($file_info['height']) ? $file_info['height'] : null;
+         * #### onSuccess Example:
+            1. `onSuccess` **Callback**: This function is called when the upload is successful.
+            2. **Iterating through Files**
+               * The `files` array contains the uploaded file objects.
+               * The `forEach` method is used to iterate through each file.
+            3. **Updating File Properties**
+               * Inside the loop, a new property `url` is added to each file object.
+               * The `url` property is assigned a value (e.g., `'https://example-url.com'`).
+               * This URL can be dynamically assigned based on your requirements.
             
-                    // Process the file information as needed
-                    echo "File ID: $file_id\n";
-                    echo "Name: $name\n";
-                    echo "Size: $size bytes\n";
-                    echo "Type: $type\n";
-                    echo "Last Modified: " . date('Y-m-d H:i:s', $lastModified / 1000) . "\n";
-                    echo "Width: $width px\n";
-                    echo "Height: $height px\n";
-                }
-            }
-            ```
-            **Accessing Hidden Inputs:** After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
+            **Hidden Input Creation**
+            The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
+            **Image-Specific Properties**
+            If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
+            
+            By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This    approach ensures that you have full control over the file objects after a successful upload.
       
-      * **Second Scenario**
-         In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
-         1. **Include Required HTML Tags:**
-            ```html
-            <div class="upload-container"></div>
-            <div class="uploaded-photo"></div>
-            ```
-         2. **Initialize the Uploader:**
-            ```javascript
-            uploader.create('.upload-container', '/upload-file-url', {
-            	inputName = 'eoFileUpload', // give the input file a name
-                previewSelector: '.uploaded-photo',
-                disablePreview: false,
-                uploadType: 'image',
-                accept: 'image/*',
-                multiple: true,
-                onBeforeSend: () => { console.log('Before sending the request'); }
-                onError: (error) => { console.error('Upload failed!', error); }
-            });
-            ```
-         3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
-         4. **Access the File on the Server Side:**
-            ```javascript
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            	// if multiple file upload was used
-                foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
-                    // Move file to the desired folder and save in the Database
-                    // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
-                    // Save file information to the database
-                }
-            }
-            ```
+      * ### Comprehensive Guide
+         * **First Scenario**
+            In this scenario, you upload an image, process it, move it to a temporary folder, and return the image data in JSON format. Upon a    successful response, hidden input fields are dynamically created based on the server’s response. Finally, submit your form to save the    image data to the database.
+            
+            1. **Create a `<form>` Tag**:
+               ```html
+               <form id="uploadForm" action="/submit-form-url" method="post">
+                   <div class="upload-container"></div>
+                   <div class="uploaded-photo"></div>
+                   <button type="submit">Submit</button>
+               </form>
+               ```
+            2. **Initialize the Uploader:**
+               ```javascript
+               uploader.create('.upload-container', '/upload-file-url', {
+               	inputName = 'eoFileUpload',
+                   previewSelector: '.uploaded-photo',
+                   disablePreview: false,
+                   uploadType: 'image',
+                   accept: 'image/*',
+                   multiple: true,
+                   onBeforeSend: () => { console.log('Before sending the request'); },
+                   onSuccess: (response, files) => {
+                       files.forEach((file, index) => {
+                           // Manipulate hidden input value
+                          file.url = response[index].url; // Assuming response contains URLs for each file
+                       });
+                   },
+                   onError: (error) => { console.error('Upload failed!', error); }
+               });
+               ```
+            3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
+            4. **Access the File on the Server Side:**
+               ```php
+               if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                   foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
+                       // Move file to temporary folder or further processing
+                       // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/tmp/' . $name);
+                   }
+               }
+               ```
+            5. **Manipulate Hidden Input Values Based on Response:**
+               ```javascript
+               onSuccess: (response, files) => {
+                   console.log('Upload successful!', response, files);
+                   files.forEach((file, index) => {
+                       // Access and manipulate the hidden input values based on the response
+                       // Example: add URL property
+                       file.url = response[index].url; // Assuming response contains URLs for each file
+               		// Example: update NAME property
+                       file.url = response[index].name; // Assuming response contains Name for each file
+                   });
+               }
+               ```
+               Created hidden input after successful upload.
+               ```html
+               <input type="hidden" name="upload[4CN44n6AAtK][name]" value="example.jpg">
+               <input type="hidden" name="upload[4CN44n6AAtK][size]" value="102400">
+               <input type="hidden" name="upload[4CN44n6AAtK][type]" value="image/jpeg">
+               <input type="hidden" name="upload[4CN44n6AAtK][lastModified]" value="1633024800000">
+               <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
+               <input type="hidden" name="upload[4CN44n6AAtK][height]" value="6">
+               <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
+               ```
+            
+            6. **Submit Your Form:**
+            7. **Access the Hidden Input on the Server Side:**
+               ```php
+               if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                   // Loop through each uploaded file's information
+                   foreach ($_POST['upload'] as $file_id => $file_info) {
+                       $name = $file_info['name'];
+                       $size = $file_info['size'];
+                       $type = $file_info['type'];
+                       $lastModified = $file_info['lastModified'];
+                       $width = isset($file_info['width']) ? $file_info['width'] : null;
+                       $height = isset($file_info['height']) ? $file_info['height'] : null;
+               
+                       // Process the file information as needed
+                       echo "File ID: $file_id\n";
+                       echo "Name: $name\n";
+                       echo "Size: $size bytes\n";
+                       echo "Type: $type\n";
+                       echo "Last Modified: " . date('Y-m-d H:i:s', $lastModified / 1000) . "\n";
+                       echo "Width: $width px\n";
+                       echo "Height: $height px\n";
+                   }
+               }
+               ```
+               **Accessing Hidden Inputs:** After submitting the form, the hidden inputs created by the uploader module can be accessed on the server    side using `$_POST['upload']`.
+         
+         * **Second Scenario**
+            In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
+            1. **Include Required HTML Tags:**
+               ```html
+               <div class="upload-container"></div>
+               <div class="uploaded-photo"></div>
+               ```
+            2. **Initialize the Uploader:**
+               ```javascript
+               uploader.create('.upload-container', '/upload-file-url', {
+               	inputName = 'eoFileUpload', // give the input file a name
+                   previewSelector: '.uploaded-photo',
+                   disablePreview: false,
+                   uploadType: 'image',
+                   accept: 'image/*',
+                   multiple: true,
+                   onBeforeSend: () => { console.log('Before sending the request'); }
+                   onError: (error) => { console.error('Upload failed!', error); }
+               });
+               ```
+            3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
+            4. **Access the File on the Server Side:**
+               ```javascript
+               if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+               	// if multiple file upload was used
+                   foreach ($_POST['eoFileUpload'] as $file_id => $file_info) {
+                       // Move file to the desired folder and save in the Database
+                       // Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/uploads/' . $name);
+                       // Save file information to the database
+                   }
+               }
+               ```
