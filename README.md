@@ -1025,10 +1025,10 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
 * ## eo.mortgageCalculator
    The `eo.mortgageCalculator` provides functionalities to calculate monthly mortgage payments, create selection elements for down payment    interest rates, and loan years, and display the results. It is designed to be embedded into a mortgage calculator form on a web page.
    
-   * **Notes**
-      * Ensure that the form elements (#sellingPrice, #dpSelection, #interestSelection, #yearSelection, and #result) exist in your HTML.
-      * The script should be included and initialized correctly to work as expected.
-      * Customize the form and style as needed to fit your design.
+   **Notes**
+   * Ensure that the form elements (#sellingPrice, #dpSelection, #interestSelection, #yearSelection, and #result) exist in your HTML.
+   * The script should be included and initialized correctly to work as expected.
+   * Customize the form and style as needed to fit your design.
       
    * ### Required Setup
       Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
@@ -1051,12 +1051,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
 
 * ## eo.uploader
    The `eo.uploader` provides an easy-to-use interface for uploading images and documents with preview functionality. It supports both single and multiple file uploads, customizable options, and callback hooks for different stages of the upload process.
-   * **Features**
-      * Supports image and document uploads.
-      * Provides preview functionality for uploaded files.
-      * Supports single and multiple file uploads.
-      * Customizable options for upload type, file acceptance, and event callbacks.
-      * Automatically handles UI creation and event binding.
+   **Features**
+   * Supports image and document uploads.
+   * Provides preview functionality for uploaded files.
+   * Supports single and multiple file uploads.
+   * Customizable options for upload type, file acceptance, and event callbacks.
+   * Automatically handles UI creation and event binding.
    
    * ### Setup
       **Required HTML Structure:**
@@ -1074,7 +1074,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       Initialize the Uploader
       ```javascript
       uploader.create('.upload-container', '/upload-url', {
-      	inputName = 'eoFileUpload',
+          inputName = 'eoFileUpload',
           previewSelector: '.uploaded-photo',
           disablePreview: false,
           uploadType: 'image',
@@ -1093,7 +1093,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       });
       ```
    
-   * ### Methods
+   * ### Method
       * #### `create(uploadSelector, url, options)`
       Initializes the uploader with specified configuration and attaches necessary event listeners.
       
@@ -1107,7 +1107,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          * ##### Options
             | Parameter | Type | Default | Description |
             | --- | --- | --- | --- |
-            | `inputName` | `String` | `.eoFileUpload` | The input name. |
+            | `inputName` | `String` | `eoFileUpload` | The input name. |
             | `previewSelector` | `String` | `.uploaded-photo` | CSS selector for the preview container. |
             | `disablePreview` | `Boolean` | `false` | Whether to disable the preview functionality. |
             | `uploadType` | `String` | `image` | Type of upload (`image` or `document`). |
@@ -1118,13 +1118,21 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             | `onError` | `Function` | `optional` | Callback function on upload error. |
       
       * #### onSuccess Example:
+	     ```javascript
+         onSuccess: (response, files) => {
+             files.forEach((file, index) => {
+                 // Manipulate hidden input value
+                file.url = response[index].url; // Assuming response contains URLs for each file
+             });
+         }
+         ```
          1. `onSuccess` **Callback**: This function is called when the upload is successful.
          2. **Iterating through Files**
             * The `files` array contains the uploaded file objects.
             * The `forEach` method is used to iterate through each file.
          3. **Updating File Properties**
             * Inside the loop, a new property `url` is added to each file object.
-            * The `url` property is assigned a value (e.g., `'https://example-url.com'`).
+            * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
             * This URL can be dynamically assigned based on your requirements.
          
          **Hidden Input Creation**
