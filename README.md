@@ -471,12 +471,12 @@ To use the `eo.alert`, ensure the necessary HTML structure includes a container 
 # eo.modal
 The `eo.modal` provides an easy way to create and manage Bootstrap modals dynamically. It supports custom modal sizes, dynamic content injection, and automatic cleanup of destroyable modals.
 
-* **Features**
-   * Dynamically create modals with custom sizes.
-   * Inject content into the modal using a callback function.
-   * Support for modals with status indicators.
-   * Automatic destruction of modals when closed (if enabled).
-   * Handles modal close events properly.
+**Features**
+* Dynamically create modals with custom sizes.
+* Inject content into the modal using a callback function.
+* Support for modals with status indicators.
+* Automatic destruction of modals when closed (if enabled).
+* Handles modal close events properly.
 
 * **Notes**
    * Ensure Bootstrap is loaded for this to function properly.
@@ -636,11 +636,11 @@ The Video Component is for managing YouTube videos within a web interface. It pr
 # **eo.validator**
 The `eo.validator` is a lightweight data validation utility that checks objects against predefined rules. It supports nested properties using dot notation and provides customizable validation rules and error messages.
 
-* **Features**
-   * Validates objects based on predefined constraints.
-   * Supports nested properties using dot notation.
-   * Customizable validation rules.
-   * Customizable error messages.
+**Features**
+* Validates objects based on predefined constraints.
+* Supports nested properties using dot notation.
+* Customizable validation rules.
+* Customizable error messages.
 
 * ## Usage Example
    ```javascript
@@ -764,7 +764,7 @@ The `eo.validator` is a lightweight data validation utility that checks objects 
 # eo.tinymce
 The TinyMCE Module provides an easy way to initialize and configure TinyMCE, a popular WYSIWYG editor, on a specified container. It ensures the script is included and allows overriding default settings.
 
-* **Features**
+**Features**
 * **Initialize TinyMCE** on a specified `<textarea>` element.
 * **Merge default options** with custom options for flexibility.
 * **Ensure TinyMCE is removed before initialization** to prevent duplicates.
@@ -836,12 +836,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
    | `apiKey` | `string` | (Optional, required for Geo and Map charts) Google API key for maps/geolocation features. |
 
 * ## Available Methods
-   1. ### `googleChart.bar(params)`
+   1. ### `bar(params)`
       Renders a bar chart.
       
       * #### Example Usage
          ```javascript
-         googleChart.bar({
+         eo.googleChart.bar({
              containerId: 'barChart',
              data: (dataTable) => {
                  dataTable.addColumn('string', 'Year');
@@ -853,12 +853,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   2. ### `googleChart.calendar(params)`
+   2. ### `calendar(params)`
       Renders a calendar heatmap chart.
       
       * #### Example Usage
          ```javascript
-         googleChart.calendar({
+         eo.googleChart.calendar({
              containerId: 'calendarChart',
              data: (dataTable) => {
                  dataTable.addColumn({ type: 'date', id: 'Date' });
@@ -869,13 +869,13 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   3. ### `googleChart.geo(params)`
+   3. ### `geo(params)`
       Renders a geographical map chart.
       > ⚠️ **Requires an API key for** `displayMode: 'markers'`.
       
       * #### Example Usage
          ```javascript
-         googleChart.geo({
+         eo.googleChart.geo({
              containerId: 'geoChart',
              data: (dataTable) => {
                  dataTable.addColumn('string', 'Country');
@@ -888,12 +888,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   4. ### `googleChart.pie(params)`
+   4. ### `pie(params)`
       Renders a pie chart.
       
       * #### Example Usage
          ```javascript
-         googleChart.pie({
+         eo.googleChart.pie({
              containerId: 'pieChart',
              data: (dataTable) => {
                  dataTable.addColumn('string', 'Category');
@@ -905,12 +905,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   5. ### `googleChart.line(params)`
+   5. ### `line(params)`
       Renders a line chart.
       
       * #### Example Usage
          ```javascript
-         googleChart.line({
+         eo.googleChart.line({
              containerId: 'lineChart',
              data: (dataTable) => {
                  dataTable.addColumn('string', 'Month');
@@ -922,13 +922,13 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   6. ### `googleChart.map(params)`
+   6. ### `map(params)`
       Renders a Google Maps visualization.
       > ⚠️ **Requires an API key.**
       
       * #### Example Usage
          ```javascript
-         googleChart.map({
+         eo.googleChart.map({
              containerId: 'mapChart',
              data: (dataTable) => {
                  dataTable.addColumn('number', 'Lat');
@@ -942,12 +942,12 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
          });
          ```
    
-   7. ### `googleChart.trendLine(params)`
+   7. ### `trendLine(params)`
       Renders a scatter plot with a trend line.s
       
       * #### Example Usage
          ```javascript
-         googleChart.trendLine({
+         eo.googleChart.trendLine({
              containerId: 'trendChart',
              data: (dataTable) => {
                  dataTable.addColumn('number', 'X');

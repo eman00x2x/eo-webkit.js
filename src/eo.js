@@ -44,6 +44,24 @@
 		return token;
 	})();
 
+	const diffDays = (date, otherDate) => Math.ceil(Math.abs(date - otherDate) / (1000 * 60 * 60 * 24));
+	const dayOfYear = (date) => Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+	const removeFalsy = (arr) => arr.filter(Boolean);
+	const removeDuplicates = (arr) => [...new Set(arr)];
+
+	function getCookie(key) {
+		return document.cookie
+			.split(';')
+			.map(cookie => cookie.trim())
+			.find(cookie => cookie.startsWith(key + '='))
+			?.split('=')[1] || '';
+	}
+
+	function setCookie(key, value, days) {
+		const expires = new Date(Date.now() + days * 864e5).toUTCString();
+		document.cookie = `${key}=${value}; expires=${expires}; path=/`;
+	}
+
 	const _sanitize = str => new Option(str).innerHTML;
 
 	/**
