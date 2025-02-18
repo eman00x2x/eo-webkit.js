@@ -974,7 +974,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
 * ## eo.submitForm
    The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
    
-   * **Features**
+   **Features**
       * Validates form data using the `eo.validator` before submission.
       * Submits form data via AJAX (`post` function).
       * Displays alerts using the `eo.alert`.
@@ -982,15 +982,15 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
       * Disables & enables buttons during the request to prevent multiple submissions.
       * Redirects users upon success if `redirectUrl` is provided.
    
-   * **Dependencies**
-      * eo.validator (Read the documentation)
-      * eo.post (Read the documentation)
-	  * eo.alert (Read the documentation)
-	  * eo.button (Read the documentation)
-	  * csrf-token in meta tag
-	     ```html
-		 <meta name="csrf-token" content="{{ csrf_token() }}">
-		 ```
+   **Dependencies**
+   * eo.validator (Read the documentation)
+   * eo.post (Read the documentation)
+   * eo.alert (Read the documentation)
+   * eo.button (Read the documentation)
+   * csrf-token in meta tag
+      ```html
+      <meta name="csrf-token" content="{{ csrf_token() }}">
+      ```
    
    * ### Syntax
       ```javascript
@@ -1058,10 +1058,15 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
    * Supports single and multiple file uploads.
    * Customizable options for upload type, file acceptance, and event callbacks.
    * Automatically handles UI creation and event binding.
+
+   **Dependency**
+   This eo.uploader requires a csrf-token in meta tag
+   ```html
+   <meta name="csrf-token" content="{{ csrf_token() }}">
+   ```
    
    * ### Setup
       **Required HTML Structure:**
-
 	  Container for the response.
       ```html
       <div class="response"></div>

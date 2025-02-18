@@ -44,25 +44,65 @@
 		return token;
 	})();
 
+	const _sanitize = str => new Option(str).innerHTML;
+
 	const diffDays = (date, otherDate) => Math.ceil(Math.abs(date - otherDate) / (1000 * 60 * 60 * 24));
 	const dayOfYear = (date) => Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-	const removeFalsy = (arr) => arr.filter(Boolean);
+	const removeFalsy = (arr) => arr.filter(item => item !== '' && item !== null && item !== false && item !== undefined && typeof item !== 'boolean');
 	const removeDuplicates = (arr) => [...new Set(arr)];
 
-	function getCookie(key) {
+	const getCookie = (key) => {
 		return document.cookie
 			.split(';')
 			.map(cookie => cookie.trim())
 			.find(cookie => cookie.startsWith(key + '='))
 			?.split('=')[1] || '';
-	}
+	};
 
-	function setCookie(key, value, days) {
+	const setCookie = (key, value, days) => {
 		const expires = new Date(Date.now() + days * 864e5).toUTCString();
 		document.cookie = `${key}=${value}; expires=${expires}; path=/`;
-	}
+	};
 
-	const _sanitize = str => new Option(str).innerHTML;
+	/**
+	 * Formats a given timestamp into a human-readable string.
+	 *
+	 * This function converts a timestamp into a string representation with varying
+	 * formats based on the date's relation to the current date:
+	 * - If the date is today, returns the time in 'HH:MM' format.
+	 * - If the date is yesterday, returns "Yesterday at HH:MM".
+	 * - If the date is within the current year, returns 'MMM DD, HH:MM'.
+	 * - Otherwise, returns 'MMM DD, YYYY'.
+	 *
+	 * @param {number|string|Date} timestamp - The timestamp to format, which can be 
+	 *                                         a number (seconds/milliseconds since epoch),
+	 *                                         a string representation of a date, 
+	 *                                         or a Date object.
+	 * @returns {string} A formatted date string.
+	 */
+	const readableDate = (timestamp) => {
+		const date = 
+        typeof timestamp === 'number' ? new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp) :
+        typeof timestamp === 'string' || timestamp instanceof Date ? new Date(timestamp) :
+        (() => { throw new Error('Invalid timestamp type. Expected number, string, or Date object.'); })();
+
+		const now = new Date();
+		const [isToday, isYesterday, isSameYear] = [
+			date.toDateString() === now.toDateString(),
+			date.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString(),
+			date.getFullYear() === now.getFullYear()
+		];
+
+		if (isToday) {
+			return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		} else if (isYesterday) {
+			return 'Yesterday at ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		} else if (isSameYear) {
+			return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+		} else {
+			return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+		}
+	};
 
 	/**
      * Redirects the browser to a given URL.
