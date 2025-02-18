@@ -1143,6 +1143,9 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
             
             By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This ensures that you have full control over the file objects after a successful upload.
+
+         * #### disablePreview
+            if disablePreview is true, then the `eo.uploader` won't create the upload preview where the hidden input will be added. To create your own upload preview use the onSuccess callback to manipulate the DOM.
    
    * ### Comprehensive Guide
       * **First Scenario**  
@@ -1217,6 +1220,7 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
                   file.url = response[index].url; // Assuming response contains URLs for each file
                   // Example: update NAME property
                   file.name = response[index].name; // Assuming response contains Name for each file
+                  file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
                });
             }
             ```
@@ -1229,12 +1233,13 @@ This `eo.googleChart` simplifies the integration of Google Charts by providing m
             <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
             <input type="hidden" name="upload[4CN44n6AAtK][height]" value="600">
             <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
+            <input type="hidden" name="upload[4CN44n6AAtK][lastModifiedDate]" value="Friday, October 1, 2021 2:00:00 AM">
             ```
          6. **Submit Your Form**
          7. **Access the Hidden Input on the Server Side:**
 		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
             ```php
-            // save_uploaded_image.php
+            // save_image_data.php
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Loop through each uploaded file's information
                 foreach ($_POST['upload'] as $file_id => $file_info) {

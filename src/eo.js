@@ -72,20 +72,23 @@
 	const redirect = (url) => window.location = url;
 
 	/**
-	 * Converts an epoch time (in seconds) to a localized string in the format:
+	 * Converts an epoch time (in seconds/milliseconds) to a localized string in the format:
 	 * "Weekday, Month Day, Year, HH:MM AM/PM"
 	 *
-	 * @param {number} epoch - The epoch time, in seconds
+	 * @param {number} epoch - The epoch time, in seconds/milliseconds
 	 * @returns {string} A localized string representation of the date and time
 	 */
-	const epochToTimeString = (epoch) => new Date(epoch * 1000).toLocaleString('en-US', {
-		weekday: 'long',
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-	});
+	const epochToTimeString = (epoch) => {
+		const isMilliseconds = epoch > 10000000000;
+		const date = new Date(isMilliseconds ? epoch : epoch * 1000);
+		return date.toLocaleString('en-US', {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+    });
 
 	/**
 	 * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
