@@ -51,13 +51,13 @@ This information is cached in localStorage to avoid redundant API calls.
    ```
 
 # eo.epochToTimeString(epoch)
-`eo.epochToTimeString(epoch)` converts a Unix epoch timestamp (seconds since 1970-01-01 UTC) into a human-readable date string formatted in US English.
-Converts an epoch time (in seconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
+`eo.epochToTimeString(epoch)` converts a Unix epoch timestamp (seconds/milliseconds since 1970-01-01 UTC) into a human-readable date string formatted in US English.
+Converts an epoch time (in seconds/milliseconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
 
 * ## Parameters
    | Parameter | Type | Description |
    | --- | --- | --- |
-   | `epoch` | `Number` | A **Unix timestamp** in **seconds** (not milliseconds). |
+   | `epoch` | `Number` | A **Unix timestamp** in **seconds/milliseconds**. |
 
 * ## Returns
    `String` A formatted date string in English (US locale).

@@ -88,7 +88,8 @@
 			day: 'numeric',
 			hour: '2-digit',
 			minute: '2-digit',
-    });
+		});
+	};
 
 	/**
 	 * Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
