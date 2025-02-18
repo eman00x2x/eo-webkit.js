@@ -44,13 +44,53 @@
 		return token;
 	})();
 
+
+	/**
+	 * Sanitizes a given string by escaping HTML special characters.
+	 * Uses the browser's built-in option element to convert the string.
+	 * 
+	 * @param {string} str - The string to be sanitized.
+	 * @returns {string} - The sanitized string with HTML special characters escaped.
+	 */
 	const _sanitize = str => new Option(str).innerHTML;
 
+	/**
+	 * Calculates the absolute difference between two dates in days.
+	 *
+	 * The function takes two arguments, `date` and `otherDate`, and returns the number
+	 * of days between them. The result is always positive, regardless of the order of
+	 * the arguments.
+	 *
+	 * @param {Date} date
+	 * @param {Date} otherDate
+	 * @returns {number} The absolute difference in days between the two dates.
+	 */
 	const diffDays = (date, otherDate) => Math.ceil(Math.abs(date - otherDate) / (1000 * 60 * 60 * 24));
-	const dayOfYear = (date) => Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-	const removeFalsy = (arr) => arr.filter(item => item !== '' && item !== null && item !== false && item !== undefined && typeof item !== 'boolean');
-	const removeDuplicates = (arr) => [...new Set(arr)];
+	
+	/**
+	 * Removes all elements from the given array that are either empty strings, null, false, undefined, or booleans.
+	 * @param {array} arr - The array to be filtered.
+	 * @returns {array} The filtered array.
+	 */
+	const removeFalseArray = (arr) => arr.filter(item => item !== '' && item !== null && item !== false && item !== undefined && typeof item !== 'boolean');
+	
+	/**
+	 * Removes all duplicate elements from the given array.
+	 * @param {array} arr - The array to be filtered.
+	 * @returns {array} The filtered array.
+	 */
+	const removeDuplicatesArray = (arr) => [...new Set(arr)];
 
+	/**
+	 * Retrieves the value of a cookie by its key.
+	 *
+	 * This function searches the document's cookies for a key-value pair that matches
+	 * the given key. If found, it returns the value associated with the key. If no
+	 * matching key is found, it returns an empty string.
+	 *
+	 * @param {string} key - The name of the cookie to retrieve.
+	 * @returns {string} The value of the cookie, or an empty string if the key is not found.
+	 */
 	const getCookie = (key) => {
 		return document.cookie
 			.split(';')
@@ -59,6 +99,18 @@
 			?.split('=')[1] || '';
 	};
 
+	/**
+	 * Sets a cookie with the given key and value, expiring in the specified number of days.
+	 *
+	 * The function takes three arguments: `key`, `value`, and `days`. The `key` is the name
+	 * of the cookie, the `value` is the string value to be stored, and `days` is the number
+	 * of days until the cookie expires. The cookie is set with the path set to '/', making
+	 * it accessible to all pages on the current domain.
+	 *
+	 * @param {string} key - The name of the cookie.
+	 * @param {string} value - The value to be stored in the cookie.
+	 * @param {number} days - The number of days until the cookie expires.
+	 */
 	const setCookie = (key, value, days) => {
 		const expires = new Date(Date.now() + days * 864e5).toUTCString();
 		document.cookie = `${key}=${value}; expires=${expires}; path=/`;
