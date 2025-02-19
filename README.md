@@ -1,3 +1,27 @@
+**eo.js** is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks, including:
+
+* **Data Manipulation:**  Functions for trimming strings (`trim`), formatting file sizes (`formatFileSize`), generating UUIDs (`uuidv4`), converting currencies (`convertCurrency`), serializing form data (`serializeFormData`), and converting between array and dot notation (`arrayToDotNotation`, `dotNotationToArray`).
+
+* **Date and Time:**  Utilities for converting epoch timestamps to time strings (`epochToTimeString`).
+
+* **DOM Manipulation:** Functions for moving HTML elements (`moveHtmlElement`), creating elements (`createElements`), creating hidden input fields (`createHiddenInput`), and interacting with video elements (`video`).
+
+* **Network Requests:**  Convenient wrappers for making POST and GET requests (`post`, `get`), and handling redirects (`redirect`).  Includes functions for interacting with a user client (`userClient`) and managing CSRF tokens (`_CSRFToken`).
+
+* **Random Data Generation:** Functions for generating random characters (`getRandomChar`) and numbers (`getRandomNum`).
+
+* **Form Handling and Validation:** A form validator (`validator`) and a function for submitting forms (`submitForm`).
+
+* **UI Components:** Pre-built components for common UI elements such as modals (`modal`), alerts (`alert`), buttons (`button`), sliders (`slider`), and file uploaders (`uploader`).  Includes integrations for third-party libraries like TinyMCE (`tinymce`), Google Charts (`googleChart`), and Tom Select (`tomSelect`).
+
+* **Third-Party Integrations:** Functions for fetching YouTube video data (`getYoutubeVideoData`).
+
+* **Settings Management:**  A function for managing settings (`settings`).
+
+* **Calculators:**  A mortgage calculator component (`mortgageCalculator`).
+
+eo.js aims to simplify front-end development by providing a single, well-documented library for a variety of everyday tasks.  It's designed to be modular and easy to use, helping developers build web applications more efficiently.
+
 
 # eo.userClient
 The `eo.userClient` collects and manages client-related data, including:
