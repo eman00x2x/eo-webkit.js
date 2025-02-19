@@ -1,7 +1,7 @@
 {
-  "name": "eo",
+  "name": "eo.js",
   "version": "1.0.0",
-  "description": "",
+  "description": "eo.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks.",
   "main": ".eslintrc.js",
   "directories": {
     "test": "tests"
