@@ -1052,6 +1052,7 @@ require(['eo'], function(eo) {
    | `formId` | `string` | The ID of the form to submit (with or without `#`). |
    | `options` | `object` | Configuration options for the `eo.submitForm`. |
 
+   **Options**
    | Options | Type | Description |
    | --- | --- | --- |
    | `rules` | `object` | The validation rules based on the [`eo.validator`](#eovalidator). |
