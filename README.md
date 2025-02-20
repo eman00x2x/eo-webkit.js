@@ -1138,7 +1138,8 @@ require(['eo-webkit'], function(eo) {
    * The callback function should return a valid HTML string or a DOM element.
    * Destroyable modals are automatically removed from the DOM upon closing.
    
-   #### create({ id, size, callback, status = false, destroyable = true })
+   #### Method
+   1. `create({ id, size, callback, status = false, destroyable = true })`
    Creates and displays a Bootstrap modal.
 
    **Parameters**
