@@ -12,44 +12,44 @@ eo.js is a comprehensive JavaScript utility library designed to streamline web d
     *   [AMD](#amd)
 *   [API Reference](#api-reference)
     *   [Data Manipulation](#data-manipulation)
-        *   [`trim(string)`](#trim-string) - Removes leading and trailing whitespace from a string.
-        *   [`formatFileSize(size)`](#formatfilesize-size) - Formats a file size into a human-readable string (e.g., "10KB", "2MB").
-        *   [`uuidv4()`](#uuidv4) - Generates a UUID (Universally Unique Identifier) v4.
-        *   [`convertCurrency(amount, from, to)`](#convertcurrency-amount-from-to) - Converts a currency amount from one currency to another.
-        *   [`serializeFormData(form)`](#serializeformdata-form) - Serializes form data into a query string.
-        *   [`arrayToDotNotation(array)`](#arraytodotnotation-array) - Converts an array to dot notation (e.g., `['a', 'b', ['c']]` becomes `'a.b.c'`).
-        *   [`dotNotationToArray(dotNotation)`](#dotnotationtoarray-dotnotation) - Converts dot notation to an array.
+        *   [`eo.trim`](#eotrim) - Removes leading and trailing whitespace from a string.
+        *   [`eo.formatFileSize`](#eoformatfilesize) - Formats a file size into a human-readable string (e.g., "10KB", "2MB").
+        *   [`eo.uuidv4`](#eouuidv4) - Generates a UUID (Universally Unique Identifier) v4.
+        *   [`eo.convertCurrency`](#eoconvertcurrency) - Converts a currency amount from one currency to another.
+        *   [`eo.serializeFormData`](#seoerializeformdata) - Serializes form data into a query string.
+        *   [`eo.arrayToDotNotation`](#eoarraytodotnotation) - Converts an array to dot notation (e.g., `['a', 'b', ['c']]` becomes `'a.b.c'`).
+        *   [`eo.dotNotationToArray`](#eodotnotationtoarray) - Converts dot notation to an array.
     *   [Date and Time](#date-and-time)
-        *   [`epochToTimeString(epoch)`](#epochtotimestring-epoch) - Converts an epoch timestamp to a human-readable time string.
+        *   [`eo.epochToTimeString`](#eoepochtotimestring) - Converts an epoch timestamp to a human-readable time string.
     *   [DOM Manipulation](#dom-manipulation)
-        *   [`moveHtmlElement(element, target)`](#movehtmlelement-element-target) - Moves an HTML element to a new target element.
-        *   [`createElements(tagName, attributes)`](#createelements-tagname-attributes) - Creates one or more HTML elements.
-        *   [`createHiddenInput(name, value)`](#createhiddeninput-name-value) - Creates a hidden input field.
-        *   [`getYoutubeVideoData(videoId)`](#getyoutubevideodata-videoid) - Retrieves data about a YouTube video.
+        *   [`eo.moveHtmlElement`](#eomovehtmlelement) - Moves an HTML element to a new target element.
+        *   [`eo.createElements`](#eocreateelements) - Creates one or more HTML elements.
+        *   [`eo.createHiddenInput`](#eocreatehiddeninput) - Creates a hidden input field.
+        *   [`eo.getYoutubeVideoData`](#eogetyoutubevideodata) - Retrieves data about a YouTube video.
     *   [Network Requests](#network-requests)
-        *   [`post(url, data, callback)`](#post-url-data-callback) - Makes a POST request.
-        *   [`get(url, callback)`](#get-url-callback) - Makes a GET request.
-        *   [`redirect(url)`](#redirect-url) - Redirects the browser to a new URL.
-        *   [`userClient()`](#userclient) - Manages user client interactions.
-        *   [`_CSRFToken()`](#csrftoken) - Retrieves the CSRF token.
+        *   [`eo.post`](#eopost) - Makes a POST request.
+        *   [`eo.get`](#eoget) - Makes a GET request.
+        *   [`eo.redirect`](#eoredirect) - Redirects the browser to a new URL.
+        *   [`eo.userClient`](#eouserclient) - Manages user client interactions.
+        *   [`eo._CSRFToken`](#eocsrftoken) - Retrieves the CSRF token.
     *   [Random Data Generation](#random-data-generation)
-        *   [`getRandomChar()`](#getrandomchar) - Generates a random character.
-        *   [`getRandomNum(min, max)`](#getrandomnum-min-max) - Generates a random number within a range.
+        *   [`eo.getRandomChar`](#eogetrandomchar) - Generates a random character.
+        *   [`eo.getRandomNum`](#eogetrandomnum) - Generates a random number within a range.
     *   [Form Handling and Validation](#form-handling-and-validation)
-        *   [`validator(form, rules)`](#validator-form-rules) - Validates a form based on specified rules.
-        *   [`submitForm(form, callback)`](#submitform-form-callback) - Submits a form.
+        *   [`eo.validator`](#eovalidator) - Validates a form based on specified rules.
+        *   [`eo.submitForm`](#eosubmitform) - Submits a form.
     *   [UI Components](#ui-components)
-        *   [`modal(selector)`](#modal-selector) - Manages a modal dialog.
-        *   [`alert(message)`](#alert-message) - Displays an alert message.
-        *   [`button(selector)`](#button-selector) - Provides an interface for interacting with buttons.
-        *   [`slider(selector)`](#slider-selector) - Manages a slider component.
-        *   [`uploader(selector)`](#uploader-selector) - Manages a file uploader.
-        *   [`video(selector)`](#video-selector) - Provides an interface for interacting with video elements.
-        *   [`mortgageCalculator(element)`](#mortgagecalculator-element) - Provides a mortgage calculator component.
+        *   [`eo.modal`](#eomodal) - Manages a modal dialog.
+        *   [`eo.alert`](#eoalert) - Displays an alert message.
+        *   [`eo.button`](#eobutton) - Provides an interface for interacting with buttons.
+        *   [`eo.slider`](#eoslider) - Manages a slider component.
+        *   [`eo.uploader`](#eouploader) - Manages a file uploader.
+        *   [`eo.video`](#eovideo) - Provides an interface for interacting with video elements.
+        *   [`eo.mortgageCalculator`](#eomortgagecalculator) - Provides a mortgage calculator component.
     *   [Third-Party Integrations](#third-party-integrations)
-        *   [`tinymce(selector, options)`](#tinymce-selector-options) - Integrates with TinyMCE.
-        *   [`googleChart(element, data, options)`](#googlechart-element-data-options) - Integrates with Google Charts.
-        *   [`tomSelect(selector, options)`](#tomselect-selector-options) - Integrates with Tom Select.
+        *   [`eo.tinymce`](#eotinymce) - Integrates with TinyMCE.
+        *   [`eo.googleChart`](#eogooglechart) - Integrates with Google Charts.
+        *   [`eo.tomSelect`](#eotomselect) - Integrates with Tom Select.
 *   [License](#license)
 
 
@@ -112,7 +112,7 @@ require(['eo'], function(eo) {
 
 # API-Reference
    ## Data Manipulation
-   ### eo.trim(stringValue, maximumLength)
+   ### eo.trim
    `eo.trim(stringValue, maxLength)` truncates a string if it exceeds the specified maxLength and appends "...". If the string is within the limit, it   remains unchanged.
 
    * #### Parameters
@@ -133,7 +133,7 @@ require(['eo'], function(eo) {
       // Output: "Short" (unchanged)
       ```
 
-   ### eo.formatFileSize(bytes, decimalPlaces = 0)
+   ### eo.formatFileSize
    `eo.formatFileSize(bytes, decimalPlaces = 0)` converts a file size in bytes into a human-readable format (e.g., KB, MB, GB). It supports up to Yottabytes (YB) and allows formatting with a specified number of decimal places.
 
    * #### Parameters
@@ -160,7 +160,7 @@ require(['eo'], function(eo) {
       // Output: "0 Bytes"
       ```
 
-   ### eo.uuidv4()
+   ### eo.uuidv4
    `eo.uuidv4()` generates a random UUID (Universally Unique Identifier) Version 4 in the standard format:  
    `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`  
    where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4 specification).
@@ -174,7 +174,7 @@ require(['eo'], function(eo) {
       // Output: "3f94a8a7-1d2b-4c19-9b2f-6de8f0ea6df0" (random each time)
       ```
 
-   ### eo.convertCurrency(amount)
+   ### eo.convertCurrency
    `eo.convertCurrency(amount)` formats large numbers into a more readable currency notation using suffixes like K (thousand), M (million), B (billion) T (trillion), and beyond, up to Googol (1e100).
    
    * #### Parameters
@@ -194,7 +194,7 @@ require(['eo'], function(eo) {
       console.log(eo.convertCurrency(999));       // "999"
       ```
 
-   ### eo.serializeFormData(formData)
+   ### eo.serializeFormData
    `eo.serializeFormData(formData)` converts form data into a plain JavaScript object. It supports different input types, including:
    **FormData** (browser API)  
    **Array of object**s (e.g., { name: "email", value: "test@example.com" })  
@@ -240,7 +240,7 @@ require(['eo'], function(eo) {
    ### eo.dotNotationToArray(dotNotation)
 
    ## Date and Time
-   ### eo.epochToTimeString(epoch)
+   ### eo.epochToTimeString
    `eo.epochToTimeString(epoch)` converts a Unix epoch timestamp (seconds/milliseconds since 1970-01-01 UTC) into a human-readable date string formatted in US English.
    Converts an epoch time (in seconds/milliseconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
 
@@ -296,7 +296,7 @@ require(['eo'], function(eo) {
       </div>
       ```
 
-   ### eo.createElements(tag, attributes = {}, children)
+   ### eo.createElements
    `eo.createElements(tag, attributes, children)` dynamically creates an HTML element, applies attributes, and appends child elements or text nodes. Ensures data sanitization before inserting into the DOM.
 
    * #### Parameters
@@ -341,7 +341,7 @@ require(['eo'], function(eo) {
       | `attributes` is not an object | `"Attributes must be an object"` |
       | `children` is not an array | `"Children must be an array"` |
 
-   ### eo.createHiddenInput(name, value)
+   ### eo.createHiddenInput
    `eo.createHiddenInput(name, value)` creates a hidden input field with a specified name and value. This is useful for storing data in forms without displaying it to the user.
    
    * #### Parameters
@@ -370,7 +370,7 @@ require(['eo'], function(eo) {
       | `name` is **not a string** or empty | `"Invalid name"` |
       | `value` is **not a string** | `"Invalid value"` |
 
-   ### eo.getYoutubeVideoData(url)
+   ### eo.getYoutubeVideoData
       `eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
       It retrieves:  
       * **The video ID**
@@ -529,7 +529,7 @@ require(['eo'], function(eo) {
       });
       ```
 
-   ### eo.redirect(url)
+   ### eo.redirect
    `eo.redirect(url)` navigates the browser to the specified URL by setting window.location.
 
    * #### Parameters
@@ -582,7 +582,7 @@ require(['eo'], function(eo) {
       * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
    ## Random Data Generation
-   ### eo.getRandomChar(length)
+   ### eo.getRandomChar
    `eo.getRandomChar(length)` generates a random hexadecimal string of the specified length using the Web Crypto API for cryptographic security.
 
    * ## Parameters
@@ -599,7 +599,7 @@ require(['eo'], function(eo) {
       // Output: "f3a9c2b4d1" (random each time)
       ```
 
-   ### eo.getRandomNum(start, end)
+   ### eo.getRandomNum
    `eo.getRandomNum(start, end)` generates a random integer between start and end (inclusive).
    
    * #### Parameters
