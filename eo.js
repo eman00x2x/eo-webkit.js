@@ -8,6 +8,8 @@
 /* global module */ // For CommonJS
 /* global exports */ // For CommonJS
 
+// eo.js
+
 ; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
 		define([], factory); // Use AMD define
@@ -203,7 +205,7 @@
 		const i = Math.floor(Math.log2(bytes) / Math.log2(1000));
 		const size = (bytes / Math.pow(1000, i)).toFixed(decimalPlaces);
 
-		return `${size} ${sizes[i]}`;
+		return `${size}${sizes[i]}`;
 	};
 
 	/**
@@ -215,7 +217,7 @@
 	 * @returns {string} A randomly generated UUID version 4
 	 */
 	const uuidv4 = () => {
-		return '00000000-0000-0000-0000-000000000000'.replace(/[018]/g, c =>
+		return '00000000-0000-4000-8000-000000000000'.replace(/[018]/g, c =>
 			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
 		);
 	};
@@ -362,7 +364,7 @@
 					maxres: `http://img.youtube.com/vi/${id}/maxresdefault.jpg`,
 				},
 				url: `https://www.youtube.com/watch?v=${id}`,
-				embed: `https://www.youtube.com/embed/${id}`,
+				embed: `https://www.youtube.com/embed/${id}`
 			};
 		}
 
@@ -1690,15 +1692,11 @@
 
 	const eo = {
 		initBeforeLoad: function() {
-			/* Address.initBeforeLoad(); */
 			video._initBeforeLoad();
-			_slider._initBeforeLoad();
 			mortgageCalculator._initBeforeLoad();
 		},
 
 		initAfterLoad: () => {
-			/* Address.initAfterLoad(); */
-			_slider._initAfterLoad();
 			modal._initAfterLoad();
 
 			let resizeTO;
@@ -1715,7 +1713,6 @@
 
 		userClient,
 		_CSRFToken,
-		settings,
 		moveHtmlElement,
 		createElements,
 		createHiddenInput,
@@ -1746,7 +1743,6 @@
 		button,
 		tinymce,
 		googleChart,
-		slider,
 		tomSelect,
 
 		submitForm,

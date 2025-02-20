@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "lint-all": "eslint ."
   },
   "repository": {
@@ -15,16 +15,16 @@
     "url": "git+https://github.com/eman00x2x/eo.js.git"
   },
   "keywords": [
-	"comprehensive JavaScript utility library",
-	"data manipulation",
-	"date/time handling",
-	"DOM manipulation",
-	"network requests",
-	"random data generation",
-	"form handling",
-	"UI components",
-	"third-party integrations",
-	"mortgage calculators"
+    "comprehensive JavaScript utility library",
+    "data manipulation",
+    "date/time handling",
+    "DOM manipulation",
+    "network requests",
+    "random data generation",
+    "form handling",
+    "UI components",
+    "third-party integrations",
+    "mortgage calculators"
   ],
   "author": "Eman Olivas",
   "license": "MIT",
@@ -35,6 +35,8 @@
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.1",
-    "globals": "^15.14.0"
+    "globals": "^15.14.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
