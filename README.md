@@ -1816,8 +1816,7 @@ require(['eo'], function(eo) {
    | `render` | `Object` | Default Rendering Function | Custom rendering functions for items and options. |
 
    **Default Rendering Function**
-   * `**_renderOption(data, escape)**` A private function that defines how to render options in the dropdown.
-   * Uses `eo.createElements` to create and return DOM elements.
+   * **`_renderOption(data, escape)`** A private function that defines how to render options in the dropdown.
    ```javascript
    eo.tomSelect.init('#mySelect', {
       // ....
