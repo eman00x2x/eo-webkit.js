@@ -1712,6 +1712,64 @@ require(['eo'], function(eo) {
       ```
 
    ### eo.tomSelect
+   `eo.tomSelect.init(containerId, options = {})` Initializes Tom Select on a specified container with optional settings.
+
+   **Features**
+   * **Initialization of Tom Select:** Simplifies the process of initializing Tom Select on an element.
+   * **Customizable Options:** Allows for customization of options while providing sensible defaults.
+   * **Custom Rendering:** Supports custom rendering of dropdown items and options.
+
+   #### Setup
+   Ensure the Tom Select script is included in your HTML head:
+   ```javascript
+   <script src="https://cdn.jsdelivr.net/npm/tom-select@latest/dist/js/tom-select.complete.min.js"></script>
+   ```
+
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `containerId` | `string` | The CSS selector of the container element where Tom Select will be initialized. 
+   | `options` | `Object` | Optional settings to customize Tom Select. |
+
+   | Options | Type | Default | Description |
+   | --- | --- | --- |
+   | `copyClassesToDropdown` | `Boolean` | false | Whether to copy classes to the dropdown. |
+   | `dropdownParent` | `String` | `body` | The parent element of the dropdown. |
+   | `controlInput` | `String` | `<input>` | The input element used for control. |
+   | `render` | `Object` | Default Rendering Function | Custom rendering functions for items and options. |
+
+   **Default Rendering Function**
+   * `**_renderOption(data, escape)**` A private function that defines how to render options in the dropdown.
+   * Uses `eo.createElements` to create and return DOM elements.
+   ```javascript
+   eo.tomSelect.init('#mySelect', {
+      // ....
+      render: {
+         item: _renderOption,
+         option: _renderOption,
+      }
+   });
+   ```
+
+   #### Return
+   `void` This function does not return anything.
+
+   #### Example Usage
+   ```javascript
+   document.addEventListener('DOMContentLoaded', () => {
+      eo.tomSelect.init('#mySelect', {
+         copyClassesToDropdown: true,
+         render: {
+               option: (data, escape) => {
+                  return `<div class="custom-option">${escape(data.text)}</div>`;
+               }
+         }
+      });
+   });
+   ```
+
+
+
 
 # License
 MIT License
