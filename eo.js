@@ -20,23 +20,15 @@
 
 	'use strict';
 
-	let DOMAIN;
-	let CDN;
-
-	const settings = ({ domain, cdn } = {}) => {
-		DOMAIN = domain;
-		CDN = cdn;
-	};
-
 	/**
-	   * Checks if the application is in development mode by examining a meta tag.
-	   *
-	   * This function looks for a meta tag with the name "inDevelopment" in the document.
-	   * If the content of this meta tag is "1", the function returns true, indicating
-	   * that the application is in development mode. Otherwise, it returns false.
-	   *
-	   * @returns {boolean} True if the application is in development mode, false otherwise.
-	   */
+	 * Checks if the application is in development mode by examining a meta tag.
+	 *
+	 * This function looks for a meta tag with the name "inDevelopment" in the document.
+	 * If the content of this meta tag is "1", the function returns true, indicating
+	 * that the application is in development mode. Otherwise, it returns false.
+	 *
+	 * @returns {boolean} True if the application is in development mode, false otherwise.
+	 */
 	const isInDevelopment = () => document.querySelector('meta[name="inDevelopment"]')?.content === '1';
 
 	const _CSRFToken = (() => {
@@ -577,7 +569,14 @@
 			browser: null
 		};
 
-		const getGeoInfo = async () => {
+		/**
+		 * Asynchronously retrieves the user's geographical information from the IPInfo service.
+		 * Updates the clientInfo object with the retrieved geo data and stores it in local storage.
+		 * In case of an error during the fetch process, logs an error message to the console.
+		 * @private
+		 * @throws Will log an error to the console if the request fails.
+		 */
+		const _getGeoInfo = async () => {
 			try {
 				clientInfo.geo = await get('https://ipinfo.io/json');
 				localStorage.setItem('EOclient', JSON.stringify(clientInfo));
@@ -586,7 +585,15 @@
 			}
 		};
 
-		const detectBrowser = () => {
+		/**
+		 * Detects the browser name from the user agent string.
+		 * Tries to match the user agent string against the given browsers.
+		 * If a match is found, the corresponding browser name is assigned to the clientInfo object.
+		 * If no match is found, assigns 'Unknown Browser' to the clientInfo object.
+		 * @private
+		 * @returns {void}
+		 */
+		const _detectBrowser = () => {
 			const browsers = {
 				'Opera|Opr': 'Opera',
 				'Edg': 'Microsoft Edge',
@@ -603,132 +610,47 @@
 		};
 
 		if (!localStorage.getItem('EOclient')) {
-			getGeoInfo();
-			detectBrowser();
+			_getGeoInfo();
+			_detectBrowser();
 		}
 
 		return clientInfo;
 	})();
 
-	const _slider = function() {
-
-		const inputFromElementId = 'sliderFrom';
-		const inputToElementId = 'sliderTo';
-		const minValue = 1000;
-		const maxValue = 10000;
-		const stepValue = 1000;
-
-		const defaultOptions = {
-			start: [minValue, maxValue],
-			connect: true,
-			step: stepValue,
-			range: {
-				min: minValue,
-				max: maxValue
-			}
-		};
-
-		const create = (rangeContainerSelector, options = {}) => {
-			const rangeContainer = document.createElement('div');
-			rangeContainer.classList.add('range');
-			document.querySelector(rangeContainerSelector).appendChild(rangeContainer);
-
-			if (rangeContainer === null) {
-				return;
-			}
-
-			const mergedOptions = { ...defaultOptions, ...options };
-			noUiSlider.create(rangeContainer, mergedOptions);
-
-			const sliderValueDisplay = document.createElement('div');
-			sliderValueDisplay.classList.add('slider-non-linear-step-value');
-			rangeContainer.parentNode.insertBefore(sliderValueDisplay, rangeContainer.nextSibling);
-
-			_createSliderInputElement(rangeContainerSelector, rangeContainer);
-		};
-
-		const _createSliderInputElement = (sliderElement, rangeContainer) => {
-			let inputFromId = document.querySelector(sliderElement)
-				.dataset.inputFromId || inputFromElementId;
-			let inputToId = document.querySelector(sliderElement).dataset.inputToId || inputToElementId;
-
-			const inputFrom = createElements('input', {
-				type: 'hidden',
-				name: inputFromId,
-				id: inputFromId,
-				value: ''
-			});
-
-			const inputTo = createElements('input', {
-				type: 'hidden',
-				name: inputToId,
-				id: inputToId,
-				value: ''
-			});
-
-			document.querySelector(sliderElement).prepend(inputFrom);
-			document.querySelector(sliderElement).prepend(inputTo);
-
-			rangeContainer.noUiSlider.on('update', (values) => {
-				const sliderValueDisplay = document.querySelector('.slider-non-linear-step-value');
-				sliderValueDisplay.innerHTML = `<span class="text-muted">Range:</span> P${formatCurrency(values[0])} - P${formatCurrency(values[1])}`;
-
-				document.getElementById(inputFromId).value = values[0];
-				document.getElementById(inputToId).value = values[1];
-			});
-		};
-
-		const _initSLider = () => {
-			const rangeContainerSelector = '.slider-display';
-			const rangeContainer = document.querySelector(rangeContainerSelector);
-			if (rangeContainer === null) {
-				return;
-			}
-
-			const min = Number(document.querySelector(rangeContainerSelector).dataset.min) || minValue;
-			const max = Number(document.querySelector(rangeContainerSelector).dataset.max) || maxValue;
-			const step = Number(document.querySelector(rangeContainerSelector).dataset.step) || stepValue;
-
-			defaultOptions.start = [min, max];
-			defaultOptions.range.min = min;
-			defaultOptions.range.max = max;
-			defaultOptions.step = step;
-			defaultOptions.format = wNumb({
-				decimals: 2
-			});
-
-			create(rangeContainerSelector, defaultOptions);
-		};
-
-		return {
-			_initAfterLoad: () => {
-				_initSLider();
-			},
-
-			_initBeforeLoad: () => {
-			},
-
-			create
-		};
-	}();
-
-	const slider = function() {
-		return { create: _slider.create };
-	}();
-
 	const video = (() => {
+		/**
+		 * Resets the form and shows an error message to the user when the response from the server
+		 * is invalid (e.g. the video URL is not valid or the video is already added).
+		 * @param {HTMLInputElement} input - The input element to add the is-invalid class to.
+		 * @param {HTMLSpanElement} btnSpinner - The spinner button element to hide.
+		 * @param {HTMLSpanElement} btnText - The text button element to show.
+		 */
 		const _resetForm = (input, btnSpinner, btnText) => {
 			btnSpinner.classList.add('d-none');
 			btnText.classList.remove('d-none');
 			input.disabled = false;
 		};
 
+		/**
+		 * Resets the form and shows an error message to the user when the response from the server
+		 * is invalid (e.g. the video URL is not valid or the video is already added).
+		 * @param {HTMLInputElement} input - The input element to add the is-invalid class to.
+		 * @param {HTMLSpanElement} btnSpinner - The spinner element to hide.
+		 * @param {HTMLSpanElement} btnText - The text element to show.
+		 * @param {string} message - The error message to show to the user.
+		 */
 		const _invalidResponse = (input, btnSpinner, btnText, message) => {
 			input.classList.add('is-invalid');
 			_resetForm(input, btnSpinner, btnText);
 			alert.error(message);
 		};
 
+		/**
+		 * Handles the click event of the add video button and adds the video to the
+		 * video list container if the YouTube URL is valid and the video is not already
+		 * added.
+		 * @private
+		 */
 		const _handleVideoAdd = () => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-add-video');
@@ -781,6 +703,13 @@
 			});
 		};
 
+		/**
+		 * Handles video playback by listening for clicks on the video thumbnails and
+		 * opening a modal with the video player.
+		 *
+		 * @private
+		 * @function
+		 */
 		const _handleVideoPlayback = () => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-playback');
@@ -813,6 +742,15 @@
 			});
 		};
 
+		/**
+		 * Attaches a click event listener to the document to handle video deletion.
+		 * 
+		 * This function listens for clicks on elements with the class 'btn-remove-video'.
+		 * When clicked, it removes the corresponding video element from the DOM using 
+		 * the data-id attribute of the clicked button.
+		 * 
+		 * @private
+		 */
 		const _handleVideoDeletion = () => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-remove-video');
@@ -820,6 +758,12 @@
 			});
 		};
 
+		/**
+		 * Creates the video form element.
+		 *
+		 * @private
+		 * @function
+		 */
 		const _createVideoForm = () => {
 			const container = document.getElementById('videoInput');
 			if (!container) return;
@@ -846,11 +790,22 @@
 		};
 
 		return {
+			/**
+			 * Initializes the video module before the page finishes loading.
+			 * This is needed to add the event listeners to the video buttons.
+			 * @private
+			 * @function
+			 */
 			_initBeforeLoad: () => {
 				_handleVideoAdd();
 				_handleVideoDeletion();
 				_handleVideoPlayback();
 			},
+			/**
+			 * Initializes the video module by creating the form elements for inputting
+			 * YouTube URLs and adding them to the page.
+			 * @function
+			 */
 			init: () => {
 				_createVideoForm();
 			}
@@ -858,6 +813,13 @@
 	})();
 
 	const alert = function() {
+		/**
+		 * Displays a message in the specified container element on the webpage.
+		 *
+		 * @param {string} message - The message to be displayed.
+		 * @param {string} element - The CSS selector of the container where the message will be displayed.
+		 *                           If the container does not exist, a new one will be created.
+		 */
 		const _display = (message, element) => {
 			const messageContainer = document.querySelector(element);
 
@@ -868,6 +830,13 @@
 			document.querySelector(element).innerHTML = message;
 		};
 
+		/**
+		 * Creates and displays an alert message on the webpage.
+		 * 
+		 * @param {string} message - The message to be displayed in the alert.
+		 * @param {string} [type='success'] - The type of alert, which determines its styling (e.g., 'success', 'danger').
+		 * @param {string} [element='.response'] - The CSS selector of the container where the alert will be displayed.
+		 */
 		const _createAlert = (message, type = 'success', element = '.response') => {  // Combined function
 			const alertClasses = `message alert alert-${type} alert-dismissible show`; // Dynamic class
 			const alertDiv = createElements('div', { class: alertClasses, role: 'alert' }, [
@@ -884,6 +853,12 @@
 		const success = (message, element = '.response') => _createAlert(message, 'success', element);
 		const error = (message, element = '.response') => _createAlert(message, 'danger', element);
 
+		/**
+		 * Displays a processing loader with a message in the specified container element on the webpage.
+		 *
+		 * @param {string} [message='Processing, Please wait...'] - The message to be displayed with the loader.
+		 * @param {string} [element='.response'] - The CSS selector of the container where the loader will be displayed.
+		 */
 		const loader = (message = 'Processing, Please wait...', element = '.response') => {
 			const loaderDiv = createElements('div', { class: 'bg-white p-3 mt-3 rounded border' }, [
 				createElements('div', { class: 'd-flex gap-3 align-items-center' }, [
@@ -895,6 +870,13 @@
 			_display(loaderDiv.outerHTML, element);
 		};
 
+		/**
+		 * Creates and displays an alert message on the webpage.
+		 * 
+		 * @param {string} message - The message to be displayed in the alert.
+		 * @param {string} type - The type of alert, which determines its styling (e.g., 'success', 'danger').
+		 * @param {string} [element='.response'] - The CSS selector of the container where the alert will be displayed.
+		 */
 		const message = (message, type, element = '.response') => {
 			_createAlert(message, type, element);
 		};
@@ -908,6 +890,12 @@
 	}();
 
 	const button = (() => {
+		/**
+		 * Sets the state of a set of buttons or clickable elements identified by the given selector.
+		 * @param {string} selector - The CSS selector to identify the elements to modify.
+		 * @param {boolean} disabled - Whether to disable the elements or not.
+		 * @returns {undefined}
+		 */
 		const setState = (selector, disabled) => {
 			document.querySelectorAll(selector).forEach(el => {
 				Object.assign(el.style, {
@@ -991,6 +979,14 @@
 	};
 
 	const modal = (() => {
+		/**
+		 * Creates a modal element with a given id, size, content, status and destroyable flag.
+		 * @param {string} id - The id of the modal element.
+		 * @param {string} size - The size of the modal element. Can be "xs", "sm", "md", "lg", "xl", "fullscreen".
+		 * @param {function} [callback] - A callback function to be called to generate the modal content.
+		 * @param {boolean} [status=false] - Whether to add a modal status element to the modal element.
+		 * @param {boolean} [destroyable=true] - Whether to add a modal destroyable class to the modal element.
+		 */
 		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
 			const _modal = createElements('div', {
 				class: `modal ${destroyable ? 'modal-destroyable' : ''}`,
@@ -1019,6 +1015,13 @@
 			new bootstrap.Modal(_modal, { keyboard: false }).show();
 		};
 
+		/**
+		 * Parses the result of a callback function into an array of DOM elements.
+		 * 
+		 * @param {Function} callback - A callback function that returns either an HTML string or a DOM Element.
+		 * @returns {Array} An array of DOM elements derived from the callback's return value.
+		 *                  Returns an empty array if no callback is provided, or the result is not a string or Element.
+		 */
 		const _parseCallback = (callback) => {
 			if (!callback) return [];
 			const content = callback();
@@ -1030,6 +1033,13 @@
 			return content instanceof Element ? [content] : [];
 		};
 
+		/**
+		 * Handles the click event of the close button for the modal.
+		 * 
+		 * When the close button is clicked, the modal is closed using the
+		 * Bootstrap Modal instance. If the modal is not found, nothing will
+		 * happen.
+		 */
 		const _handleModalClose = () => {
 			document.addEventListener('click', (event) => {
 				const _modal = event.target.closest('.modal');
@@ -1039,6 +1049,12 @@
 			});
 		};
 
+		/**
+		 * Attaches an event listener to the document to listen for the 'hidden.bs.modal' event,
+		 * which is triggered when a Bootstrap modal is fully hidden. If the modal has the class
+		 * 'modal-destroyable', it will be removed from the DOM upon closure.
+		 * This helps manage dynamic modal elements and prevents clutter in the DOM.
+		 */
 		const _destroyModalOnClose = () => {
 			document.addEventListener('hidden.bs.modal', (event) => {
 				const _modal = document.getElementById(event.target.id);
@@ -1047,6 +1063,16 @@
 		};
 
 		return {
+			/**
+			 * Initializes the modal after the page has finished loading.
+			 * 
+			 * This method is called when the page has finished loading and is responsible
+			 * for attaching an event listener to the document to listen for the
+			 * 'hidden.bs.modal' event, which is triggered when a Bootstrap modal is
+			 * fully hidden. Additionally, this method will attach an event listener to
+			 * the document to listen for the click event of the close button for the
+			 * modal.
+			 */
 			_initAfterLoad: () => {
 				_destroyModalOnClose();
 				_handleModalClose();
@@ -1062,6 +1088,22 @@
 		const defaultDocumentSingleUploadIcon = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiqCCMGSzWTOHM5Cs4eQXx6nPL_fWBuPprhw&s';
 		const defaultDocumentIcon = 'https://cdn-icons-png.flaticon.com/512/4726/4726010.png';
 
+		/**
+		 * Creates a new file uploader.
+		 * @param {string} [uploadSelector] - The CSS selector of the container element to create the uploader in.
+		 * @param {string} url - The URL to send the upload to.
+		 * @param {Object} [options] - Options to configure the uploader.
+		 * @param {string} [options.inputName] - The input name. Default is "eoFileUpload".
+		 * @param {string} [options.previewSelector] - The CSS selector of the preview container element. Default is ".uploaded-photo".
+		 * @param {boolean} [options.disablePreview] - Whether to disable the preview functionality. Default is false.
+		 * @param {string} [options.uploadType] - The type of upload. Either "image" or "document". Default is "image".
+		 * @param {string} [options.accept] - The MIME type of the file to accept. Default is "image/*" for images and "application/pdf" for documents.
+		 * @param {boolean} [options.multiple] - Whether to allow multiple files to be uploaded. Default is true.
+		 * @param {function} [options.onBeforeSend] - A callback to call before sending the upload request.
+		 * @param {function} [options.onSuccess] - A callback to call when the upload is successful.
+		 * @param {function} [options.onError] - A callback to call when the upload fails.
+		 * @returns {void}
+		 */
 		const create = (uploadSelector = '.upload-container', url, options = {}) => {
 			const {
 				inputName = 'eoFileUpload',
@@ -1081,9 +1123,19 @@
 			const inputId = 'a' + getRandomChar(6);
 
 			_createUI(uploadSelector, previewSelector, inputName, inputId, accept, multiple);
-			_handleEvents(uploadSelector, previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
+			_handleEvents(previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
 		};
 
+		/**
+		 * Creates the UI elements for the file uploader.
+		 * @param {string} selector - The CSS selector of the container element to create the uploader in.
+		 * @param {string} previewSelector - The CSS selector of the preview container element.
+		 * @param {string} inputName - The input name.
+		 * @param {string} inputId - The ID of the input element.
+		 * @param {string} accept - The MIME type of the file to accept.
+		 * @param {boolean} multiple - Whether to allow multiple files to be uploaded.
+		 * @returns {void}
+		 */
 		const _createUI = (selector, previewSelector, inputName, inputId, accept, multiple) => {
 			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
 			
@@ -1118,6 +1170,19 @@
 			if (!multiple) document.querySelector('.photo-preview').classList.add('btn-eo-uploader-browse');
 		};
 
+		/**
+		 * Renders a preview UI for uploaded files, handling both single and multiple file previews.
+		 * 
+		 * @param {string} previewSelector - The CSS selector for the preview container.
+		 * @param {boolean} multiple - Indicates whether multiple files can be uploaded.
+		 * @param {File[]} files - Array of files to be previewed.
+		 * 
+		 * The function creates a preview of the uploaded files, displaying them in a specified container.
+		 * It uses FileReader to load file data and dynamically creates HTML elements to represent each file.
+		 * For images, it sets their data URLs as background images. It also generates hidden inputs to store
+		 * file metadata such as name, size, type, and dimensions for images. If the specified preview container
+		 * is not found, it logs an error to the console.
+		 */
 		const _createPreviewUI = (previewSelector, multiple, files) => {
 			const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
 			if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
@@ -1178,7 +1243,21 @@
 			});
 		};
 
-		const _handleEvents = (selector, previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
+		/**
+		 * Handles events for the uploader.
+		 *
+		 * @param {string} selector - The selector for the container which contains the browse button.
+		 * @param {string} previewSelector - The selector for the container which contains the preview.
+		 * @param {boolean} multiple - Whether multiple files can be uploaded.
+		 * @param {string} inputId - The id of the file input.
+		 * @param {string} url - The url to post the file to.
+		 * @param {function} onBeforeSend - A callback function which is called before sending the request.
+		 *                                  Returning false will cancel the request.
+		 * @param {function} onSuccess - A callback function which is called when the request is successful.
+		 * @param {function} onError - A callback function which is called when the request fails.
+		 * @param {boolean} disablePreview - Whether to disable the preview UI.
+		 */
+		const _handleEvents = (previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
 			document.addEventListener('click', (e) => {
 				if (e.target.closest('.btn-eo-uploader-browse')) document.getElementById(inputId).click();
 			});
@@ -1219,6 +1298,15 @@
 	}();
 
 	const tinymce = function() {
+		/**
+		 * Initializes a TinyMCE editor in a given container.
+		 * 
+		 * @param {string} containerId - The id of the container which contains the textarea to be converted to a TinyMCE editor.
+		 * @param {Object} options - An object of options to be passed to TinyMCE's init function. For more details, refer to the TinyMCE documentation.
+		 * 
+		 * The function creates a TinyMCE editor in the specified container. It uses a default set of options which can be overridden by the options argument.
+		 * If the specified container is not found, it does nothing. If the TinyMCE script is not included in the head, it throws an error.
+		 */
 		const init = (containerId, options = {}) => {
 			const textarea = document.querySelector(containerId);
 			if (!textarea) return;
@@ -1252,6 +1340,17 @@
 	}();
 
 	const tomSelect = (() => {
+		/**
+		 * Initializes a TomSelect dropdown component in a specified container.
+		 *
+		 * @param {string} containerId - The CSS selector of the container element to initialize TomSelect in.
+		 * @param {Object} [options={}] - Optional configuration object to customize TomSelect behavior.
+		 * @throws {Error} If the TomSelect script is not included in the head.
+		 *
+		 * The function checks for the presence of the TomSelect library and initializes a dropdown
+		 * component in the specified container using default options that can be overridden by the
+		 * provided options argument. If the specified container is not found, the function does nothing.
+		 */
 		const init = (containerId, options = {}) => {
 			if (!window.TomSelect) {
 				throw new Error('TomSelect script is not included in head.');
@@ -1274,6 +1373,12 @@
 			new TomSelect(element, mergedOptions);
 		};
 
+		/**
+		 * A private function that defines how to render options in the dropdown.
+		 * @param {Object} data - The object which contains the option data.
+		 * @param {function} escape - A function which escapes the text of the option.
+		 * @return {HTMLDivElement} A div element which contains the option.
+		 */
 		const _renderOption = (data, escape) => {
 			return createElements('div', {}, [
 				...(data.customProperties ? [
@@ -1289,6 +1394,19 @@
 	})();
 
 	const googleChart = (() => {
+		/**
+		 * Creates a Google Chart in the specified container.
+		 * 
+		 * @param {Object} params - An object of parameters to create the chart.
+		 * @param {string} params.containerId - The id of the container element to contain the chart.
+		 * @param {function} params.data - A function which returns a populated google.visualization.DataTable.
+		 * @param {Object} [params.options={}] - An object of options to customize the chart behavior.
+		 * @param {string} params.packageType - The package type of the chart.
+		 * @param {function} params.chartType - The constructor function of the chart type.
+		 * @param {string} [params.apiKey=null] - The Google Maps API key.
+		 * @return {boolean} True if the chart is created successfully, false otherwise.
+		 * @throws {Error} If the container element is not found, or data is not set, or the chart type is not supported.
+		 */
 		const _createChart = ({ containerId, data, options = {}, packageType, chartType, apiKey }) => {
 			const container = document.getElementById(containerId);
 			if (!container) return false;
@@ -1455,35 +1573,52 @@
 	})();
 
 	const validator = function() {
-		let constraints = {};
-		let errors = [];
+		let _constraints = {};
+		let _errors = [];
 
-		const validate = (data, rules = constraints) => {
+		/**
+		 * Validates the given data against the given rules.
+		 * @param {Object} data The object to validate.
+		 * @param {Object} [rules] The validation rules. If omitted, previously set _constraints are used.
+		 * @returns {Boolean} true if validation passes, false if validation fails (_errors can be retrieved using getErrors()).
+		 */
+		const validate = (data, rules = _constraints) => {
 			if (typeof rules !== 'object') throw new Error('rules must be an object.');
 			if (typeof data !== 'object' || data instanceof FormData) throw new Error('data must be an object. Use eo.serializeFormData(data) instead.');
-			errors = [];
+			_errors = [];
 			Object.entries(rules).forEach(([field, ruleset]) => {
-				const value = getValue(data, field);
+				const value = _getValue(data, field);
 				Object.entries(ruleset).forEach(([rule, param]) => {
-					if (validators[rule] && !validators[rule](value, param)) {
-						const customMessage = param.message || errorMessages[rule](param);
-						errors.push(`${formatField(field)} ${customMessage}`);
+					if (_validators[rule] && !_validators[rule](value, param)) {
+						const customMessage = param.message || _errorMessages[rule](param);
+						_errors.push(`${_formatField(field)} ${customMessage}`);
 					}
 				});
 			});
-			return errors.length === 0;
+			return _errors.length === 0;
 		};
 
-		const getValue = (data, field) =>
+		/**
+		 * Retrieves the value of a nested property in an object.
+		 * @param {Object} data The object to retrieve the value from.
+		 * @param {String} field The dot-separated path to the nested property.
+		 * @returns {*} The value of the nested property, or undefined if the property does not exist.
+		 */
+		const _getValue = (data, field) =>
 			field.split('.').reduce((obj, key) => obj?.[key], data);
 
-		const formatField = (name) => {
+		/**
+		 * Formats a field name by replacing underscores with spaces and capitalizing the first letter of each word.
+		 * @param {String} name The field name to format.
+		 * @returns {String} The formatted field name.
+		 */
+		const _formatField = (name) => {
 			const parts = name.split('.');
 			const fieldName = parts.pop();
 			return fieldName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 		};
 
-		const errorMessages = {
+		const _errorMessages = {
 			required: () => 'is required.',
 			length: ({ min, max }) => `must be between ${min} and ${max} characters.`,
 			number: ({ min, max }) => `must be a number${min ? ` greater than ${min}` : ''}${max ? ` and less than ${max}` : ''}.`,
@@ -1495,7 +1630,7 @@
 			type: (param) => `must be of type ${param}.`
 		};
 
-		const validators = {
+		const _validators = {
 			required: (value, param) => param && (value !== null && value !== undefined && value !== ''),
 			length: (value, { min, max }) => typeof value === 'string' && value.length >= min && value.length <= max,
 			number: (value, { min, max }) => {
@@ -1513,13 +1648,20 @@
 
 		return {
 			validate,
-			getErrors: () => errors,
-			setConstraints: (rules) => (constraints = rules),
-			resetConstraints: () => (constraints = {})
+			getErrors: () => _errors,
+			setConstraints: (rules) => (_constraints = rules),
+			resetConstraints: () => (_constraints = {})
 		};
 
 	}();
 
+	/**
+	 * Converts a nested object into a flat object with dot notation keys.
+	 *
+	 * @param {Object} obj - The nested object to be converted.
+	 * @param {string} [prefix=''] - An optional prefix for the keys in the resulting flat object.
+	 * @returns {Object} A new flat object with dot notation keys.
+	 */
 	const arrayToDotNotation = (obj, prefix = '') =>
 		Object.keys(obj).reduce((res, key) => {
 			const prop = prefix ? `${prefix}.${key}` : key;
@@ -1531,6 +1673,12 @@
 			return res;
 		}, {});
 
+	/**
+	 * Converts a flat object with dot notation keys into a nested object.
+	 *
+	 * @param {Object} obj - The flat object to be converted.
+	 * @returns {Object} A new nested object.
+	 */
 	const dotNotationToArray = (obj) => {
 		let result = {};
 		Object.keys(obj).forEach(key => {
@@ -1601,7 +1749,6 @@
 		slider,
 		tomSelect,
 
-		/** COMPONENTS */
 		submitForm,
 		uploader,
 		mortgageCalculator,
