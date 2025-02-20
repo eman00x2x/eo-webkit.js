@@ -303,7 +303,7 @@ require(['eo'], function(eo) {
 
    #### Parameters
    | Parameters | Type | Default | Description |
-   | --- | --- | --- |
+   | --- | --- | --- | --- |
    | `obj` | `Object` | required | The nested object to be converted. |
    | `prefix` | `string` | empty `string` | An optional prefix for the keys in the resulting flat object. |
 
