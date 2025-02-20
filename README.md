@@ -294,6 +294,51 @@ require(['eo'], function(eo) {
    ```
 
    ### eo.dotNotationToArray
+   `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
+
+   **Features**
+   * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.
+   * **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.
+   * **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.
+
+   #### Parameters
+   | Parameters | Type | Default | Description |
+   | --- | --- | --- |
+   | `obj` | `Object` | required | The nested object to be converted. |
+   | `prefix` | `string` | empty `string` | An optional prefix for the keys in the resulting flat object. |
+
+   #### Returns
+   `Object` A new flat object with dot notation keys.
+
+   #### Example Usage
+   ```javascript
+   const nestedObj = {
+      user: {
+         name: 'John Doe',
+         address: {
+               city: 'New York',
+               zip: '10001'
+         }
+      }
+   };
+   const flatObj = arrayToDotNotation(nestedObj);
+   console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
+
+   const anotherNestedObj = {
+      product: {
+         id: 123,
+         details: {
+               name: 'Laptop',
+               specs: {
+                  cpu: 'Intel i7',
+                  ram: '16GB'
+               }
+         }
+      }
+   };
+   const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
+   console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product.details.specs.ram': '16GB' }
+   ```
 
    ### eo.removeFalseArray
    `eo.removeFalseArray(arr)` Filters an array by removing empty strings, null, false, undefined, and boolean values.
@@ -744,15 +789,15 @@ require(['eo'], function(eo) {
    ### eo.getRandomChar
    `eo.getRandomChar(length)` generates a random hexadecimal string of the specified length using the Web Crypto API for cryptographic security.
 
-   ## Parameters
+   #### Parameters
    | Parameter | Type | Description |
    | --- | --- | --- |
    | `length` | `Number` | The desired length of the output string. |
    
-   ## Returns
+   #### Returns
    `String` A random hexadecimal string of the given length.
    
-   ## Example Usage
+   #### Example Usage
    ```javascript
    console.log(eo.getRandomChar(10)); 
    // Output: "f3a9c2b4d1" (random each time)
@@ -1428,7 +1473,7 @@ require(['eo'], function(eo) {
       * Clicking on an added video will play it in a fullscreen modal.
       * A delete button is provided to remove a video entry.
 
-   ## eo.mortgageCalculator
+   ### eo.mortgageCalculator
    The `eo.mortgageCalculator` provides functionalities to calculate monthly mortgage payments, create selection elements for down payment    interest rates, and loan years, and display the results. It is designed to be embedded into a mortgage calculator form on a web page.
    
    **Notes**
@@ -1436,7 +1481,7 @@ require(['eo'], function(eo) {
    * The script should be included and initialized correctly to work as expected.
    * Customize the form and style as needed to fit your design.
       
-   ### Required Setup
+   #### Required Setup
     Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
     **JavaScript**
     ```javascript
