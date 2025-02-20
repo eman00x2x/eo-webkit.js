@@ -269,7 +269,7 @@
 
 
 	/**
-	 * Converts a given number to a human-readable currency format.
+	 * Formats large numbers into a more readable currency notation
 	 *
 	 * The function will return a string that represents the given number in a
 	 * human-readable format. The format will be one of the following:
@@ -282,7 +282,7 @@
 	 * @param {number} amount - The number to convert to a human-readable format
 	 * @returns {string} A human-readable string representation of the given number
 	 */
-	const convertCurrency = (amount) => {
+	const formatCurrency = (amount) => {
 		const num = Math.abs(Number(amount));
 		const suffixes = ['', 'K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'Nn', 'Dc', 'Ud', 'Dd', 'Td', 'Qdd', 'Qnd', 'Sxd', 'Spd', 'Od', 'Nd', 'V']; // Added suffixes for larger numbers up to Googol
 		const factor = [
@@ -669,7 +669,7 @@
 
 			rangeContainer.noUiSlider.on('update', (values) => {
 				const sliderValueDisplay = document.querySelector('.slider-non-linear-step-value');
-				sliderValueDisplay.innerHTML = `<span class="text-muted">Range:</span> P${convertCurrency(values[0])} - P${convertCurrency(values[1])}`;
+				sliderValueDisplay.innerHTML = `<span class="text-muted">Range:</span> P${formatCurrency(values[0])} - P${formatCurrency(values[1])}`;
 
 				document.getElementById(inputFromId).value = values[0];
 				document.getElementById(inputToId).value = values[1];
@@ -927,14 +927,14 @@
 	 * Submits the given form id, handles validation, redirects, and callbacks
 	 *
 	 * @param {String} formId - the form id to submit
-	 * @param {{ validation: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
-	 * @param {{ validation: Object }} [options.validation] - the validation object, see https://validatejs.org/#validatejs-validators
+	 * @param {{ rules: Object, callback: Function, onBeforeSend: Function, redirectUrl: String  }} [options] - options for the submission
+	 * @param {{ rules: Object }} [options.rules] - the rules object
 	 * @param {Function} [options.callback] - the callback function to call on success
 	 * @param {Function} [options.onBeforeSend] - the callback function to call before sending
 	 * @param {String} [options.redirectUrl] - the url to redirect to on success
 	 * @returns {JQueryPromise} - the promise returned by $.post
 	 */
-	const submitForm = (formId, { validation, callback, onBeforeSend, redirectUrl } = {}) => {
+	const submitForm = (formId, { rules, callback, onBeforeSend, redirectUrl } = {}) => {
 		formId = formId.replace('#', '');
 		const form = document.getElementById(formId);
 
@@ -957,8 +957,8 @@
 				alert.loader();
 				button.disable();
 
-				if (typeof validation === 'object') {
-					const validation = validator.validate(serializeFormData(formData), validation);
+				if (typeof rules === 'object') {
+					const validation = validator.validate(serializeFormData(formData), rules);
 					if (! validation) {
 						alert.error(validator.getErrors().join('<br /> '));
 					}
@@ -1575,7 +1575,7 @@
 		uuidv4,
 		getRandomChar,
 		getRandomNum,
-		convertCurrency,
+		formatCurrency,
 		serializeFormData,
 		getYoutubeVideoData,
 		post,

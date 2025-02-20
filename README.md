@@ -15,7 +15,7 @@ eo.js is a comprehensive JavaScript utility library designed to streamline web d
         *   [`eo.trim`](#eotrim) - Removes leading and trailing whitespace from a string.
         *   [`eo.formatFileSize`](#eoformatfilesize) - Formats a file size into a human-readable string (e.g., "10KB", "2MB").
         *   [`eo.uuidv4`](#eouuidv4) - Generates a UUID (Universally Unique Identifier) v4.
-        *   [`eo.convertCurrency`](#eoconvertcurrency) - Converts a currency amount from one currency to another.
+        *   [`eo.formatCurrency`](#eoformatcurrency) - formats large numbers into a more readable currency notation
         *   [`eo.serializeFormData`](#eoserializeformdata) - Serializes form data into a query string.
         *   [`eo.arrayToDotNotation`](#eoarraytodotnotation) - Converts a nested object into a flat object with dot notation keys.
         *   [`eo.dotNotationToArray`](#eodotnotationtoarray) - Converts dot notation to an array.
@@ -184,8 +184,8 @@ require(['eo'], function(eo) {
    // Output: "3f94a8a7-1d2b-4c19-9b2f-6de8f0ea6df0" (random each time)
    ```
 
-   ### eo.convertCurrency
-   `eo.convertCurrency(amount)` formats large numbers into a more readable currency notation using suffixes like K (thousand), M (million), B (billion) T (trillion), and beyond, up to Googol (1e100).
+   ### eo.formatCurrency
+   `eo.formatCurrency(amount)` formats large numbers into a more readable currency notation using suffixes like K (thousand), M (million), B (billion) T (trillion), and beyond, up to Googol (1e100).
    
    #### Parameters
    | Parameter | Type | Description |
@@ -197,11 +197,11 @@ require(['eo'], function(eo) {
 
    #### Example Usage
    ```javascript
-   console.log(eo.convertCurrency(1500));      // "1.5K"
-   console.log(eo.convertCurrency(1000000));   // "1M"
-   console.log(eo.convertCurrency(2500000000)); // "2.5B"
-   console.log(eo.convertCurrency(1e100));     // "1V"  (Googol)
-   console.log(eo.convertCurrency(999));       // "999"
+   console.log(eo.formatCurrency(1500));      // "1.5K"
+   console.log(eo.formatCurrency(1000000));   // "1M"
+   console.log(eo.formatCurrency(2500000000)); // "2.5B"
+   console.log(eo.formatCurrency(1e100));     // "1V"  (Googol)
+   console.log(eo.formatCurrency(999));       // "999"
    ```
 
    ### eo.serializeFormData
@@ -467,7 +467,7 @@ require(['eo'], function(eo) {
 
    ## DOM Manipulation
    ### eo.moveHtmlElement(fromSelector, toSelector)
-      `eo.moveHtmlElement(fromSelector, toSelector)` moves the inner HTML from one element to another. This is useful for dynamically repositioning content within a webpage.
+   `eo.moveHtmlElement(fromSelector, toSelector)` moves the inner HTML from one element to another. This is useful for dynamically repositioning content within a webpage.
 
    #### Parameters
    | Parameter | Type | Description |
@@ -786,6 +786,59 @@ require(['eo'], function(eo) {
    * Geo Fetch Failure: Logs an error (Error getting geo info:).
    * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
+   ### eo._CSRFToken
+   `eo._CSRFToken` Automatically retrieves the CSRF token from the meta tags.
+   
+   **Features**
+   * **Automatic CSRF Token Retrieval:** Automatically retrieves the CSRF token from the meta tags.
+   * **Error Logging:** Logs an error to the console if the CSRF token is not found.
+
+   #### Setup
+   Ensure the CSRF token is generated and validated on the server side:
+
+   **Server-Side: Generating and Validating CSRF Token**
+   1. **Generate CSRF Token:**
+      * Generate a CSRF token on the server side and include it in the meta tags of your HTML document.
+      * Example in PHP:
+      ```php
+      session_start();
+      if (empty($_SESSION['csrf_token'])) {
+         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+      }
+      $csrf_token = $_SESSION['csrf_token'];
+      ?>
+      <meta name="csrf-token" content="<?= $csrf_token ?>">
+      ```
+   2. **Validate CSRF Token:**
+      * Validate the CSRF token on the server side when processing form submissions or AJAX requests.
+      * Example in PHP:
+      ```php
+      session_start();
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+         $csrf_token = $_POST['csrf_token'] ?? '';
+         if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+            die('Invalid CSRF token');
+         }
+         // Proceed with processing the request
+      }
+      ```
+
+   #### Returns
+   * `string` The CSRF token if found.
+   * `undefined` If the CSRF token is not found, logs an error message to the console.
+
+   #### Example Usage
+   ```javascript
+   document.addEventListener('DOMContentLoaded', () => {
+      if (_CSRFToken) {
+         console.log('CSRF Token:', _CSRFToken);
+         // You can use _CSRFToken in your AJAX requests or forms
+      } else {
+         console.error('CSRF Token is missing!');
+      }
+   });
+   ```
+
    ## Random Data Generation
    ### eo.getRandomChar
    `eo.getRandomChar(length)` generates a random hexadecimal string of the specified length using the Web Crypto API for cryptographic security.
@@ -938,18 +991,31 @@ require(['eo'], function(eo) {
    ```
 
    **Custom Error Messages**
-   Custom error messages can be defined in the constraints. If a custom message is provided, it will be used instead of the default error message.
+   Custom error messages can be defined in the rules. If a custom message is provided, it will be used instead of the default error message.
 
    **Example Usage with Custom Messages**
    ```javascript
-   const constraints = {
+   const rules = {
     first_name: {
-        required: { param: true, message: 'cannot be empty.' },
-        length: { min: 2, max: 50, message: 'should have 2 to 50 characters.' }
+      required: { 
+         param: true, 
+         message: 'cannot be empty.' 
+      },
+      length: { 
+         min: 2, 
+         max: 50, 
+         message: 'should have 2 to 50 characters.' 
+      }
     },
     email: {
-        required: { param: true, message: 'is needed for account creation.' },
-        email: { param: true, message: 'must be a valid email format.' }
+      required: { 
+         param: true, 
+         message: 'is needed for account creation.' 
+      },
+      email: { 
+         param: true, 
+         message: 'must be a valid email format.' 
+      }
     }
    };
    ```
@@ -965,11 +1031,11 @@ require(['eo'], function(eo) {
    * Disables & enables buttons during the request to prevent multiple submissions.
    * Redirects users upon success if `redirectUrl` is provided.
    
-   **Dependencies**
-   * eo.validator (Read the documentation)
-   * eo.post (Read the documentation)
-   * eo.alert (Read the documentation)
-   * eo.button (Read the documentation)
+   **This method used the following:**
+   * [`eo.validator`](#eovalidator)
+   * [`eo.post`](#eopost)
+   * [`eo.alert`](#eoalert)
+   * [`eo.button`](#eobutton)
    * csrf-token in meta tag
       ```html
       <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -977,21 +1043,21 @@ require(['eo'], function(eo) {
    
    #### Syntax
    ```javascript
-   eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
+   eo.submitForm(formId, { rules, callback, onBeforeSend, redirectUrl } = {})
    ```
    
    #### Parameters
    | Parameter | Type | Description |
    | --- | --- | --- |
    | `formId` | `string` | The ID of the form to submit (with or without `#`). |
-   | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
+   | `rules` | `object` | The validation rules based on the [`eo.validator`](#eovalidator). |
    | `callback` | `function` | A callback function executed on a successful submission. |
    | `onBeforeSend` | `function` | A function executed before sending the form data. |
    
    #### Example Usage
    ```javascript
    eo.submitForm('#myForm', {
-       validation: {
+       rules: {
            name: { required: true, min: 3 },
            email: { required: true, email: true },
        },
