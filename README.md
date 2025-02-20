@@ -976,7 +976,7 @@ require(['eo-webkit'], function(eo) {
      name: { required: true, length: { min: 3, max: 50 } },
      email: { required: true, email: true },
      age: { number: { min: 18, max: 99 } },
-     brithdate: { date: true }
+     brithdate: { date: true },
      address: { 
        street: { required: true }, 
        city: { required: true }
