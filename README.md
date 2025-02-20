@@ -16,11 +16,15 @@ eo.js is a comprehensive JavaScript utility library designed to streamline web d
         *   [`eo.formatFileSize`](#eoformatfilesize) - Formats a file size into a human-readable string (e.g., "10KB", "2MB").
         *   [`eo.uuidv4`](#eouuidv4) - Generates a UUID (Universally Unique Identifier) v4.
         *   [`eo.convertCurrency`](#eoconvertcurrency) - Converts a currency amount from one currency to another.
-        *   [`eo.serializeFormData`](#seoerializeformdata) - Serializes form data into a query string.
-        *   [`eo.arrayToDotNotation`](#eoarraytodotnotation) - Converts an array to dot notation (e.g., `['a', 'b', ['c']]` becomes `'a.b.c'`).
+        *   [`eo.serializeFormData`](#eoserializeformdata) - Serializes form data into a query string.
+        *   [`eo.arrayToDotNotation`](#eoarraytodotnotation) - Converts a nested object into a flat object with dot notation keys.
         *   [`eo.dotNotationToArray`](#eodotnotationtoarray) - Converts dot notation to an array.
+        *   [`eo.removeFalseArray`](#eoremovefalsearray) - Filters an array by removing empty strings, null, false, undefined, and boolean values.
+        *   [`eo.removeDuplicatesArray`](#eoremoveduplicatesarray) - Removes duplicate elements from an array.values.
     *   [Date and Time](#date-and-time)
         *   [`eo.epochToTimeString`](#eoepochtotimestring) - Converts an epoch timestamp to a human-readable time string.
+        *   [`eo.readableDate`](#eoreadabledate) - Formats dates as "Today", "Yesterday", or full date with time based on the input date.
+        *   [`eo.diffDays`](#eodiffDays) - Calculates the difference in days between two dates.
     *   [DOM Manipulation](#dom-manipulation)
         *   [`eo.moveHtmlElement`](#eomovehtmlelement) - Moves an HTML element to a new target element.
         *   [`eo.createElements`](#eocreateelements) - Creates one or more HTML elements.
@@ -38,6 +42,9 @@ eo.js is a comprehensive JavaScript utility library designed to streamline web d
     *   [Form Handling and Validation](#form-handling-and-validation)
         *   [`eo.validator`](#eovalidator) - Validates a form based on specified rules.
         *   [`eo.submitForm`](#eosubmitform) - Submits a form.
+    *   [Cookie Management](#cookie-management)
+        *   [`eo.setCookie`](#eosetCookie) - Sets a cookie with the given key and value, expiring in the specified number of days.
+        *   [`eo.getCookie`](#eogetCookie) - Retrieves the value of a specified cookie by its key.
     *   [UI Components](#ui-components)
         *   [`eo.modal`](#eomodal) - Manages a modal dialog.
         *   [`eo.alert`](#eoalert) - Displays an alert message.
@@ -91,8 +98,10 @@ console.log(eo.trim("  hello  "));
 
 ## AMD (Asynchronous Module Definition)
 If you're using an AMD module loader like RequireJS, you can load eo.js as an AMD module:
-**1. Configure RequireJS:**  
-Make sure RequireJS is configured in your HTML file.  
+
+**1. Configure RequireJS:**
+Make sure RequireJS is configured in your HTML file.
+
 **2. Define the module path:**
 Configure the path to your eo.js file in your RequireJS configuration:
 ```javascript
@@ -102,6 +111,7 @@ require.config({
   }
 });
 ```
+
 **3. Use the module:**  
 Use require to load and use the module:
 ```javascript
@@ -236,8 +246,106 @@ require(['eo'], function(eo) {
          console.log(eo.serializeFormData(formObject));
          // { age: 25, country: "USA" }
          ```
-   ### eo.arrayToDotNotation(array)
-   ### eo.dotNotationToArray(dotNotation)
+   ### eo.arrayToDotNotation
+   `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
+   
+   **Features**
+   * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.
+   * **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.
+   * **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.
+
+   * #### Parameters
+      | Parameter | Type | Description |
+      | --- | --- | --- |
+      | `obj` | `Object` | The nested object to be converted. |
+      | `prefix` | `string` | An optional prefix for the keys in the resulting flat object. |
+
+   * #### Returns
+      `Object` A new flat object with dot notation keys.
+
+   * #### Example Usage
+      ```javascript
+      const nestedObj = {
+         user: {
+            name: 'John Doe',
+            address: {
+                  city: 'New York',
+                  zip: '10001'
+            }
+         }
+      };
+      const flatObj = arrayToDotNotation(nestedObj);
+      console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
+
+      const anotherNestedObj = {
+         product: {
+            id: 123,
+            details: {
+                  name: 'Laptop',
+                  specs: {
+                     cpu: 'Intel i7',
+                     ram: '16GB'
+                  }
+            }
+         }
+      };
+      const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
+      console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product.details.specs.ram': '16GB' }
+      ```
+
+   ### eo.dotNotationToArray
+
+   ### eo.removeFalseArray
+   `eo.removeFalseArray(arr)` Filters an array by removing empty strings, null, false, undefined, and boolean values.
+
+   **Features**
+   * **Filter Out Falsy Values:** Removes empty strings, null, false, undefined, and boolean values from an array.
+   * **Simplified Filtering:** Uses the filter method for efficient and concise array filtering.
+
+   * #### Parameter
+      | Parameter | Type | Description |
+      | --- | --- | --- |
+      | `arr` | `Array` | The `array` to be filtered. |
+
+   * #### Return
+      `Array` A new array with the falsy values removed.
+
+   * #### Example Usage
+      ```javascript
+      const array = [0, 1, false, '', 'hello', null, undefined, true, 'world'];
+      const filteredArray = removeFalseArray(array);
+      console.log(filteredArray); // Outputs: [0, 1, 'hello', 'world']
+
+      const mixedArray = [0, '', false, true, null, undefined, 'string', 123];
+      const filteredMixedArray = removeFalseArray(mixedArray);
+      console.log(filteredMixedArray); // Outputs: [0, 'string', 123]
+      ```
+
+   ### eo.removeDuplicatesArray
+   `eo.removeDuplicatesArray(arr)` Removes duplicate elements from an array.
+   
+   **Features**
+   * **Remove Duplicate Elements:** Efficiently removes duplicate elements from an array.
+   * **Simplified Usage:** Uses the Set object to filter out duplicates, returning a new array.
+
+   * #### Parameter
+      | Parameter | Type | Description |
+      | --- | --- | --- |
+      | `arr` | `Array` | The `array` from which duplicates will be removed. |
+
+   * #### Return
+      `Array` A new array with duplicate elements removed.
+
+   * #### Example Usage
+      ```javascript
+      const array = [1, 2, 2, 3, 4, 4, 5];
+      const uniqueArray = removeDuplicatesArray(array);
+      console.log(uniqueArray); // Outputs: [1, 2, 3, 4, 5]
+
+      const stringArray = ['apple', 'banana', 'apple', 'orange'];
+      const uniqueStringArray = removeDuplicatesArray(stringArray);
+      console.log(uniqueStringArray); // Outputs: ['apple', 'banana', 'orange']
+      ```
 
    ## Date and Time
    ### eo.epochToTimeString
@@ -257,6 +365,45 @@ require(['eo'], function(eo) {
       console.log(eo.epochToTimeString(1700000000)); 
       // Output: "Sunday, November 12, 2023, 12:26 PM"
       ```
+   
+   ### eo.readableDate
+   `eo.readableDate(timestamp)` Converts a timestamp into a human-readable date string similar to Meta Messenger's format. It can accept epoch time in seconds, milliseconds, a string representation of a date, or a Date object.
+
+   * #### Parameter
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | timestamp | number|string|Date | The input timestamp to be converted. Can be a number (in seconds or milliseconds), a string representation of a date, or a Date object. |
+
+   * #### Returns
+   `string` The formatted date `string`.
+
+   * #### Throws
+   `Error` Throws an error if the timestamp type is invalid.
+
+   * #### Example Usage
+   ```javascript
+   console.log(readableDate(1739845344)); // Outputs: formatted date assuming input in seconds
+   console.log(readableDate(1739845344000)); // Outputs: formatted date assuming input in milliseconds
+   console.log(readableDate('2022-12-31T23:59:59Z')); // Outputs: formatted date from string
+   console.log(readableDate(new Date())); // Outputs: current time if input is Date object
+   ```
+
+   ### eo.diffDays
+   `eo.diffDays(date, otherDate)` Calculates the difference in days between two dates.
+
+   **Features**
+   * **Date Difference Calculation:** Calculates the difference in days between two dates.
+   * **Handles Various Date Formats:** Can accept Date objects, timestamp in milliseconds, or any other format that JavaScript's Date constructor can handle.
+   * **Accurate Calculation:** Uses Math.abs and Math.ceil to ensure accurate and non-negative results.
+
+   * #### Parameters
+      | Parameters | Type | Description |
+      | --- | --- | --- |
+      | `date` | `Date`|`number`|`string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+      | `otherDate` | `Date`|`number`|`string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+
+   * #### Returns
+      `number` The difference in days between the two dates.
 
    ## DOM Manipulation
    ### eo.moveHtmlElement(fromSelector, toSelector)
@@ -795,6 +942,56 @@ require(['eo'], function(eo) {
           },
           redirectUrl: '/dashboard'
       });
+      ```
+
+   ## Cookie Management
+   ### eo.setCookie
+   `eo.setCookie` Sets a cookie with a specified key, value, and expiration date in days.
+   
+   **Features**
+   * **Easy Cookie Management**: Allows setting cookies with a specified key, value, and expiration date.
+   * **Customizable Expiration**: Supports setting cookie expiration in days.
+   * **Universal Path**: Sets the cookie's path to the root ("/") for universal accessibility across the entire site.
+
+   * #### Parameters:
+      | Parameters | Type | Description |
+      | --- | --- | --- |
+      | `key` | `string` | The name of the cookie to be set. |
+      | `value` | `string` | The value to be stored in the cookie. |
+      | `days` | `number` | The number of days until the cookie expires. |
+
+   * #### Returns
+      `void` This function does not return anything.
+
+   * #### Example Usage
+      ```javascript
+      setCookie('username', 'JohnDoe', 7); // Sets a cookie "username" with value "JohnDoe" that expires in 7 days
+      setCookie('sessionToken', 'abc123', 1); // Sets a cookie "sessionToken" with value "abc123" that expires in 1 day
+      ```
+
+   ### eo.getCookie
+   `eo.getCookie(key)` Retrieves the value of a specified cookie by its key.
+
+   **Features**
+   * **Easy Cookie Retrieval:** Allows retrieving the value of a specified cookie by its key.
+   * **Trim and Find:** Efficiently trims and searches through cookies to find the desired key.
+   * **Default Value:** Returns an empty string if the cookie is not found.
+   
+   * #### Parameters
+      | Parameters | Type | Description |
+      | --- | --- | --- |
+      | key | string | The name of the cookie to retrieve. |
+
+   * #### Returns
+      `string` The value of the cookie if found, otherwise an empty string.
+
+   * #### Example Usage
+      ```javascript
+      const username = getCookie('username'); // Retrieves the value of the "username" cookie
+      console.log('Username:', username);
+
+      const sessionToken = getCookie('sessionToken'); // Retrieves the value of the "sessionToken" cookie
+      console.log('Session Token:', sessionToken);
       ```
 
    ## UI Components
