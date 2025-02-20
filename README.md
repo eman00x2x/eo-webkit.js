@@ -1063,17 +1063,17 @@ require(['eo'], function(eo) {
    #### Example Usage
    ```javascript
    eo.submitForm('#myForm', {
-       rules: {
-           name: { required: true, min: 3 },
-           email: { required: true, email: true },
-       },
-       callback: (formData, response) => {
-           console.log('Form submitted successfully:', response);
-       },
-       onBeforeSend: (formData) => {
-           console.log('Processing form data:', formData);
-       },
-       redirectUrl: '/dashboard'
+      rules: {
+          name: { required: true, min: 3 },
+          email: { required: true, email: true },
+      },
+      callback: (formData, response) => {
+          console.log('Form submitted successfully:', response);
+      },
+      onBeforeSend: (formData) => {
+          console.log('Processing form data:', formData);
+      },
+      redirectUrl: '/dashboard'
    });
    ```
 
@@ -1807,9 +1807,10 @@ require(['eo'], function(eo) {
    | `containerId` | `string` | The CSS selector of the container element where Tom Select will be initialized. 
    | `options` | `Object` | Optional settings to customize Tom Select. |
 
+   **Options**
    | Options | Type | Default | Description |
-   | --- | --- | --- |
-   | `copyClassesToDropdown` | `Boolean` | false | Whether to copy classes to the dropdown. |
+   | --- | --- | --- | --- |
+   | `copyClassesToDropdown` | `Boolean` | `false` | Whether to copy classes to the dropdown. |
    | `dropdownParent` | `String` | `body` | The parent element of the dropdown. |
    | `controlInput` | `String` | `<input>` | The input element used for control. |
    | `render` | `Object` | Default Rendering Function | Custom rendering functions for items and options. |
