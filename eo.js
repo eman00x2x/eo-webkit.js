@@ -1,6 +1,8 @@
-// Copyright (c) [2025] [Emmanuel Olivas]
-
-// eo.js
+/*!
+ * eo.js 1.0.0
+ * Copyright (c) 2025 Eman Olivas
+ * eo.js may be freely distributed under the MIT license.
+*/
 
 /* global define */ // For AMD
 /* global module */ // For CommonJS

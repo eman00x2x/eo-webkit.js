@@ -1,8 +1,8 @@
 {
   "name": "eo.js",
   "version": "1.0.0",
-  "description": "eo.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks.",
-  "main": ".eslintrc.js",
+  "description": "eo.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks, including data manipulation, date/time handling, DOM manipulation, network requests, random data generation, form handling, UI components, third-party integrations, and calculators.",
+  "main": "eo.js",
   "directories": {
     "test": "tests"
   },
@@ -14,9 +14,20 @@
     "type": "git",
     "url": "git+https://github.com/eman00x2x/eo.js.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+	"comprehensive JavaScript utility library",
+	"data manipulation",
+	"date/time handling",
+	"DOM manipulation",
+	"network requests",
+	"random data generation",
+	"form handling",
+	"UI components",
+	"third-party integrations",
+	"mortgage calculators"
+  ],
+  "author": "Eman Olivas",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/eman00x2x/eo.js/issues"
   },
@@ -25,11 +36,5 @@
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.1",
     "globals": "^15.14.0"
-  },
-  "dependencies": {
-    "bootstrap": "^5.3.3",
-    "tom-select": "^2.4.3",
-    "validate.js": "^0.13.1"
-  },
-  "type": "module"
+  }
 }
