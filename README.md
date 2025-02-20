@@ -1050,9 +1050,13 @@ require(['eo'], function(eo) {
    | Parameter | Type | Description |
    | --- | --- | --- |
    | `formId` | `string` | The ID of the form to submit (with or without `#`). |
+   | `options` | `object` | Configuration options for the `eo.submitForm`. |
+
+   | Options | Type | Description |
    | `rules` | `object` | The validation rules based on the [`eo.validator`](#eovalidator). |
    | `callback` | `function` | A callback function executed on a successful submission. |
    | `onBeforeSend` | `function` | A function executed before sending the form data. |
+   | `redirect` | `url` | The url to redirect to on success |
    
    #### Example Usage
    ```javascript
@@ -1246,49 +1250,49 @@ require(['eo'], function(eo) {
    * Automatically handles UI creation and event binding.
 
    **Dependency**
-   This eo.uploader requires a csrf-token in meta tag
+   This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
    ```html
    <meta name="csrf-token" content="{{ csrf_token() }}">
    ```
    
    #### Setup
-    **Required HTML Structure:**
-    Container for the response.
-    ```html
-    <div class="response"></div>
-    ```
+   **Required HTML Structure:**
+   Container for the response.
+   ```html
+   <div class="response"></div>
+   ```
    
-    Container for the upload button.
-    ```html
-    <div class="upload-container"></div>
-    ```
+   Container for the upload button.
+   ```html
+   <div class="upload-container"></div>
+   ```
    
-    Container for the preview of uploaded files.
-    ```html
-    <div class="uploaded-photo"></div>
-    ```
+   Container for the preview of uploaded files.
+   ```html
+   <div class="uploaded-photo"></div>
+   ```
    
-    Initializes the uploader with specified configuration and attaches necessary event listeners.
-    ```javascript
-    eo.uploader.create('.upload-container', '/upload-url', {
-       inputName: 'eoFileUpload',
-       previewSelector: '.uploaded-photo',
-       disablePreview: false,
-       uploadType: 'image',
-       accept: 'image/*',
-       multiple: true,
-       onBeforeSend: () => { console.log('Before sending the request'); },
-       onSuccess: (response, files) => {
-           console.log('Upload successful!', response, files);
-           files.forEach((file, index) => {
-               // Manipulate hidden input value, e.g., add a URL property
-               file.url = response[index].url; // Assuming response contains URLs for each file
-               console.log(`File ${index + 1} URL: ${file.url}`);
-           });
-       },
-       onError: (error) => { console.error('Upload failed!', error); }
-    });
-    ```
+   Initializes the uploader with specified configuration and attaches necessary event listeners.
+   ```javascript
+   eo.uploader.create('.upload-container', '/upload-url', {
+      inputName: 'eoFileUpload',
+      previewSelector: '.uploaded-photo',
+      disablePreview: false,
+      uploadType: 'image',
+      accept: 'image/*',
+      multiple: true,
+      onBeforeSend: () => { console.log('Before sending the request'); },
+      onSuccess: (response, files) => {
+          console.log('Upload successful!', response, files);
+          files.forEach((file, index) => {
+              // Manipulate hidden input value, e.g., add a URL property
+              file.url = response[index].url; // Assuming response contains URLs for each file
+              console.log(`File ${index + 1} URL: ${file.url}`);
+          });
+      },
+      onError: (error) => { console.error('Upload failed!', error); }
+   });
+   ```
 
    #### Parameters
    | Parameters | Type | Default | Description |
