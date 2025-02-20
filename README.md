@@ -273,7 +273,7 @@ require(['eo'], function(eo) {
       }
    };
 
-   const flatObj = arrayToDotNotation(nestedObj);
+   const flatObj = eo.arrayToDotNotation(nestedObj);
    console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
 
    const anotherNestedObj = {
@@ -289,7 +289,7 @@ require(['eo'], function(eo) {
       }
    };
 
-   const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
+   const anotherFlatObj = eo.arrayToDotNotation(anotherNestedObj);
    console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product details.specs.ram': '16GB' }
    ```
 
@@ -321,7 +321,7 @@ require(['eo'], function(eo) {
          }
       }
    };
-   const flatObj = arrayToDotNotation(nestedObj);
+   const flatObj = eo.arrayToDotNotation(nestedObj);
    console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
 
    const anotherNestedObj = {
@@ -336,7 +336,7 @@ require(['eo'], function(eo) {
          }
       }
    };
-   const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
+   const anotherFlatObj = eo.arrayToDotNotation(anotherNestedObj);
    console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product.details.specs.ram': '16GB' }
    ```
 
@@ -358,10 +358,11 @@ require(['eo'], function(eo) {
    #### Example Usage
    ```javascript
    const array = [0, 1, false, '', 'hello', null, undefined, true, 'world'];
-   const filteredArray = removeFalseArray(array);
+   const filteredArray = eo.removeFalseArray(array);
    console.log(filteredArray); // Outputs: [0, 1, 'hello', 'world']
+
    const mixedArray = [0, '', false, true, null, undefined, 'string', 123];
-   const filteredMixedArray = removeFalseArray(mixedArray);
+   const filteredMixedArray = eo.removeFalseArray(mixedArray);
    console.log(filteredMixedArray); // Outputs: [0, 'string', 123]
    ```
 
@@ -383,11 +384,11 @@ require(['eo'], function(eo) {
    #### Example Usage
    ```javascript
    const array = [1, 2, 2, 3, 4, 4, 5];
-   const uniqueArray = removeDuplicatesArray(array);
+   const uniqueArray = eo.removeDuplicatesArray(array);
    console.log(uniqueArray); // Outputs: [1, 2, 3, 4, 5]
 
    const stringArray = ['apple', 'banana', 'apple', 'orange'];
-   const uniqueStringArray = removeDuplicatesArray(stringArray);
+   const uniqueStringArray = eo.removeDuplicatesArray(stringArray);
    console.log(uniqueStringArray); // Outputs: ['apple', 'banana', 'orange']
    ```
 
@@ -426,10 +427,10 @@ require(['eo'], function(eo) {
 
    #### Example Usage
    ```javascript
-   console.log(readableDate(1739845344)); // Outputs: formatted date assuming input in seconds
-   console.log(readableDate(1739845344000)); // Outputs: formatted date assuming input in milliseconds
-   console.log(readableDate('2022-12-31T23:59:59Z')); // Outputs: formatted date from string
-   console.log(readableDate(new Date())); // Outputs: current time if input is Date object
+   console.log(eo.readableDate(1739845344)); // Outputs: formatted date assuming input in seconds
+   console.log(eo.readableDate(1739845344000)); // Outputs: formatted date assuming input in milliseconds
+   console.log(eo.readableDate('2022-12-31T23:59:59Z')); // Outputs: formatted date from string
+   console.log(eo.readableDate(new Date())); // Outputs: current time if input is Date object
    ```
 
    ### eo.diffDays
@@ -453,15 +454,15 @@ require(['eo'], function(eo) {
    ```javascript
    const date1 = new Date('2022-01-01');
    const date2 = new Date('2022-01-10');
-   console.log(diffDays(date1, date2)); // Outputs: 9
+   console.log(eo.diffDays(date1, date2)); // Outputs: 9
 
    const timestamp1 = Date.now();
    const timestamp2 = timestamp1 + (1000 * 60 * 60 * 24 * 7); // 7 days later
-   console.log(diffDays(timestamp1, timestamp2)); // Outputs: 7
+   console.log(eo.diffDays(timestamp1, timestamp2)); // Outputs: 7
 
    const dateStr1 = '2022-01-01';
    const dateStr2 = '2022-01-05';
-   console.log(diffDays(new Date(dateStr1), new Date(dateStr2))); // Outputs: 4
+   console.log(eo.diffDays(new Date(dateStr1), new Date(dateStr2))); // Outputs: 4
    ```
 
    ## DOM Manipulation
@@ -562,7 +563,7 @@ require(['eo'], function(eo) {
    #### Example Usage
    **Creating a Hidden Input**
    ```javascript
-   const hiddenInput = createHiddenInput('user_id', '12345');
+   const hiddenInput = eo.createHiddenInput('user_id', '12345');
    document.body.appendChild(hiddenInput);
    ```
    **Output**
@@ -759,9 +760,9 @@ require(['eo'], function(eo) {
    
    #### Usage Example
    ```javascript
-   console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-   console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
-   console.log(userClient.browser); // e.g., "Google Chrome"
+   console.log(eo.userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+   console.log(eo.userClient.geo); // e.g., { country: "US", city: "New York", ... }
+   console.log(eo.userClient.browser); // e.g., "Google Chrome"
    ```
 
    #### Properties
@@ -1025,8 +1026,8 @@ require(['eo'], function(eo) {
 
    #### Example Usage
    ```javascript
-   setCookie('username', 'JohnDoe', 7); // Sets a cookie "username" with value "JohnDoe" that expires in 7 days
-   setCookie('sessionToken', 'abc123', 1); // Sets a cookie "sessionToken" with value "abc123" that expires in 1 day
+   eo.setCookie('username', 'JohnDoe', 7); // Sets a cookie "username" with value "JohnDoe" that expires in 7 days
+   eo.setCookie('sessionToken', 'abc123', 1); // Sets a cookie "sessionToken" with value "abc123" that expires in 1 day
    ```
 
    ### eo.getCookie
@@ -1047,9 +1048,10 @@ require(['eo'], function(eo) {
 
    #### Example Usage
    ```javascript
-   const username = getCookie('username'); // Retrieves the value of the "username" cookie
+   const username = eo.getCookie('username'); // Retrieves the value of the "username" cookie
    console.log('Username:', username);
-   const sessionToken = getCookie('sessionToken'); // Retrieves the value of the "sessionToken" cookie
+
+   const sessionToken = eo.getCookie('sessionToken'); // Retrieves the value of the "sessionToken" cookie
    console.log('Session Token:', sessionToken);
    ```
 
@@ -1083,7 +1085,7 @@ require(['eo'], function(eo) {
 
    **Example Usage**
    ```javascript
-   eo.commponent.modal.create({
+   eo.modal.create({
      id: 'exampleModal',
      size: 'md',
      callback: () => '<p>This is a dynamic modal!</p>',
@@ -1163,8 +1165,8 @@ require(['eo'], function(eo) {
 
       **Example Usage**
       ```javascript
-      button.enable(); // Enables all buttons with class '.btn'
-      button.enable('.custom-button'); // Enables elements with class '.custom-button'
+      eo.button.enable(); // Enables all buttons with class '.btn'
+      eo.button.enable('.custom-button'); // Enables elements with class '.custom-button'
       ```
 
    ### eo.uploader
@@ -1202,7 +1204,7 @@ require(['eo'], function(eo) {
    
     Initializes the uploader with specified configuration and attaches necessary event listeners.
     ```javascript
-    uploader.create('.upload-container', '/upload-url', {
+    eo.uploader.create('.upload-container', '/upload-url', {
        inputName: 'eoFileUpload',
        previewSelector: '.uploaded-photo',
        disablePreview: false,
@@ -1287,7 +1289,7 @@ require(['eo'], function(eo) {
 
    2. **Initialize the Uploader:**
       ```javascript
-      uploader.create('.upload-container', '/upload-file-url', {
+      eo.uploader.create('.upload-container', '/upload-file-url', {
          inputName: 'eoFileUpload',
          previewSelector: '.uploaded-photo',
          disablePreview: false,
@@ -1400,7 +1402,7 @@ require(['eo'], function(eo) {
 
    2. **Initialize the Uploader:**
       ```javascript
-      uploader.create('.upload-container', '/upload-file-url', {
+      eo.uploader.create('.upload-container', '/upload-file-url', {
          inputName: 'eoFileUpload', // give the input file a name
          previewSelector: '.uploaded-photo',
          disablePreview: false,
@@ -1545,15 +1547,15 @@ require(['eo'], function(eo) {
    #### Example Usage
    **Basic Initialization**
    ```javascript
-   tinymce.init('#editor');
+   eo.tinymce.init('#editor');
    ```
 
    **Custom Configuration**
    ```javascript
-   tinymce.init('#editor', {
-       height: 300,
-       plugins: ['lists', 'table', 'code'],
-       toolbar: 'bold italic | alignleft aligncenter alignright'
+   eo.tinymce.init('#editor', {
+      height: 300,
+      plugins: ['lists', 'table', 'code'],
+      toolbar: 'bold italic | alignleft aligncenter alignright'
    });
    ```
 
@@ -1724,6 +1726,8 @@ require(['eo'], function(eo) {
    ```javascript
    <script src="https://cdn.jsdelivr.net/npm/tom-select@latest/dist/js/tom-select.complete.min.js"></script>
    ```
+   * **Documentation**
+      For Configuration please read [TomSelect Usage Documentation](https://tom-select.js.org/docs/)
 
    #### Parameters
    | Parameter | Type | Description |
@@ -1767,9 +1771,6 @@ require(['eo'], function(eo) {
       });
    });
    ```
-
-
-
 
 # License
 MIT License
