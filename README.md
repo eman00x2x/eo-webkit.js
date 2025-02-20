@@ -125,173 +125,173 @@ require(['eo'], function(eo) {
    ### eo.trim
    `eo.trim(stringValue, maxLength)` truncates a string if it exceeds the specified maxLength and appends "...". If the string is within the limit, it   remains unchanged.
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `stringValue` | `String` | The input string to be trimmed. |
-      | `maxLength` | `Number` | The maximum allowed length of the string (including ... if truncated). |
-   
-   * #### Returns
-      `String` The original string if within maxLength, otherwise a truncated version with "..." appended.
-         
-   * #### Example Usage
-      ```javascript
-      console.log(eo.trim("Hello, world!", 10)); 
-      // Output: "Hello, w..."
-      
-      console.log(eo.trim("Short", 10)); 
-      // Output: "Short" (unchanged)
-      ```
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `stringValue` | `String` | The input string to be trimmed. |
+   | `maxLength` | `Number` | The maximum allowed length of the string (including ... if truncated). |
+
+   #### Returns
+   `String` The original string if within maxLength, otherwise a truncated version with "..." appended.
+
+   #### Example Usage
+   ```javascript
+   console.log(eo.trim("Hello, world!", 10)); 
+   // Output: "Hello, w..."
+
+   console.log(eo.trim("Short", 10)); 
+   // Output: "Short" (unchanged)
+   ```
 
    ### eo.formatFileSize
    `eo.formatFileSize(bytes, decimalPlaces = 0)` converts a file size in bytes into a human-readable format (e.g., KB, MB, GB). It supports up to Yottabytes (YB) and allows formatting with a specified number of decimal places.
 
-   * #### Parameters
-      | Parameter | Type | Default | Description |
-      | --- | --- | --- | --- |
-      | `bytes` | `Number` | Required | The file size in **bytes**. |
-      | `decimalPlaces` | `Number` | `0` (optional) | The **number of decimal places** for formatting. |
-
-   * #### Returns
-      `String` A human-readable file size with units (e.g., "1.5 MB", "500 KB").
+   #### Parameters
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `bytes` | `Number` | Required | The file size in **bytes**. |
+   | `decimalPlaces` | `Number` | `0` (optional) | The **number of decimal places** for formatting. |
    
-   * #### Example Usage
-      ```javascript
-      console.log(eo.formatFileSize(1024));       
-      // Output: "1 KB"
-      
-      console.log(eo.formatFileSize(1048576));    
-      // Output: "1 MB"
-      
-      console.log(eo.formatFileSize(1500000, 2)); 
-      // Output: "1.50 MB"
-      
-      console.log(eo.formatFileSize(0));          
-      // Output: "0 Bytes"
-      ```
+   #### Returns
+   `String` A human-readable file size with units (e.g., "1.5 MB", "500 KB").
+
+   #### Example Usage
+   ```javascript
+   console.log(eo.formatFileSize(1024));       
+   // Output: "1 KB"
+
+   console.log(eo.formatFileSize(1048576));    
+   // Output: "1 MB"
+
+   console.log(eo.formatFileSize(1500000, 2)); 
+   // Output: "1.50 MB"
+
+   console.log(eo.formatFileSize(0));          
+   // Output: "0 Bytes"
+   ```
 
    ### eo.uuidv4
    `eo.uuidv4()` generates a random UUID (Universally Unique Identifier) Version 4 in the standard format:  
    `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`  
    where x is a random hexadecimal digit and y is one of 8, 9, A, or B (per UUID v4 specification).
    
-   * #### Returns
-      `String` A randomly generated UUID v4 in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
+   #### Returns
+   `String` A randomly generated UUID v4 in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
    
-   * #### Example Usage
-      ```javascript
-      console.log(eo.uuidv4()); 
-      // Output: "3f94a8a7-1d2b-4c19-9b2f-6de8f0ea6df0" (random each time)
-      ```
+   #### Example Usage
+   ```javascript
+   console.log(eo.uuidv4()); 
+   // Output: "3f94a8a7-1d2b-4c19-9b2f-6de8f0ea6df0" (random each time)
+   ```
 
    ### eo.convertCurrency
    `eo.convertCurrency(amount)` formats large numbers into a more readable currency notation using suffixes like K (thousand), M (million), B (billion) T (trillion), and beyond, up to Googol (1e100).
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `amount` | `Number` \| `String` | The numeric value to be formatted. Can be a number or a string that represents a number. |
-   
-   * #### Returns
-      `String` A formatted string representing the number with an appropriate suffix (e.g., "1.5M", "2B").
-   
-   * #### Example Usage
-      ```javascript
-      console.log(eo.convertCurrency(1500));      // "1.5K"
-      console.log(eo.convertCurrency(1000000));   // "1M"
-      console.log(eo.convertCurrency(2500000000)); // "2.5B"
-      console.log(eo.convertCurrency(1e100));     // "1V"  (Googol)
-      console.log(eo.convertCurrency(999));       // "999"
-      ```
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `amount` | `Number` \| `String` | The numeric value to be formatted. Can be a number or a string that represents a number. |
+
+   #### Returns
+   `String` A formatted string representing the number with an appropriate suffix (e.g., "1.5M", "2B").
+
+   #### Example Usage
+   ```javascript
+   console.log(eo.convertCurrency(1500));      // "1.5K"
+   console.log(eo.convertCurrency(1000000));   // "1M"
+   console.log(eo.convertCurrency(2500000000)); // "2.5B"
+   console.log(eo.convertCurrency(1e100));     // "1V"  (Googol)
+   console.log(eo.convertCurrency(999));       // "999"
+   ```
 
    ### eo.serializeFormData
    `eo.serializeFormData(formData)` converts form data into a plain JavaScript object. It supports different input types, including:
-   **FormData** (browser API)  
-   **Array of object**s (e.g., { name: "email", value: "test@example.com" })  
-   **Plain JavaScript objects**  
+   * **FormData** (browser API)  
+   * **Array of object**s (e.g., { name: "email", value: "test@example.com" })  
+   * **Plain JavaScript objects**  
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `formData` | `FormData` \| `Array` \| `Object` | The data to be converted into a plain object. |
-   
-   * #### Returns
-      `Object` A JavaScript object where keys represent form field names and values represent user input.
-   
-   * #### Example Usage
-      * **Handling FormData**
-         ```javascript
-         const formElement = document.querySelector("form");
-         const formData = new FormData(formElement);
-         
-         console.log(eo.serializeFormData(formData));
-         // { name: "John", email: "john@example.com", password: "123456" }
-         ```
-      
-      * **Handling an Array of Objects**
-         ```javascript
-         const formArray = [
-             { name: "username", value: "johndoe" },
-             { name: "email", value: "john@example.com" }
-         ];
-         
-         console.log(eo.serializeFormData(formArray));
-         // { username: "johndoe", email: "john@example.com" }
-         ```
-      
-      * **Handling a Plain Object**
-         ```javascript
-         const formObject = { age: 25, country: "USA" };
-         
-         console.log(eo.serializeFormData(formObject));
-         // { age: 25, country: "USA" }
-         ```
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `formData` | `FormData` \| `Array` \| `Object` | The data to be converted into a plain object. |
+
+   #### Returns
+   `Object` A JavaScript object where keys represent form field names and values represent user input.
+
+   #### Example Usage
+   * **Handling FormData**
+      ```javascript
+      const formElement = document.querySelector("form");
+      const formData = new FormData(formElement);
+      console.log(eo.serializeFormData(formData));
+      // { name: "John", email: "john@example.com", password: "123456" }
+      ```
+
+   * **Handling an Array of Objects**
+      ```javascript
+      const formArray = [
+          { name: "username", value: "johndoe" },
+          { name: "email", value: "john@example.com" }
+      ];
+      console.log(eo.serializeFormData(formArray));
+      // { username: "johndoe", email: "john@example.com" }
+      ```
+
+   * **Handling a Plain Object**
+      ```javascript
+      const formObject = { age: 25, country: "USA" };
+      console.log(eo.serializeFormData(formObject));
+      // { age: 25, country: "USA" }
+      ```
+
    ### eo.arrayToDotNotation
    `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
    
    **Features**
-   **Object Flattening:** Converts a nested object into a flat object with dot notation keys.   
-   **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.   
-   **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.   
+   * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.   
+   * **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.   
+   * **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.   
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `obj` | `Object` | The nested object to be converted. |
-      | `prefix` | `string` | An optional prefix for the keys in the resulting flat object. |
-
-   * #### Returns
-      `Object` A new flat object with dot notation keys.
-
-   * #### Example Usage
-      ```javascript
-      const nestedObj = {
-         user: {
-            name: 'John Doe',
-            address: {
-                  city: 'New York',
-                  zip: '10001'
-            }
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `obj` | `Object` | The nested object to be converted. |
+   | `prefix` | `string` | An optional prefix for the keys in the resulting flat object. |
+   
+   #### Returns
+   `Object` A new flat object with dot notation keys.
+   
+   #### Example Usage
+   ```javascript
+   const nestedObj = {
+      user: {
+         name: 'John Doe',
+         address: {
+               city: 'New York',
+               zip: '10001'
          }
-      };
-      const flatObj = arrayToDotNotation(nestedObj);
-      console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
+      }
+   };
 
-      const anotherNestedObj = {
-         product: {
-            id: 123,
-            details: {
-                  name: 'Laptop',
-                  specs: {
-                     cpu: 'Intel i7',
-                     ram: '16GB'
-                  }
-            }
+   const flatObj = arrayToDotNotation(nestedObj);
+   console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
+
+   const anotherNestedObj = {
+      product: {
+         id: 123,
+         details: {
+               name: 'Laptop',
+               specs: {
+                  cpu: 'Intel i7',
+                  ram: '16GB'
+               }
          }
-      };
-      const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
-      console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product.details.specs.ram': '16GB' }
-      ```
+      }
+   };
+
+   const anotherFlatObj = arrayToDotNotation(anotherNestedObj);
+   console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product details.specs.ram': '16GB' }
+   ```
 
    ### eo.dotNotationToArray
 
@@ -302,24 +302,23 @@ require(['eo'], function(eo) {
    * **Filter Out Falsy Values:** Removes empty strings, null, false, undefined, and boolean values from an array.
    * **Simplified Filtering:** Uses the filter method for efficient and concise array filtering.
 
-   * #### Parameter
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `arr` | `Array` | The `array` to be filtered. |
+   #### Parameter
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `arr` | `Array` | The `array` to be filtered. |
 
-   * #### Return
-      `Array` A new array with the falsy values removed.
+   #### Return
+   `Array` A new array with the falsy values removed.
 
-   * #### Example Usage
-      ```javascript
-      const array = [0, 1, false, '', 'hello', null, undefined, true, 'world'];
-      const filteredArray = removeFalseArray(array);
-      console.log(filteredArray); // Outputs: [0, 1, 'hello', 'world']
-
-      const mixedArray = [0, '', false, true, null, undefined, 'string', 123];
-      const filteredMixedArray = removeFalseArray(mixedArray);
-      console.log(filteredMixedArray); // Outputs: [0, 'string', 123]
-      ```
+   #### Example Usage
+   ```javascript
+   const array = [0, 1, false, '', 'hello', null, undefined, true, 'world'];
+   const filteredArray = removeFalseArray(array);
+   console.log(filteredArray); // Outputs: [0, 1, 'hello', 'world']
+   const mixedArray = [0, '', false, true, null, undefined, 'string', 123];
+   const filteredMixedArray = removeFalseArray(mixedArray);
+   console.log(filteredMixedArray); // Outputs: [0, 'string', 123]
+   ```
 
    ### eo.removeDuplicatesArray
    `eo.removeDuplicatesArray(arr)` Removes duplicate elements from an array.
@@ -328,59 +327,59 @@ require(['eo'], function(eo) {
    * **Remove Duplicate Elements:** Efficiently removes duplicate elements from an array.
    * **Simplified Usage:** Uses the Set object to filter out duplicates, returning a new array.
 
-   * #### Parameter
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `arr` | `Array` | The `array` from which duplicates will be removed. |
+   #### Parameter
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `arr` | `Array` | The `array` from which duplicates will be removed. |
+   
+   #### Return
+   `Array` A new array with duplicate elements removed.
 
-   * #### Return
-      `Array` A new array with duplicate elements removed.
+   #### Example Usage
+   ```javascript
+   const array = [1, 2, 2, 3, 4, 4, 5];
+   const uniqueArray = removeDuplicatesArray(array);
+   console.log(uniqueArray); // Outputs: [1, 2, 3, 4, 5]
 
-   * #### Example Usage
-      ```javascript
-      const array = [1, 2, 2, 3, 4, 4, 5];
-      const uniqueArray = removeDuplicatesArray(array);
-      console.log(uniqueArray); // Outputs: [1, 2, 3, 4, 5]
-
-      const stringArray = ['apple', 'banana', 'apple', 'orange'];
-      const uniqueStringArray = removeDuplicatesArray(stringArray);
-      console.log(uniqueStringArray); // Outputs: ['apple', 'banana', 'orange']
-      ```
+   const stringArray = ['apple', 'banana', 'apple', 'orange'];
+   const uniqueStringArray = removeDuplicatesArray(stringArray);
+   console.log(uniqueStringArray); // Outputs: ['apple', 'banana', 'orange']
+   ```
 
    ## Date and Time
    ### eo.epochToTimeString
    `eo.epochToTimeString(epoch)` converts a Unix epoch timestamp (seconds/milliseconds since 1970-01-01 UTC) into a human-readable date string formatted in US English.
    Converts an epoch time (in seconds/milliseconds) to a localized string in the format: "Weekday, Month Day, Year, HH:MM AM/PM"
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `epoch` | `Number` | A **Unix timestamp** in **seconds/milliseconds**. |
-   
-   * #### Returns
-      `String` A formatted date string in English (US locale).
-   
-   * #### Example Usage
-      ```javascript
-      console.log(eo.epochToTimeString(1700000000)); 
-      // Output: "Sunday, November 12, 2023, 12:26 PM"
-      ```
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `epoch` | `Number` | A **Unix timestamp** in **seconds/milliseconds**. |
+
+   #### Returns
+   `String` A formatted date string in English (US locale).
+
+   #### Example Usage
+   ```javascript
+   console.log(eo.epochToTimeString(1700000000)); 
+   // Output: "Sunday, November 12, 2023, 12:26 PM"
+   ```
    
    ### eo.readableDate
    `eo.readableDate(timestamp)` Converts a timestamp into a human-readable date string similar to Meta Messenger's format. It can accept epoch time in seconds, milliseconds, a string representation of a date, or a Date object.
 
-   * #### Parameter
+   #### Parameter
    | Parameter | Type | Description |
    | --- | --- | --- |
    | timestamp | number|string|Date | The input timestamp to be converted. Can be a number (in seconds or milliseconds), a string representation of a date, or a Date object. |
 
-   * #### Returns
+   #### Returns
    `string` The formatted date `string`.
 
-   * #### Throws
+   #### Throws
    `Error` Throws an error if the timestamp type is invalid.
 
-   * #### Example Usage
+   #### Example Usage
    ```javascript
    console.log(readableDate(1739845344)); // Outputs: formatted date assuming input in seconds
    console.log(readableDate(1739845344000)); // Outputs: formatted date assuming input in milliseconds
@@ -396,301 +395,314 @@ require(['eo'], function(eo) {
    * **Handles Various Date Formats:** Can accept Date objects, timestamp in milliseconds, or any other format that JavaScript's Date constructor can handle.
    * **Accurate Calculation:** Uses Math.abs and Math.ceil to ensure accurate and non-negative results.
 
-   * #### Parameters
-      | Parameters | Type | Description |
-      | --- | --- | --- |
-      | `date` | `Date`|`number`|`string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
-      | `otherDate` | `Date`|`number`|`string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+   #### Parameters
+    | Parameters | Type | Description |
+    | --- | --- | --- |
+    | `date` | `Date`|`number`|`string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+    | `otherDate` | `Date`|`number`|`string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+   
+   #### Returns
+    `number` The difference in days between the two dates.
 
-   * #### Returns
-      `number` The difference in days between the two dates.
+   #### Example Usage
+   ```javascript
+   const date1 = new Date('2022-01-01');
+   const date2 = new Date('2022-01-10');
+   console.log(diffDays(date1, date2)); // Outputs: 9
+
+   const timestamp1 = Date.now();
+   const timestamp2 = timestamp1 + (1000 * 60 * 60 * 24 * 7); // 7 days later
+   console.log(diffDays(timestamp1, timestamp2)); // Outputs: 7
+
+   const dateStr1 = '2022-01-01';
+   const dateStr2 = '2022-01-05';
+   console.log(diffDays(new Date(dateStr1), new Date(dateStr2))); // Outputs: 4
+   ```
 
    ## DOM Manipulation
    ### eo.moveHtmlElement(fromSelector, toSelector)
       `eo.moveHtmlElement(fromSelector, toSelector)` moves the inner HTML from one element to another. This is useful for dynamically repositioning content within a webpage.
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `fromSelector` | `string` | **CSS selector** of the element whose content will be moved. |
-      | `toSelector` | `string` | **CSS selector** of the element where the content will be placed. |
-   
-   * #### Returns
-      `void` Does not return a value. It modifies the DOM directly.
-   
-   * #### Example Usage
-      * **Move Content from One Element to Another**
-      ```html
-      <div id="source">
-          <p>Hello, World!</p>
-      </div>
-      
-      <div id="destination">
-          <!-- Content will be moved here -->
-      </div>
-      ```
-      ```javascript
-      eo.moveHtmlElement('#source', '#destination');
-      ```
-      * **Output**
-      ```html
-      <div id="source">
-          <!-- Empty after move -->
-      </div>
-      
-      <div id="destination">
-          <p>Hello, World!</p>
-      </div>
-      ```
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `fromSelector` | `string` | **CSS selector** of the element whose content will be moved. |
+   | `toSelector` | `string` | **CSS selector** of the element where the content will be placed. |
+
+   #### Returns
+   `void` Does not return a value. It modifies the DOM directly.
+
+   #### Example Usage
+   * **Move Content from One Element to Another**
+   ```html
+   <div id="source">
+       <p>Hello, World!</p>
+   </div>
+
+   <div id="destination">
+       <!-- Content will be moved here -->
+   </div>
+   ```
+   ```javascript
+   eo.moveHtmlElement('#source', '#destination');
+   ```
+   * **Output**
+   ```html
+   <div id="source">
+       <!-- Empty after move -->
+   </div>
+
+   <div id="destination">
+       <p>Hello, World!</p>
+   </div>
+   ```
 
    ### eo.createElements
    `eo.createElements(tag, attributes, children)` dynamically creates an HTML element, applies attributes, and appends child elements or text nodes. Ensures data sanitization before inserting into the DOM.
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `tag` | `string` | The **HTML tag name** (e.g., `'div'`, `'span'`). |
-      | `attributes` | `object` (optional) | An object containing **attribute key-value pairs** (e.g., `{ class: 'btn', id: 'my-button' }`). |
-      | `children` | `array` (optional) | An array of **child elements or strings** (text content). |
-   
-   * #### Returns
-      `HTMLElement` Returns a newly created DOM element with the specified attributes and children.
-   
-   * #### Example Usage
-      **Creating a Simple** `<div>`
-      ```javascript
-      const div = eo.createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
-      document.body.appendChild(div);
-      ```
-      **Output**
-      ```html
-      <div class="container" id="main">Hello, world!</div>
-      ```
-      
-      **Creating a Nested Structure**
-      ```javascript
-      const button = eo.createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
-      const wrapper = eo.createElements('div', { class: 'wrapper' }, [button]);
-      
-      document.body.appendChild(wrapper);
-      ```
-      **Output**
-      ```html
-      <div class="wrapper">
-          <button class="btn" type="button">Click Me</button>
-      </div>
-      ```
-   
-   * #### Error Handling
-      | Error Condition | Thrown Error |
-      | --- | --- |
-      | `tag` is **not a string** or empty | `"Invalid tag name"` |
-      | `attributes` is not an object | `"Attributes must be an object"` |
-      | `children` is not an array | `"Children must be an array"` |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `tag` | `string` | The **HTML tag name** (e.g., `'div'`, `'span'`). |
+   | `attributes` | `object` (optional) | An object containing **attribute key-value pairs** (e.g., `{ class: 'btn', id: 'my-button' }`). |
+   | `children` | `array` (optional) | An array of **child elements or strings** (text content). |
+
+   #### Returns
+   `HTMLElement` Returns a newly created DOM element with the specified attributes and children.
+
+   #### Example Usage
+   **Creating a Simple** `<div>`
+   ```javascript
+   const div = eo.createElements('div', { class: 'container', id: 'main' }, ['Hello, world!']);
+   document.body.appendChild(div);
+   ```
+   **Output**
+   ```html
+   <div class="container" id="main">Hello, world!</div>
+   ```
+
+   **Creating a Nested Structure**
+   ```javascript
+   const button = eo.createElements('button', { class: 'btn', type: 'button' }, ['Click Me']);
+   const wrapper = eo.createElements('div', { class: 'wrapper' }, [button]);
+
+   document.body.appendChild(wrapper);
+   ```
+   **Output**
+   ```html
+   <div class="wrapper">
+       <button class="btn" type="button">Click Me</button>
+   </div>
+   ```
+
+   #### Error Handling
+   | Error Condition | Thrown Error |
+   | --- | --- |
+   | `tag` is **not a string** or empty | `"Invalid tag name"` |
+   | `attributes` is not an object | `"Attributes must be an object"` |
+   | `children` is not an array | `"Children must be an array"` |
 
    ### eo.createHiddenInput
    `eo.createHiddenInput(name, value)` creates a hidden input field with a specified name and value. This is useful for storing data in forms without displaying it to the user.
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `name` | `string` | The **name attribute** of the hidden input. |
-      | `value` | `string` | The **value to be stored** in the hidden input. |
-   
-   * #### Returns
-      `HTMLElement` A hidden <input> element with the provided name and value.
-   
-   * #### Example Usage
-      **Creating a Hidden Input**
-      ```javascript
-      const hiddenInput = createHiddenInput('user_id', '12345');
-      document.body.appendChild(hiddenInput);
-      ```
-      **Output**
-      ```html
-      <input type="hidden" name="user_id" value="12345">
-      ```
-   
-   * #### Error Handling
-      | Error Condition | Thrown Error |
-      | --- | --- |
-      | `name` is **not a string** or empty | `"Invalid name"` |
-      | `value` is **not a string** | `"Invalid value"` |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `name` | `string` | The **name attribute** of the hidden input. |
+   | `value` | `string` | The **value to be stored** in the hidden input. |
+
+   #### Returns
+   `HTMLElement` A hidden <input> element with the provided name and value.
+
+   #### Example Usage
+   **Creating a Hidden Input**
+   ```javascript
+   const hiddenInput = createHiddenInput('user_id', '12345');
+   document.body.appendChild(hiddenInput);
+   ```
+   **Output**
+   ```html
+   <input type="hidden" name="user_id" value="12345">
+   ```
+
+   #### Error Handling
+   | Error Condition | Thrown Error |
+   | --- | --- |
+   | `name` is **not a string** or empty | `"Invalid name"` |
+   | `value` is **not a string** | `"Invalid value"` |
 
    ### eo.getYoutubeVideoData
-      `eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
-      It retrieves:  
-      * **The video ID**
-      * **Thumbnail URLs** in various resolutions
-      * The **direct watch URL**
-      * The **embed URL**
-      
-      If the URL is invalid, an error alert is triggered.
-      
-      * #### Parameters
-         | Parameter | Type | Description |
-         | --- | --- | --- |
-         | `url` | `string` | The YouTube video URL to extract details from. |
-      
-      * #### Returns
-         | Type	| Description |
-         | --- | --- |
-         | `Object`	| Returns an object with video details (**if the URL is valid**). |
-         | `null`	| Returns null and triggers an alert if the URL is invalid. |
-      
-      * #### Example Usage
-         * **Valid Youtube URL**
-            ```javascript
-            const videoData = eo.getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-            
-            console.log(videoData);
-            /* {
-              id: "dQw4w9WgXcQ",
-              thumbnail: {
-                default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
-                hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-                mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-                sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
-                maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-              },
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-              embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            } */
-            ```
-         
-         * **Invalid YouTube URL**
-            ```javascript
-            const videoData = eo.getYoutubeVideoData("https://example.com/video");
-            
-            console.log(videoData); // null
-            // ⚠️ Alert: "Invalid YouTube URL"
-            ```
-      
-      * #### Supported Youtube URL Formats
-         | Format Type | Example |
-         | --- | --- |
-         | Standard URL | https://www.youtube.com/watch?v=**VIDEO_ID** |
-         | Shortened URL | https://youtu.be/**VIDEO_ID** |
-         | Embed URL | https://www.youtube.com/embed/**VIDEO_ID** |
-         | Other Variants | https://www.youtube.com/v/**VIDEO_ID**, https://www.youtube.com/watch?v=**VIDEO_ID**&feature=share |
+   `eo.getYoutubeVideoData(url)` extracts YouTube video details from a given URL.
+   It retrieves:  
+   * **The video ID**
+   * **Thumbnail URLs** in various resolutions
+   * The **direct watch URL**
+   * The **embed URL**
+
+   If the URL is invalid, an error alert is triggered.
+
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The YouTube video URL to extract details from. |
+
+   #### Returns
+   | Type	| Description |
+   | --- | --- |
+   | `Object`	| Returns an object with video details (**if the URL is valid**). |
+   | `null`	| Returns null and triggers an alert if the URL is invalid. |
+
+   #### Example Usage
+   * **Valid Youtube URL**
+      ```javascript
+      const videoData = eo.getYoutubeVideoData("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      console.log(videoData);
+      /* {
+      id: "dQw4w9WgXcQ",
+      thumbnail: {
+         default: "http://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
+         hq: "http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+         mq: "http://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+         sd: "http://img.youtube.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+         maxres: "http://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+      },
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      embed: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      } */
+      ```
+
+   * **Invalid YouTube URL**
+      ```javascript
+      const videoData = eo.getYoutubeVideoData("https://example.com/video");
+      console.log(videoData); // null
+      // ⚠️ Alert: "Invalid YouTube URL"
+      ```
+
+   #### Supported Youtube URL Formats
+   | Format Type | Example |
+   | --- | --- |
+   | Standard URL | https://www.youtube.com/watch?v=**VIDEO_ID** |
+   | Shortened URL | https://youtu.be/**VIDEO_ID** |
+   | Embed URL | https://www.youtube.com/embed/**VIDEO_ID** |
+   | Other Variants | https://www.youtube.com/v/**VIDEO_ID**, https://www.youtube.com/watch?v=**VIDEO_ID**&feature=share |
 
    ## Network Requests
    ### eo.post
    The `eo.post` function **performs an HTTP POST request** to a specified `url` using the Fetch API. It supports **different data types** (`FormData`, `JSON`, `array`, or plain objects), **allows custom content types**, and provides **callback hooks** for different stages of the request.
 
-   * #### Syntax
-      ```javascript
-      eo.post(url, data, {
-          onBeforeSend,
-          onSuccess,
-          onError,
-          onComplete,
-          contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
-      });
-      ```
+   #### Syntax
+   ```javascript
+   eo.post(url, data, {
+       onBeforeSend,
+       onSuccess,
+       onError,
+       onComplete,
+       contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
+   });
+   ```
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `url` | `string` | The API endpoint where the request is sent. |
-      | `data` | `FormData`, `Object`, `Array` | The data to be sent in the request body. |
-      | `options` | `object` | Optional configuration options (see below). |
-      
-      **Options Object**
-      | Option | Type | Description |
-      | --- | --- | --- |
-      | `onBeforeSend` | `function` | **Callback function** executed before the request is sent. |
-      | `onSuccess` | `function` | **Callback function** executed when the request is successful. |
-      | `onError` | `function` | **Callback function** executed when the request fails. |
-      | `onComplete` | `function` | **Callback function** executed when the request completes (whether successful or not). |
-      | `contentType` | `string` | The `Content-Type` of the request (`application/json`, `application/x-www-form-urlencoded`, etc.). |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The API endpoint where the request is sent. |
+   | `data` | `FormData`, `Object`, `Array` | The data to be sent in the request body. |
+   | `options` | `object` | Optional configuration options (see below). |
+
+   **Options Object**
+   | Option | Type | Description |
+   | --- | --- | --- |
+   | `onBeforeSend` | `function` | **Callback function** executed before the request is sent. |
+   | `onSuccess` | `function` | **Callback function** executed when the request is successful. |
+   | `onError` | `function` | **Callback function** executed when the request fails. |
+   | `onComplete` | `function` | **Callback function** executed when the request completes (whether successful or not). |
+   | `contentType` | `string` | The `Content-Type` of the request (`application/json`, `application/x-www-form-urlencoded`, etc.). |
    
-   * #### Returns
-      `void` Does not return a value. Instead, it executes the provided callback functions.
+   #### Returns
+   `void` Does not return a value. Instead, it executes the provided callback functions.
    
-   * #### Example Usage
-      **Send Form Data**
-      ```javascript
-      const formData = new FormData();
-      formData.append('username', 'john_doe');
-      formData.append('password', 'securePass123');
-      
-      eo.post('/login', formData, {
-          onSuccess: (response) => console.log('Login Success:', response),
-          onError: (xhr, status, error) => console.error('Error:', status, error)
-      });
-      ```
-      
-      **Send JSON Data**
-      ```javascript
-      const userData = { username: 'john_doe', age: 30 };
-      
-      eo.post('/update-profile', userData, {
-          contentType: 'application/json',
-          onSuccess: (response) => console.log('Profile Updated:', response),
-          onError: (xhr, status, error) => console.error('Profile Update Failed:', error)
-      });
-      ```
+   #### Example Usage
+   **Send Form Data**
+   ```javascript
+   const formData = new FormData();
+   formData.append('username', 'john_doe');
+   formData.append('password', 'securePass123');
+
+   eo.post('/login', formData, {
+       onSuccess: (response) => console.log('Login Success:', response),
+       onError: (xhr, status, error) => console.error('Error:', status, error)
+   });
+   ```
+
+   **Send JSON Data**
+   ```javascript
+   const userData = { username: 'john_doe', age: 30 };
+
+   eo.post('/update-profile', userData, {
+       contentType: 'application/json',
+       onSuccess: (response) => console.log('Profile Updated:', response),
+       onError: (xhr, status, error) => console.error('Profile Update Failed:', error)
+   });
+   ```
 
    ### eo.get
    The `eo.get` function **performs an HTTP GET request** to fetch data from a given `url`. It supports **callbacks for request lifecycle events**,    including `beforeRequest`, `onSuccess`, and `onError`. The function **automatically detects and processes JSON responses** while handling errors    gracefully.
    
-   * #### Syntax
-      ```javascript
-      eo.get(url, { beforeRequest, onSuccess, onError });
-      ```
+   #### Syntax
+   ```javascript
+   eo.get(url, { beforeRequest, onSuccess, onError });
+   ```
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `url` | `string` | The API endpoint from which data is fetched. |
-      | `options` | `object` | (Optional) An object containing callback functions (see below). |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `string` | The API endpoint from which data is fetched. |
+   | `options` | `object` | (Optional) An object containing callback functions (see below). |
 
-      **Options Object**
-      | Option | Type | Description |
-      | --- | --- | --- |
-      | `beforeRequest` | `function` | **Callback function** executed before the request is made. If it returns `false`, the request is canceled. |
-      | `onSuccess` | `function` | **Callback function** executed when the request is successful. Receives the response data as an argument. |
-      | `onError` | `function` | **Callback function** executed when the request fails. Receives (`null`, `'error'`, `error`) as arguments. |
+   **Options Object**
+   | Option | Type | Description |
+   | --- | --- | --- |
+   | `beforeRequest` | `function` | **Callback function** executed before the request is made. If it returns `false`, the request is canceled. |
+   | `onSuccess` | `function` | **Callback function** executed when the request is successful. Receives the response data as an argument. |
+   | `onError` | `function` | **Callback function** executed when the request fails. Receives (`null`, `'error'`, `error`) as arguments. |
    
-   * #### Returns
-      `Promise<any>` A promise that resolves with the response data or logs an error.
+   #### Returns
+   `Promise<any>` A promise that resolves with the response data or logs an error.
    
-   * #### Example Usage
-      **Basic GET Request**
-      ```javascript
-      get('/api/user', {
-          onSuccess: (data) => console.log('User Data:', data),
-          onError: (xhr, status, error) => console.error('Error:', status, error)
-      });
-      ```
+   #### Example Usage
+   **Basic GET Request**
+   ```javascript
+   eo.get('/api/user', {
+       onSuccess: (data) => console.log('User Data:', data),
+       onError: (xhr, status, error) => console.error('Error:', status, error)
+   });
+   ```
 
-      **Cancel Request with** `beforeRequest`
-      ```javascript
-      get('/api/config', {
-          beforeRequest: () => {
-              console.log('Checking before request...');
-              return false; // Request will be canceled
-          },
-          onSuccess: (data) => console.log('Config Loaded:', data),
-      });
-      ```
+   **Cancel Request with** `beforeRequest`
+   ```javascript
+   eo.get('/api/config', {
+       beforeRequest: () => {
+           console.log('Checking before request...');
+           return false; // Request will be canceled
+       },
+       onSuccess: (data) => console.log('Config Loaded:', data),
+   });
+   ```
 
    ### eo.redirect
    `eo.redirect(url)` navigates the browser to the specified URL by setting window.location.
 
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `url` | `String` | The URL to which the browser should be redirected. |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `url` | `String` | The URL to which the browser should be redirected. |
    
-   * #### Returns
-      `void` This function does not return anything. It redirects the user immediately.
-   * #### Example Usage
-      ```javascript
-      eo.redirect("https://example.com");
-      // The browser navigates to "https://example.com"
-      ```
+   #### Returns
+   `void` This function does not return anything. It redirects the user immediately.
+   #### Example Usage
+   ```javascript
+   eo.redirect("https://example.com");
+   // The browser navigates to "https://example.com"
+   ```
 
    ### eo.userClient
    The `eo.userClient` collects and manages client-related data, including:
@@ -700,69 +712,69 @@ require(['eo'], function(eo) {
    
    This information is cached in localStorage to avoid redundant API calls.
    
-   * #### Usage Example
-      ```javascript
-      console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-      console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
-      console.log(userClient.browser); // e.g., "Google Chrome"
-      ```
-   
-   * #### Properties
-      `eo.userClient` **Object**
-      | Property | Type | Description |
-      | --- | --- | --- |
-      | `userAgent` | `string` | The browser's user agent string. |
-      | `geo` | `Object` | null |
-      | `browser` | `string` | string |
-   
-   * #### Implementation Details
-      **Fetching Geolocation Data**
-      * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
-      * The response is cached in localStorage for future use.
-      
-      **Browser Detection**
-      * Uses navigator.userAgent to determine the browser name.
-      * Compares the user agent string against common browser signatures.
-   
-   * #### Error Handling
-      * Geo Fetch Failure: Logs an error (Error getting geo info:).
-      * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
+   #### Usage Example
+   ```javascript
+   console.log(userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+   console.log(userClient.geo); // e.g., { country: "US", city: "New York", ... }
+   console.log(userClient.browser); // e.g., "Google Chrome"
+   ```
+
+   #### Properties
+   `eo.userClient` **Object**
+   | Property | Type | Description |
+   | --- | --- | --- |
+   | `userAgent` | `string` | The browser's user agent string. |
+   | `geo` | `Object` | null |
+   | `browser` | `string` | string |
+
+   #### Implementation Details
+   **Fetching Geolocation Data**
+   * If geolocation data isn't stored, userClient calls https://ipinfo.io/json to retrieve location details.
+   * The response is cached in localStorage for future use.
+
+   **Browser Detection**
+   * Uses navigator.userAgent to determine the browser name.
+   * Compares the user agent string against common browser signatures.
+
+   #### Error Handling
+   * Geo Fetch Failure: Logs an error (Error getting geo info:).
+   * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
    ## Random Data Generation
    ### eo.getRandomChar
    `eo.getRandomChar(length)` generates a random hexadecimal string of the specified length using the Web Crypto API for cryptographic security.
 
-   * ## Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `length` | `Number` | The desired length of the output string. |
+   ## Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `length` | `Number` | The desired length of the output string. |
    
-   * ## Returns
-      `String` A random hexadecimal string of the given length.
+   ## Returns
+   `String` A random hexadecimal string of the given length.
    
-   * ## Example Usage
-      ```javascript
-      console.log(eo.getRandomChar(10)); 
-      // Output: "f3a9c2b4d1" (random each time)
-      ```
+   ## Example Usage
+   ```javascript
+   console.log(eo.getRandomChar(10)); 
+   // Output: "f3a9c2b4d1" (random each time)
+   ```
 
    ### eo.getRandomNum
    `eo.getRandomNum(start, end)` generates a random integer between start and end (inclusive).
    
-   * #### Parameters
-      | Parameter | Type | Default | Description |
-      | --- | --- | --- | --- |
-      | `start` | `Number` | Required | The minimum value (inclusive). |
-      | `end` | `Number` | Required | The maximum value (inclusive). |
-   
-   * #### Returns
-      `Number` A random integer between start and end (both inclusive).
-   
-   * #### Example Usage
-      ```javascript
-      console.log(eo.getRandomNum(1, 10)); 
-      // Output: Random number between 1 and 10
-      ```
+   #### Parameters
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `start` | `Number` | Required | The minimum value (inclusive). |
+   | `end` | `Number` | Required | The maximum value (inclusive). |
+
+   #### Returns
+   `Number` A random integer between start and end (both inclusive).
+
+   #### Example Usage
+   ```javascript
+   console.log(eo.getRandomNum(1, 10)); 
+   // Output: Random number between 1 and 10
+   ```
 
    ## Form Handling and Validation
    ### eo.validator
@@ -774,124 +786,127 @@ require(['eo'], function(eo) {
    * Customizable validation rules.
    * Customizable error messages.
 
-   * #### Usage Example
-      ```javascript
-      const rules = {
-        name: { required: true, length: { min: 3, max: 50 } },
-        email: { required: true, email: true },
-        age: { number: { min: 18, max: 99 } },
-        address: { 
-          street: { required: true }, 
-          city: { required: true }
-        }
-      };
-      
-      eo.validator.setConstraints(rules);
-      
-      const data = {
-        name: "John",
-        email: "invalid-email",
-        age: 17,
-        address: { street: "123 Main St" }
-      };
-      
-      if (!eo.validator.validate(data)) {
-        console.log(eo.validator.getErrors()); 
-        // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
-      }
-      ```
-   * #### Methods
-      * ##### `validate(data, rules)`
-      
-         Validates the given data object against rules and collects errors.  
-         **Parameters:**
-         * `data` (Object) – The object to validate.
-         * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
-         
-         **Returns:**
-         * `true` if validation passes.
-         * `false` if validation fails (errors can be retrieved using getErrors()).
-         
-         **Example:**
-         ```javascript
-         const isValid = eo.validator.validate({ name: "Alice" });
-         console.log(isValid); // true or false
-         ```
-      * ##### `getErrors()`
-      
-         Retrieves an array of validation errors from the last `validate()` call.  
-         **Returns:**
-         * `Array<String>` – A list of human-readable error messages.
-         
-         **Example:**
-         ```javascript
-         console.log(eo.validator.getErrors());
-         // Output: [ "Email is not a valid email address." ]
-         ```
-      * ##### `setConstraints(rules)`
-         Sets default validation rules to be used for all future validations.
-         
-         **Parameters:**
-         * `rules (Object)` – The validation rules object.
-         
-         **Example:**
-         ```javascript
-         eo.validator.setConstraints({ username: { required: true } });
-         ```
-      * ##### `resetConstraints()`
-      
-         Clears all previously set validation rules.
-         
-         **Example:**
-         ```javascript
-         eo.validator.resetConstraints();
-         ```
-
-   * #### Validation Rules
-      The validator supports various rules that can be applied to fields.
-      
-      | Rule | Parrameter Type | Description |
-      | --- | --- | --- |
-      | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
-      | `length` | `{ min, max }` | Enforces string length constraints. |
-      | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
-      | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
-      | `email` | `Boolean` | Ensures a valid email format. |
-      | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
-      | `datetime` | `Boolean` | Ensures a valid datetime format. |
-      | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
-      | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
-      
-      **Example Rule Definition:**
-      ```javascript
-      const rules = {
-        name: { required: true, length: { min: 3, max: 50 } },
-        email: { required: true, email: true },
-        age: { number: { min: 18, max: 99 } },
-        brithdate: { date: true }
-        address: { 
-          street: { required: true }, 
-          city: { required: true }
-        }
-      };
-      ```
+   #### Usage Example
+   ```javascript
+   const rules = {
+     name: { required: true, length: { min: 3, max: 50 } },
+     email: { required: true, email: true },
+     age: { number: { min: 18, max: 99 } },
+     address: { 
+       street: { required: true }, 
+       city: { required: true }
+     }
+   };
    
-      **Custom Error Messages**
-      Custom error messages can be defined in the constraints. If a custom message is provided, it will be used instead of the default error message.
-      
-      **Example Usage with Custom Messages**
+   eo.validator.setConstraints(rules);
+   
+   const data = {
+     name: "John",
+     email: "invalid-email",
+     age: 17,
+     address: { street: "123 Main St" }
+   };
+   
+   if (!eo.validator.validate(data)) {
+     console.log(eo.validator.getErrors()); 
+     // Output: [ "Email is not a valid email address.", "Age must be a number greater than 18.", "Address City is required." ]
+   }
+   ```
+
+   #### Methods
+   1. `validate(data, rules)`
+      Validates the given data object against rules and collects errors.
+
+      **Parameters:**
+      * `data` (Object) – The object to validate.
+      * `rules` (Object, optional) – The validation rules. If omitted, previously set constraints are used.
+
+      **Returns:**
+      * `true` if validation passes.
+      * `false` if validation fails (errors can be retrieved using getErrors()).
+
+      **Example:**
       ```javascript
-      const constraints = {
-       first_name: {
-           required: { param: true, message: 'cannot be empty.' },
-           length: { min: 2, max: 50, message: 'should have 2 to 50 characters.' }
-       },
-       email: {
-           required: { param: true, message: 'is needed for account creation.' },
-           email: { param: true, message: 'must be a valid email format.' }
-       }
-      };
+      const isValid = eo.validator.validate({ name: "Alice" });
+      console.log(isValid); // true or false
       ```
+
+   2. `getErrors()`
+      Retrieves an array of validation errors from the last `validate()` call.
+
+      **Returns:**
+      * `Array<String>` – A list of human-readable error messages.
+
+      **Example:**
+      ```javascript
+      console.log(eo.validator.getErrors());
+      // Output: [ "Email is not a valid email address." ]
+      ```
+
+   3. `setConstraints(rules)`
+      Sets default validation rules to be used for all future validations.
+
+      **Parameters:**
+      * `rules (Object)` – The validation rules object.
+      
+      **Example:**
+      ```javascript
+      eo.validator.setConstraints({ username: { required: true } });
+      ```
+
+   4. `resetConstraints()`
+      Clears all previously set validation rules.
+
+      **Example:**
+      ```javascript
+      eo.validator.resetConstraints();
+      ```
+
+   #### Validation Rules
+   The validator supports various rules that can be applied to fields.
+
+   | Rule | Parrameter Type | Description |
+   | --- | --- | --- |
+   | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
+   | `length` | `{ min, max }` | Enforces string length constraints. |
+   | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
+   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
+   | `email` | `Boolean` | Ensures a valid email format. |
+   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
+   | `datetime` | `Boolean` | Ensures a valid datetime format. |
+   | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
+   | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+
+   **Example Rule Definition:**
+   ```javascript
+   const rules = {
+     name: { required: true, length: { min: 3, max: 50 } },
+     email: { required: true, email: true },
+     age: { number: { min: 18, max: 99 } },
+     brithdate: { date: true }
+     address: { 
+       street: { required: true }, 
+       city: { required: true }
+     }
+   };
+   ```
+
+   **Custom Error Messages**
+   Custom error messages can be defined in the constraints. If a custom message is provided, it will be used instead of the default error message.
+
+   **Example Usage with Custom Messages**
+   ```javascript
+   const constraints = {
+    first_name: {
+        required: { param: true, message: 'cannot be empty.' },
+        length: { min: 2, max: 50, message: 'should have 2 to 50 characters.' }
+    },
+    email: {
+        required: { param: true, message: 'is needed for account creation.' },
+        email: { param: true, message: 'must be a valid email format.' }
+    }
+   };
+   ```
 
    ### eo.submitForm
    The `eo.submitForm` simplifies handling form submissions, including validation, AJAX posting, and success/error handling. It integrates with the `eo.validator` for form validation
@@ -914,35 +929,35 @@ require(['eo'], function(eo) {
       <meta name="csrf-token" content="{{ csrf_token() }}">
       ```
    
-   * #### Syntax
-      ```javascript
-      eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
-      ```
+   #### Syntax
+   ```javascript
+   eo.submitForm(formId, { validation, callback, onBeforeSend, redirectUrl } = {})
+   ```
    
-   * #### Parameters
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `formId` | `string` | The ID of the form to submit (with or without `#`). |
-      | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
-      | `callback` | `function` | A callback function executed on a successful submission. |
-      | `onBeforeSend` | `function` | A function executed before sending the form data. |
+   #### Parameters
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `formId` | `string` | The ID of the form to submit (with or without `#`). |
+   | `validation` | `object` | The validation rules based on the eo.validator (read the documentation). |
+   | `callback` | `function` | A callback function executed on a successful submission. |
+   | `onBeforeSend` | `function` | A function executed before sending the form data. |
    
-   * #### Example Usage
-      ```javascript
-      eo.submitForm('#myForm', {
-          validation: {
-              name: { required: true, min: 3 },
-              email: { required: true, email: true },
-          },
-          callback: (formData, response) => {
-              console.log('Form submitted successfully:', response);
-          },
-          onBeforeSend: (formData) => {
-              console.log('Processing form data:', formData);
-          },
-          redirectUrl: '/dashboard'
-      });
-      ```
+   #### Example Usage
+   ```javascript
+   eo.submitForm('#myForm', {
+       validation: {
+           name: { required: true, min: 3 },
+           email: { required: true, email: true },
+       },
+       callback: (formData, response) => {
+           console.log('Form submitted successfully:', response);
+       },
+       onBeforeSend: (formData) => {
+           console.log('Processing form data:', formData);
+       },
+       redirectUrl: '/dashboard'
+   });
+   ```
 
    ## Cookie Management
    ### eo.setCookie
@@ -953,21 +968,21 @@ require(['eo'], function(eo) {
    * **Customizable Expiration**: Supports setting cookie expiration in days.
    * **Universal Path**: Sets the cookie's path to the root ("/") for universal accessibility across the entire site.
 
-   * #### Parameters:
-      | Parameters | Type | Description |
-      | --- | --- | --- |
-      | `key` | `string` | The name of the cookie to be set. |
-      | `value` | `string` | The value to be stored in the cookie. |
-      | `days` | `number` | The number of days until the cookie expires. |
+   #### Parameters:
+   | Parameters | Type | Description |
+   | --- | --- | --- |
+   | `key` | `string` | The name of the cookie to be set. |
+   | `value` | `string` | The value to be stored in the cookie. |
+   | `days` | `number` | The number of days until the cookie expires. |
 
-   * #### Returns
-      `void` This function does not return anything.
+   #### Returns
+   `void` This function does not return anything.
 
-   * #### Example Usage
-      ```javascript
-      setCookie('username', 'JohnDoe', 7); // Sets a cookie "username" with value "JohnDoe" that expires in 7 days
-      setCookie('sessionToken', 'abc123', 1); // Sets a cookie "sessionToken" with value "abc123" that expires in 1 day
-      ```
+   #### Example Usage
+   ```javascript
+   setCookie('username', 'JohnDoe', 7); // Sets a cookie "username" with value "JohnDoe" that expires in 7 days
+   setCookie('sessionToken', 'abc123', 1); // Sets a cookie "sessionToken" with value "abc123" that expires in 1 day
+   ```
 
    ### eo.getCookie
    `eo.getCookie(key)` Retrieves the value of a specified cookie by its key.
@@ -977,22 +992,21 @@ require(['eo'], function(eo) {
    * **Trim and Find:** Efficiently trims and searches through cookies to find the desired key.
    * **Default Value:** Returns an empty string if the cookie is not found.
    
-   * #### Parameters
-      | Parameters | Type | Description |
-      | --- | --- | --- |
-      | key | string | The name of the cookie to retrieve. |
+   #### Parameters
+   | Parameters | Type | Description |
+   | --- | --- | --- |
+   | key | string | The name of the cookie to retrieve. |
 
-   * #### Returns
-      `string` The value of the cookie if found, otherwise an empty string.
+   #### Returns
+   `string` The value of the cookie if found, otherwise an empty string.
 
-   * #### Example Usage
-      ```javascript
-      const username = getCookie('username'); // Retrieves the value of the "username" cookie
-      console.log('Username:', username);
-
-      const sessionToken = getCookie('sessionToken'); // Retrieves the value of the "sessionToken" cookie
-      console.log('Session Token:', sessionToken);
-      ```
+   #### Example Usage
+   ```javascript
+   const username = getCookie('username'); // Retrieves the value of the "username" cookie
+   console.log('Username:', username);
+   const sessionToken = getCookie('sessionToken'); // Retrieves the value of the "sessionToken" cookie
+   console.log('Session Token:', sessionToken);
+   ```
 
    ## UI Components
    ### eo.modal
@@ -1010,101 +1024,103 @@ require(['eo'], function(eo) {
    * The callback function should return a valid HTML string or a DOM element.
    * Destroyable modals are automatically removed from the DOM upon closing.
    
-   * #### create({ id, size, callback, status = false, destroyable = true })
-      Creates and displays a Bootstrap modal.
-    
-      **Parameters**
-      | Parameter | Type | Default | Description |
-      | --- | --- | --- | --- |
-      | `id` | `String` | *required* | The unique ID of the modal. |
-      | `size` | `String` | *required* | Modal size (`xs`, `sm`, `md`, `lg`, `xl`, `fullscreen`). |
-      | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
-      | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
-      | `destroyable` | `Boolean` | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
-      
-      **Example Usage**
-      ```javascript
-      eo.commponent.modal.create({
-        id: 'exampleModal',
-        size: 'md',
-        callback: () => '<p>This is a dynamic modal!</p>',
-        status: 'success',
-        destroyable: true
-      });
-      ```
+   #### create({ id, size, callback, status = false, destroyable = true })
+   Creates and displays a Bootstrap modal.
+
+   **Parameters**
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `id` | `String` | *required* | The unique ID of the modal. |
+   | `size` | `String` | *required* | Modal size (`xs`, `sm`, `md`, `lg`, `xl`, `fullscreen`). |
+   | `callback` | `Function` | *optional* | A function returning the modal content (HTML string or DOM element). |
+   | `status` | `Boolean` | *optional*, `default: false` | If true, adds a status indicator inside the modal. |
+   | `destroyable` | `Boolean` | *optional*, `default: true` | If true, the modal will be removed from the DOM after closing. |
+
+   **Example Usage**
+   ```javascript
+   eo.commponent.modal.create({
+     id: 'exampleModal',
+     size: 'md',
+     callback: () => '<p>This is a dynamic modal!</p>',
+     status: 'success',
+     destroyable: true
+   });
+   ```
 
    ### eo.alert
    To use the `eo.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
-   * #### Required HTML Structure
-      ```html
-      <div class="response"></div>
-      ```
-      This will act as the default container for displaying alerts and loaders.
-   * #### Methods
-      * ##### success(message, element) and error(message, element)
-         Displays a success alert.
-         | Parameter | Type | Default | Description |
-         | --- | --- | --- | --- |
-         | `message` | `String` | *required* | The success message. |
-         | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
-         
-         **Example Usage**
-         ```javascript
-         eo.alert.success('Operation completed successfully!');
-         eo.alert.error('An error occurred while processing your request.');
-         ```
-      * ##### loader(message, element)
-         Displays a processing loader with a message.
-         | Parameter | Type | Default | Description |
-         | --- | --- | --- | --- |
-         | `message` | `String` | *optional*, `default: 'Processing, Please wait...'` | The success message. |
-         | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
 
-         **Example Usage**
-         ```javascript
-         eo.alert.loader();
-         eo.alert.loader('Uploading file, please wait...');
-         ```
+   #### Required HTML Structure
+    ```html
+    <div class="response"></div>
+    ```
+    This will act as the default container for displaying alerts and loaders.
+
+   #### Methods
+   1. `success(message, element) and error(message, element)`
+      Displays a success alert.
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `message` | `String` | *required* | The success message. |
+      | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+
+      **Example Usage**
+      ```javascript
+      eo.alert.success('Operation completed successfully!');
+      eo.alert.error('An error occurred while processing your request.');
+      ```
+
+   2. `loader(message, element)`
+      Displays a processing loader with a message.
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `message` | `String` | *optional*, `default: 'Processing, Please wait...'` | The success message. |
+      | `element` | `String` | *optional*, `default: '.response'` | The container where the alert will be displayed. |
+
+      **Example Usage**
+      ```javascript
+      eo.alert.loader();
+      eo.alert.loader('Uploading file, please wait...');
+      ```
 
    ### eo.button
    The `eo.button` provides utility functions to enable or disable buttons (or any clickable elements) dynamically. It ensures a smooth user experience by preventing interactions when necessary (e.g., during form submission or loading states).
 
-   * #### Methods
-      * ##### disable(selector = '.btn')
-         Disables all buttons (or specified elements) by:
-         * Changing the cursor to "wait".
-         * Disabling pointer events.
-         * Reducing opacity to indicate inactivity.
-         * Disabling the button element.
-         
-         **Parameters**
-         | Parameter | Type | Default | Description |
-         | --- | --- | --- | --- |
-         | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to disable.|
+   #### Methods
+   1. `disable(selector = '.btn')`
+      Disables all buttons (or specified elements) by:
+      * Changing the cursor to "wait".
+      * Disabling pointer events.
+      * Reducing opacity to indicate inactivity.
+      * Disabling the button element.
 
-         **Example Usage**
-         ```javascript
-         eo.button.disable(); // Disables all buttons with class '.btn'
-         eo.button.disable('.custom-button'); // Disables elements with class '.custom-button'
-         ```
+      **Parameters**
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to disable.|
+      **Example Usage**
+      ```javascript
+      eo.button.disable(); // Disables all buttons with class '.btn'
+      eo.button.disable('.custom-button'); // Disables elements with class '.custom-button'
+      ```
       
-      * ##### enable(selector = '.btn')
-         Re-enables previously disabled buttons (or elements) by:
-         * Resetting the cursor to default.
-         * Restoring pointer events.
-         * Restoring opacity.
-         * Enabling the button element.
-         
-         **Parameters**
-         | Parameter | Type | Default | Description |
-         | --- | --- | --- | --- |
-         | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to enable.|
-         
-         **Example Usage**
-         ```javascript
-         button.enable(); // Enables all buttons with class '.btn'
-         button.enable('.custom-button'); // Enables elements with class '.custom-button'
-         ```
+   2. `enable(selector = '.btn')`
+      Re-enables previously disabled buttons (or elements) by:
+      * Resetting the cursor to default.
+      * Restoring pointer events.
+      * Restoring opacity.
+      * Enabling the button element.
+
+      **Parameters**
+      | Parameter | Type | Default | Description |
+      | --- | --- | --- | --- |
+      | `selector` | `String` | *optional* `defaults: '.btn'` | The CSS selector of the elements to enable.|
+
+      **Example Usage**
+      ```javascript
+      button.enable(); // Enables all buttons with class '.btn'
+      button.enable('.custom-button'); // Enables elements with class '.custom-button'
+      ```
 
    ### eo.uploader
    The `eo.uploader` provides an easy-to-use interface for uploading images and documents with preview functionality. It supports both single and multiple file uploads, customizable options, and callback hooks for different stages of the upload process.
@@ -1122,26 +1138,111 @@ require(['eo'], function(eo) {
    <meta name="csrf-token" content="{{ csrf_token() }}">
    ```
    
-   * #### Setup
-      **Required HTML Structure:**
-      Container for the response.
+   #### Setup
+    **Required HTML Structure:**
+    Container for the response.
+    ```html
+    <div class="response"></div>
+    ```
+   
+    Container for the upload button.
+    ```html
+    <div class="upload-container"></div>
+    ```
+   
+    Container for the preview of uploaded files.
+    ```html
+    <div class="uploaded-photo"></div>
+    ```
+   
+    Initializes the uploader with specified configuration and attaches necessary event listeners.
+    ```javascript
+    uploader.create('.upload-container', '/upload-url', {
+       inputName: 'eoFileUpload',
+       previewSelector: '.uploaded-photo',
+       disablePreview: false,
+       uploadType: 'image',
+       accept: 'image/*',
+       multiple: true,
+       onBeforeSend: () => { console.log('Before sending the request'); },
+       onSuccess: (response, files) => {
+           console.log('Upload successful!', response, files);
+           files.forEach((file, index) => {
+               // Manipulate hidden input value, e.g., add a URL property
+               file.url = response[index].url; // Assuming response contains URLs for each file
+               console.log(`File ${index + 1} URL: ${file.url}`);
+           });
+       },
+       onError: (error) => { console.error('Upload failed!', error); }
+    });
+    ```
+
+   #### Parameters
+   | Parameters | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
+   | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
+   | `options` | `Object` | `optional` | Configuration options for the uploader. |
+
+   **Options**
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `inputName` | `String` | `eoFileUpload` | The input name. |
+   | `previewSelector` | `String` | `.uploaded-photo` | CSS selector for the preview container. |
+   | `disablePreview` | `Boolean` | `false` | Whether to disable the preview functionality. |
+   | `uploadType` | `String` | `image` | Type of upload (`image` or `document`). |
+   | `accept` | `String` | `image/*` for images and `application/pdf` for documents | File types to accept. |
+   | `multiple` | `Boolean` | `true` | Whether to allow multiple file uploads. |
+   | `onBeforeSend` | `Function` | `optional` | Callback function before the upload request is sent. |
+   | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
+   | `onError` | `Function` | `optional` | Callback function on upload error. |
+   
+   **onSuccess Example:**
+   ```javascript
+   onSuccess: (response, files) => {
+       files.forEach((file, index) => {
+           // Manipulate hidden input value
+          file.url = response[index].url; // Assuming response contains URLs for each file
+       });
+   }
+   ```
+
+   1. `onSuccess` **Callback**: This function is called when the upload is successful.
+   2. **Iterating through Files**
+      * The `files` array contains the uploaded file objects.
+      * The `forEach` method is used to iterate through each file.
+   3. **Updating File Properties**
+      * Inside the loop, a new property `url` is added to each file object.
+      * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
+      * This URL can be dynamically assigned based on your requirements.
+  
+   **Hidden Input Creation**
+   The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
+   
+   **Image-Specific Properties**
+   If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
+   By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This ensures that you have full control over the file objects after a successful upload.
+  
+   **disablePreview**
+   if disablePreview is true, then the `eo.uploader` won't create the upload preview where the hidden input will be added. To create your own upload preview use the onSuccess callback to manipulate the DOM.
+   
+   #### Comprehensive Guide
+   **First Scenario**  
+   In this scenario, you upload an image, process it, move it to a temporary folder, and return the image data in JSON format. Upon a    successful response, hidden input fields are dynamically created based on the server’s response. Finally, submit your form to save the    image data to the database.
+
+   1. **Create a `<form>` Tag**:
       ```html
-      <div class="response"></div>
+      <form id="uploadForm" action="/submit-form-url" method="post">
+          <div class="response"></div>
+          <div class="upload-container"></div>
+          <div class="uploaded-photo"></div>
+          <button type="submit">Submit</button>
+      </form>
       ```
-      
-      Container for the upload button.
-      ```html
-      <div class="upload-container"></div>
-      ```
-      
-      Container for the preview of uploaded files.
-      ```html
-      <div class="uploaded-photo"></div>
-      ```
-      
-      Initializes the uploader with specified configuration and attaches necessary event listeners.
+
+   2. **Initialize the Uploader:**
       ```javascript
-      uploader.create('.upload-container', '/upload-url', {
+      uploader.create('.upload-container', '/upload-file-url', {
          inputName: 'eoFileUpload',
          previewSelector: '.uploaded-photo',
          disablePreview: false,
@@ -1150,231 +1251,151 @@ require(['eo'], function(eo) {
          multiple: true,
          onBeforeSend: () => { console.log('Before sending the request'); },
          onSuccess: (response, files) => {
-             console.log('Upload successful!', response, files);
              files.forEach((file, index) => {
-                 // Manipulate hidden input value, e.g., add a URL property
-                 file.url = response[index].url; // Assuming response contains URLs for each file
-                 console.log(`File ${index + 1} URL: ${file.url}`);
+                 // Manipulate hidden input value
+                file.url = response[index].url; // Assuming response contains URLs for each file
              });
          },
          onError: (error) => { console.error('Upload failed!', error); }
       });
       ```
-   
-   * #### Parameters
-      | Parameters | Type | Default | Description |
-      | --- | --- | --- | --- |
-      | `uploadSelector` | `String` | `required` | CSS selector for the upload container. |
-      | `url` | `String` | `required` | The endpoint URL where the files will be uploaded. |
-      | `options` | `Object` | `optional` | Configuration options for the uploader. |
-   
-      **Options**
-      | Parameter | Type | Default | Description |
-      | --- | --- | --- | --- |
-      | `inputName` | `String` | `eoFileUpload` | The input name. |
-      | `previewSelector` | `String` | `.uploaded-photo` | CSS selector for the preview container. |
-      | `disablePreview` | `Boolean` | `false` | Whether to disable the preview functionality. |
-      | `uploadType` | `String` | `image` | Type of upload (`image` or `document`). |
-      | `accept` | `String` | `image/*` for images and `application/pdf` for documents | File types to accept. |
-      | `multiple` | `Boolean` | `true` | Whether to allow multiple file uploads. |
-      | `onBeforeSend` | `Function` | `optional` | Callback function before the upload request is sent. |
-      | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
-      | `onError` | `Function` | `optional` | Callback function on upload error. |
-   
-      * **onSuccess Example:**
-         ```javascript
-         onSuccess: (response, files) => {
-             files.forEach((file, index) => {
-                 // Manipulate hidden input value
-                file.url = response[index].url; // Assuming response contains URLs for each file
-             });
+   3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
+
+   4. **Access the File on the Server Side:**
+      ```php
+      // upload.php
+      header('Content-Type: application/json; charset=utf-8');
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+         // if multiple file upload was used, the $_FILES array has a different structure,
+         // so you need first to re-structure it so it can be looped through
+         $files = array(); 
+         foreach ($_FILES['eoFileUpload'] as $k => $l) {
+            foreach ($l as $i => $v) {
+               if (!array_key_exists($i, $files)) $files[$i] = array();
+               $files[$i][$k] = $v;
+            }
          }
-         ```
-         1. `onSuccess` **Callback**: This function is called when the upload is successful.
-         2. **Iterating through Files**
-            * The `files` array contains the uploaded file objects.
-            * The `forEach` method is used to iterate through each file.
-         3. **Updating File Properties**
-            * Inside the loop, a new property `url` is added to each file object.
-            * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
-            * This URL can be dynamically assigned based on your requirements.
-               
-         **Hidden Input Creation**
-         The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
-      
-         **Image-Specific Properties**
-         If the upload type is `image`, the module also creates hidden inputs for the image's `width` and `height`.
-            
-         By using the onSuccess callback, you can dynamically manipulate the files array and update properties based on your requirements. This ensures that you have full control over the file objects after a successful upload.
+         foreach ($files as $key => $file) {
+            // Move file to the desired folder
+            $file_data['name'] = basename($file[$key]['name']);
+            $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
+            move_uploaded_file($file[$key]['tmp_name'], '/temporary/' . $file_data['name']);
+         }
+         echo json_encode($file_data);
+         /**
+          * for single upload
+          * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/temporary/' . $file_data['name']);
+         */
+      }
+      ```
 
-      * **disablePreview**
-         if disablePreview is true, then the `eo.uploader` won't create the upload preview where the hidden input will be added. To create your own upload preview use the onSuccess callback to manipulate the DOM.
-   
-   * #### Comprehensive Guide
-      * **First Scenario**  
-         In this scenario, you upload an image, process it, move it to a temporary folder, and return the image data in JSON format. Upon a    successful response, hidden input fields are dynamically created based on the server’s response. Finally, submit your form to save the    image data to the database.
-         
-         1. **Create a `<form>` Tag**:
-            ```html
-            <form id="uploadForm" action="/submit-form-url" method="post">
-                <div class="response"></div>
-                <div class="upload-container"></div>
-                <div class="uploaded-photo"></div>
-                <button type="submit">Submit</button>
-            </form>
-            ```
-         2. **Initialize the Uploader:**
-            ```javascript
-            uploader.create('.upload-container', '/upload-file-url', {
-               inputName: 'eoFileUpload',
-               previewSelector: '.uploaded-photo',
-               disablePreview: false,
-               uploadType: 'image',
-               accept: 'image/*',
-               multiple: true,
-               onBeforeSend: () => { console.log('Before sending the request'); },
-               onSuccess: (response, files) => {
-                   files.forEach((file, index) => {
-                       // Manipulate hidden input value
-                      file.url = response[index].url; // Assuming response contains URLs for each file
-                   });
-               },
-               onError: (error) => { console.error('Upload failed!', error); }
-            });
-            ```
-         3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
-         4. **Access the File on the Server Side:**
-            ```php
-            // upload.php
-            header('Content-Type: application/json; charset=utf-8');
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-               // if multiple file upload was used, the $_FILES array has a different structure,
-               // so you need first to re-structure it so it can be looped through
-               $files = array(); 
-               foreach ($_FILES['eoFileUpload'] as $k => $l) {
-                  foreach ($l as $i => $v) {
-                     if (!array_key_exists($i, $files)) $files[$i] = array();
-                     $files[$i][$k] = $v;
-                  }
-               }
+   5. **Manipulate Hidden Input Values Based on Response:**
+      ```javascript
+      onSuccess: (response, files) => {
+         console.log('Upload successful!', response, files);
+         files.forEach((file, index) => {
+            // Access and manipulate the hidden input values based on the response
+            // Example: add URL property
+            file.url = response[index].url; // Assuming response contains URLs for each file
+            // Example: update NAME property
+            file.name = response[index].name; // Assuming response contains Name for each file
+            file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
+         });
+      }
+      ```
 
-               foreach ($files as $key => $file) {
-                  // Move file to the desired folder
-                  $file_data['name'] = basename($file[$key]['name']);
-                  $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
-                  move_uploaded_file($file[$key]['tmp_name'], '/temporary/' . $file_data['name']);
-               }
+      Created hidden input after successful upload.
+      ```html
+      <input type="hidden" name="upload[4CN44n6AAtK][name]" value="example.jpg">
+      <input type="hidden" name="upload[4CN44n6AAtK][size]" value="102400">
+      <input type="hidden" name="upload[4CN44n6AAtK][type]" value="image/jpeg">
+      <input type="hidden" name="upload[4CN44n6AAtK][lastModified]" value="1633024800000">
+      <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
+      <input type="hidden" name="upload[4CN44n6AAtK][height]" value="600">
+      <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
+      <input type="hidden" name="upload[4CN44n6AAtK][lastModifiedDate]" value="Friday, October 1, 2021 2:00:00 AM">
+      ```
 
-               echo json_encode($file_data);
+   6. **Submit Your Form**
 
-               /**
-                * for single upload
-                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/temporary/' . $file_data['name']);
-               */
+   7. **Access the Hidden Input on the Server Side:**
+      After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
+      ```php
+      // save_image_data.php
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+          // Loop through each uploaded file's information
+          foreach ($_POST['upload'] as $file_id => $file_info) {
+              $name = $file_info['name'];
+              $size = $file_info['size'];
+              $type = $file_info['type'];
+              $lastModified = $file_info['lastModified'];
+              $width = isset($file_info['width']) ? $file_info['width'] : null;
+              $height = isset($file_info['height']) ? $file_info['height'] : null;
+
+              // Process the file information as needed
+              echo "File ID: $file_id\n";
+              echo "Name: $name\n";
+              echo "Size: $size bytes\n";
+              echo "Type: $type\n";
+              echo "Last Modified: " . date('Y-m-d H:i:s', $lastModified / 1000) . "\n";
+              echo "Width: $width px\n";
+              echo "Height: $height px\n";
+          }
+      }
+      ```
+
+   **Second Scenario**  
+   In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
+   1. **Include Required HTML Tags:**
+      ```html
+      <div class="response"></div>
+      <div class="upload-container"></div>
+      <div class="uploaded-photo"></div>
+      ```
+
+   2. **Initialize the Uploader:**
+      ```javascript
+      uploader.create('.upload-container', '/upload-file-url', {
+         inputName: 'eoFileUpload', // give the input file a name
+         previewSelector: '.uploaded-photo',
+         disablePreview: false,
+         uploadType: 'image',
+         accept: 'image/*',
+         multiple: true,
+         onBeforeSend: () => { console.log('Before sending the request'); }
+         onError: (error) => { console.error('Upload failed!', error); }
+      });
+      ```
+
+   3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
+
+   4. **Access the File on the Server Side:**
+      ```php
+      // upload.php
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+         // if multiple file upload was used, the $_FILES array has a different structure,
+         // so you need first to re-structure it so it can be looped through
+         $files = array(); 
+         foreach ($_FILES['eoFileUpload'] as $k => $l) {
+            foreach ($l as $i => $v) {
+               if (!array_key_exists($i, $files)) $files[$i] = array();
+               $files[$i][$k] = $v;
             }
-            ```
-         5. **Manipulate Hidden Input Values Based on Response:**
-            ```javascript
-            onSuccess: (response, files) => {
-               console.log('Upload successful!', response, files);
-               files.forEach((file, index) => {
-                  // Access and manipulate the hidden input values based on the response
-                  // Example: add URL property
-                  file.url = response[index].url; // Assuming response contains URLs for each file
-                  // Example: update NAME property
-                  file.name = response[index].name; // Assuming response contains Name for each file
-                  file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
-               });
-            }
-            ```
-            Created hidden input after successful upload.
-            ```html
-            <input type="hidden" name="upload[4CN44n6AAtK][name]" value="example.jpg">
-            <input type="hidden" name="upload[4CN44n6AAtK][size]" value="102400">
-            <input type="hidden" name="upload[4CN44n6AAtK][type]" value="image/jpeg">
-            <input type="hidden" name="upload[4CN44n6AAtK][lastModified]" value="1633024800000">
-            <input type="hidden" name="upload[4CN44n6AAtK][width]" value="800">
-            <input type="hidden" name="upload[4CN44n6AAtK][height]" value="600">
-            <input type="hidden" name="upload[4CN44n6AAtK][url]" value="https://your-assigned-url-from-server-response.com">
-            <input type="hidden" name="upload[4CN44n6AAtK][lastModifiedDate]" value="Friday, October 1, 2021 2:00:00 AM">
-            ```
-         6. **Submit Your Form**
-         7. **Access the Hidden Input on the Server Side:**
-		    After submitting the form, the hidden inputs created by the uploader module can be accessed on the server side using `$_POST['upload']`.
-            ```php
-            // save_image_data.php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                // Loop through each uploaded file's information
-                foreach ($_POST['upload'] as $file_id => $file_info) {
-                    $name = $file_info['name'];
-                    $size = $file_info['size'];
-                    $type = $file_info['type'];
-                    $lastModified = $file_info['lastModified'];
-                    $width = isset($file_info['width']) ? $file_info['width'] : null;
-                    $height = isset($file_info['height']) ? $file_info['height'] : null;
-            
-                    // Process the file information as needed
-                    echo "File ID: $file_id\n";
-                    echo "Name: $name\n";
-                    echo "Size: $size bytes\n";
-                    echo "Type: $type\n";
-                    echo "Last Modified: " . date('Y-m-d H:i:s', $lastModified / 1000) . "\n";
-                    echo "Width: $width px\n";
-                    echo "Height: $height px\n";
-                }
-            }
-            ```
-      * **Second Scenario**  
-         In this scenario, you upload an image, process its data, move the image to a directory, and save it in the database.
-         1. **Include Required HTML Tags:**
-            ```html
-            <div class="response"></div>
-            <div class="upload-container"></div>
-            <div class="uploaded-photo"></div>
-            ```
-         2. **Initialize the Uploader:**
-            ```javascript
-            uploader.create('.upload-container', '/upload-file-url', {
-               inputName: 'eoFileUpload', // give the input file a name
-               previewSelector: '.uploaded-photo',
-               disablePreview: false,
-               uploadType: 'image',
-               accept: 'image/*',
-               multiple: true,
-               onBeforeSend: () => { console.log('Before sending the request'); }
-               onError: (error) => { console.error('Upload failed!', error); }
-            });
-            ```
-         3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
-         4. **Access the File on the Server Side:**
-            ```php
-            // upload.php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-               // if multiple file upload was used, the $_FILES array has a different structure,
-               // so you need first to re-structure it so it can be looped through
-               $files = array(); 
-               foreach ($_FILES['eoFileUpload'] as $k => $l) {
-                  foreach ($l as $i => $v) {
-                     if (!array_key_exists($i, $files)) $files[$i] = array();
-                     $files[$i][$k] = $v;
-                  }
-               }
-
-               foreach ($files as $key => $file) {
-                  // Move file to the desired folder and save in the Database
-                  $file_data['name'] = basename($file[$key]['name']);
-                  $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
-                  $file_data['size'] = $file[$key]['size'];
-                  move_uploaded_file($file[$key]['tmp_name'], '/upload/' . $file_data['name']);
-                  // INSERT into Database 
-               }
-
-               /**
-                * for single upload
-                * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/upload/' . $file_data['name']);
-               */
-            }
-            ```
+         }
+         foreach ($files as $key => $file) {
+            // Move file to the desired folder and save in the Database
+            $file_data['name'] = basename($file[$key]['name']);
+            $file_data['url'] = "https://your-domain.com/images/" . $file_data['name'];
+            $file_data['size'] = $file[$key]['size'];
+            move_uploaded_file($file[$key]['tmp_name'], '/upload/' . $file_data['name']);
+            // INSERT into Database 
+         }
+         /**
+          * for single upload
+          * Example: move_uploaded_file($_FILES['eoFileUpload']['tmp_name'], '/upload/' . $file_data['name']);
+         */
+      }
+      ```
 
    ### eo.video
    The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
@@ -1384,26 +1405,28 @@ require(['eo'], function(eo) {
    * Create a hidden input dynamically.
       * `id`, `url`, `embed`, `thumbnail`, and `created_at`
       
-   * #### Usage
-      Call `eo.video.init()` before the page loads.
-      ```javascript
-      window.addEventListener('load', () => {
-         eo.video.init();
-      });
-      ```
-   * #### Required HTML Structure
-      To integrate the video module, add the following HTML elements:
-      ```html
-      <div class="response"></div>
-      <div id="videoInput"></div>
-      <div class="video-list-container"></div>
-      ```
-      * ##### Description
-         * **.response** - Displays messages after adding a video.
-         * **#videoInput** - The container where the input field and add button will be appended.
-         * **.video-list-container** - The section where added videos will be listed.
-         * Clicking on an added video will play it in a fullscreen modal.
-         * A delete button is provided to remove a video entry.
+   #### Usage
+   Call `eo.video.init()` before the page loads.
+   ```javascript
+   window.addEventListener('load', () => {
+      eo.video.init();
+   });
+   ```
+
+   #### Required HTML Structure
+   To integrate the video module, add the following HTML elements:
+   ```html
+   <div class="response"></div>
+   <div id="videoInput"></div>
+   <div class="video-list-container"></div>
+   ```
+
+   * ##### Description
+      * **.response** - Displays messages after adding a video.
+      * **#videoInput** - The container where the input field and add button will be appended.
+      * **.video-list-container** - The section where added videos will be listed.
+      * Clicking on an added video will play it in a fullscreen modal.
+      * A delete button is provided to remove a video entry.
 
    ## eo.mortgageCalculator
    The `eo.mortgageCalculator` provides functionalities to calculate monthly mortgage payments, create selection elements for down payment    interest rates, and loan years, and display the results. It is designed to be embedded into a mortgage calculator form on a web page.
@@ -1413,24 +1436,24 @@ require(['eo'], function(eo) {
    * The script should be included and initialized correctly to work as expected.
    * Customize the form and style as needed to fit your design.
       
-   * ### Required Setup
-      Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
-      **JavaScript**
-      ```javascript
-      window.addEventListener('load', () => {
-          eo.mortgageCalculator.init();
-      });
-      ```
-      **Html**
-      ```html
-      <div class="mortgage-calculator-form">
-          <input type="text" id="sellingPrice" placeholder="Enter Selling Price"> /* you can change the type to hidden */
-          <div id="dpSelection"></div>
-          <div id="interestSelection"></div>
-          <div id="yearSelection"></div>
-          <div id="result"></div>
-      </div>
-      ```
+   ### Required Setup
+    Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
+    **JavaScript**
+    ```javascript
+    window.addEventListener('load', () => {
+        eo.mortgageCalculator.init();
+    });
+    ```
+    **Html**
+    ```html
+    <div class="mortgage-calculator-form">
+        <input type="text" id="sellingPrice" placeholder="Enter Selling Price"> /* you can change the type to hidden */
+        <div id="dpSelection"></div>
+        <div id="interestSelection"></div>
+        <div id="yearSelection"></div>
+        <div id="result"></div>
+    </div>
+    ```
 
    ## Third-Party Integrations
    ### eo.tinymce
@@ -1441,205 +1464,207 @@ require(['eo'], function(eo) {
    * **Merge default options** with custom options for flexibility.
    * **Ensure TinyMCE is removed before initialization** to prevent duplicates.
    
-   * #### Required Setup
-      Ensure that the TinyMCE script is included in your project. If missing, an error will be thrown.
-      ```html
-      <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
-      ```
-      > for more information about TinyMCE, please visit their [website](https://www.tiny.cloud/docs/tinymce/latest/)
+   #### Required Setup
+   Ensure that the TinyMCE script is included in your project. If missing, an error will be thrown.
+   ```html
+   <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
+   ```
+   > for more information about TinyMCE, please visit their [website](https://www.tiny.cloud/docs/tinymce/latest/)
       
-   * #### Method
-      ##### init(containerId, options)
-      Initializes TinyMCE on the specified textarea.
-      
-      **Parameters**
-         | Parameter | Type | Description |
-         | --- | --- | --- |
-         | `containerId` | `string` | The ID or class selector of the textarea (e.g., `#editor`). |
-         | `options` | `object` | (Optional) Custom TinyMCE configuration options. |
-      **Default Options**
-      The module applies the following default configuration:
-      ```javascript
-      {
-          selector: `textarea${containerId}`,
-          height: 500,
-          menubar: false,
-          plugins: ['advlist lists link anchor', 'media table paste code'],
-          content_css: [
-              'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i's
-          ]
-      }
-      ```
-      If you need to customize the options, pass an object to override specific settings.
+   #### Method
+   1. `init(containerId, options)`
+   Initializes TinyMCE on the specified textarea.
+
+   **Parameters**
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `containerId` | `string` | The ID or class selector of the textarea (e.g., `#editor`). |
+   | `options` | `object` | (Optional) Custom TinyMCE configuration options. |
+
+   **Default Options**
+   The module applies the following default configuration:
+   ```javascript
+   {
+       selector: `textarea${containerId}`,
+       height: 500,
+       menubar: false,
+       plugins: ['advlist lists link anchor', 'media table paste code'],
+       content_css: [
+           'https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i's
+       ]
+   }
+   ```
+
+   If you need to customize the options, pass an object to override specific settings.
    
-   * #### Example Usage
-      **Basic Initialization**
-      ```javascript
-      tinymce.init('#editor');
-      ```
-      **Custom Configuration**
-      ```javascript
-      tinymce.init('#editor', {
-          height: 300,
-          plugins: ['lists', 'table', 'code'],
-          toolbar: 'bold italic | alignleft aligncenter alignright'
-      });
-      ```
+   #### Example Usage
+   **Basic Initialization**
+   ```javascript
+   tinymce.init('#editor');
+   ```
+
+   **Custom Configuration**
+   ```javascript
+   tinymce.init('#editor', {
+       height: 300,
+       plugins: ['lists', 'table', 'code'],
+       toolbar: 'bold italic | alignleft aligncenter alignright'
+   });
+   ```
 
    ### eo.googleChart
    This `eo.googleChart` simplifies the integration of Google Charts by providing methods for various chart types.
    
-   * #### Required Setup
-      Ensure you have included the Google Charts script in your HTML:
-      ```html
-      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+   #### Required Setup
+   Ensure you have included the Google Charts script in your HTML:
+   ```html
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+   ```
+   * **Documentation**
+      For DataTable and Chart Configuration please read [Google Chart Documentation](https://developers.google.com/chart/interactive/docs/quick_start)
+   
+   #### Common Parameters
+   All chart functions accept the following parameters:
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `containerId` | `string` | The ID of the HTML element where the chart will be rendered. |
+   | `data` | `function(DataTable)` | A function that returns a populated `google.visualization.DataTable` object. |
+   | `options` | `object` | (Optional) Chart-specific configuration options. |
+   | `apiKey` | `string` | (Optional, required for Geo and Map charts) Google API key for maps/geolocation features. |
+   
+   #### Available Methods
+   1. `bar(params)`
+      Renders a bar chart.
+
+      **Example Usage**
+      ```javascript
+      eo.googleChart.bar({
+          containerId: 'barChart',
+          data: (dataTable) => {
+              dataTable.addColumn('string', 'Year');
+              dataTable.addColumn('number', 'Sales');
+              dataTable.addRows([ ['2020', 1000], ['2021', 1500] ]);
+              return dataTable;
+          },
+          options: { title: 'Annual Sales' }
+      });
       ```
-      * **Documentation**
-         For DataTable and Chart Configuration please read [Google Chart Documentation](https://developers.google.com/chart/interactive/docs/quick_start)
+      
+   2. `calendar(params)`
+      Renders a calendar heatmap chart.
+
+      **Example Usage**
+      ```javascript
+      eo.googleChart.calendar({
+          containerId: 'calendarChart',
+          data: (dataTable) => {
+              dataTable.addColumn({ type: 'date', id: 'Date' });
+              dataTable.addColumn({ type: 'number', id: 'Sales' });
+              dataTable.addRows([ [new Date(2024, 0, 1), 100], [new Date(2024, 1, 14), 200] ]);
+              return dataTable;
+          }
+      });
+      ```
+      
+   3. `geo(params)`
+      Renders a geographical map chart.
+      > ⚠️ **Requires an API key for** `displayMode: 'markers'`.
+      
+      **Example Usage**
+      ```javascript
+      eo.googleChart.geo({
+         containerId: 'geoChart',
+         data: (dataTable) => {
+            dataTable.addColumn('string', 'Country');
+            dataTable.addColumn('number', 'Population');
+            dataTable.addRows([ ['Germany', 83000000], ['France', 67000000] ]);
+            return dataTable;
+         },
+         options: { displayMode: 'markers' },
+         apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
+      });
+      ```
+      
+   4. `pie(params)`
+      Renders a pie chart.
+
+      **Example Usage**
+      ```javascript
+      eo.googleChart.pie({
+          containerId: 'pieChart',
+          data: (dataTable) => {
+              dataTable.addColumn('string', 'Category');
+              dataTable.addColumn('number', 'Value');
+              dataTable.addRows([ ['Electronics', 40], ['Clothing', 25], ['Groceries', 35] ]);
+              return dataTable;
+          },
+          options: { title: 'Sales Breakdown' }
+      });
+      ```
+      
+   5. `line(params)`
+      Renders a line chart.
+
+      **Example Usage**
+      ```javascript
+      eo.googleChart.line({
+          containerId: 'lineChart',
+          data: (dataTable) => {
+              dataTable.addColumn('string', 'Month');
+              dataTable.addColumn('number', 'Revenue');
+              dataTable.addRows([ ['Jan', 5000], ['Feb', 7000], ['Mar', 6000] ]);
+              return dataTable;
+          },
+          options: { title: 'Monthly Revenue' }
+      });
+      ```
+      
+   6. `map(params)`
+      Renders a Google Maps visualization.
+      > ⚠️ **Requires an API key.**
+      **Example Usage**
+      ```javascript
+      eo.googleChart.map({
+          containerId: 'mapChart',
+          data: (dataTable) => {
+              dataTable.addColumn('number', 'Lat');
+              dataTable.addColumn('number', 'Lng');
+              dataTable.addColumn('string', 'Label');
+              dataTable.addRows([ [37.7749, -122.4194, 'San Francisco'], [40.7128, -74.0060, 'New York'] ]);
+              return dataTable;
+          },
+          options: { showTooltip: true, showInfoWindow: true },
+          apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
+      });
+      ```
+      
+   7. `trendLine(params)`
+      Renders a scatter plot with a trend line.s
+      
+      **Example Usage**
+      ```javascript
+      eo.googleChart.trendLine({
+          containerId: 'trendChart',
+          data: (dataTable) => {
+              dataTable.addColumn('number', 'X');
+              dataTable.addColumn('number', 'Y');
+              dataTable.addRows([ [1, 2], [2, 4], [3, 6], [4, 8] ]);
+              return dataTable;
+          },
+          options: { trendlines: { 0: {} } }
+      });
+      ```
    
-   * #### Common Parameters
-      All chart functions accept the following parameters:
-      | Parameter | Type | Description |
-      | --- | --- | --- |
-      | `containerId` | `string` | The ID of the HTML element where the chart will be rendered. |
-      | `data` | `function(DataTable)` | A function that returns a populated `google.visualization.DataTable` object. |
-      | `options` | `object` | (Optional) Chart-specific configuration options. |
-      | `apiKey` | `string` | (Optional, required for Geo and Map charts) Google API key for maps/geolocation features. |
-   
-   * #### Available Methods
-      1. ##### `bar(params)`
-         Renders a bar chart.
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.bar({
-             containerId: 'barChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('string', 'Year');
-                 dataTable.addColumn('number', 'Sales');
-                 dataTable.addRows([ ['2020', 1000], ['2021', 1500] ]);
-                 return dataTable;
-             },
-             options: { title: 'Annual Sales' }
-         });
-         ```
-      
-      2. ##### `calendar(params)`
-         Renders a calendar heatmap chart.
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.calendar({
-             containerId: 'calendarChart',
-             data: (dataTable) => {
-                 dataTable.addColumn({ type: 'date', id: 'Date' });
-                 dataTable.addColumn({ type: 'number', id: 'Sales' });
-                 dataTable.addRows([ [new Date(2024, 0, 1), 100], [new Date(2024, 1, 14), 200] ]);
-                 return dataTable;
-             }
-         });
-         ```
-      
-      3. ##### `geo(params)`
-         Renders a geographical map chart.
-         > ⚠️ **Requires an API key for** `displayMode: 'markers'`.
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.geo({
-             containerId: 'geoChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('string', 'Country');
-                 dataTable.addColumn('number', 'Population');
-                 dataTable.addRows([ ['Germany', 83000000], ['France', 67000000] ]);
-                 return dataTable;
-             },
-             options: { displayMode: 'markers' },
-             apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
-         });
-         ```
-      
-      4. ##### `pie(params)`
-         Renders a pie chart.
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.pie({
-             containerId: 'pieChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('string', 'Category');
-                 dataTable.addColumn('number', 'Value');
-                 dataTable.addRows([ ['Electronics', 40], ['Clothing', 25], ['Groceries', 35] ]);
-                 return dataTable;
-             },
-             options: { title: 'Sales Breakdown' }
-         });
-         ```
-      
-      5. ##### `line(params)`
-         Renders a line chart.
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.line({
-             containerId: 'lineChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('string', 'Month');
-                 dataTable.addColumn('number', 'Revenue');
-                 dataTable.addRows([ ['Jan', 5000], ['Feb', 7000], ['Mar', 6000] ]);
-                 return dataTable;
-             },
-             options: { title: 'Monthly Revenue' }
-         });
-         ```
-      
-      6. ##### `map(params)`
-         Renders a Google Maps visualization.
-         > ⚠️ **Requires an API key.**
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.map({
-             containerId: 'mapChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('number', 'Lat');
-                 dataTable.addColumn('number', 'Lng');
-                 dataTable.addColumn('string', 'Label');
-                 dataTable.addRows([ [37.7749, -122.4194, 'San Francisco'], [40.7128, -74.0060, 'New York'] ]);
-                 return dataTable;
-             },
-             options: { showTooltip: true, showInfoWindow: true },
-             apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
-         });
-         ```
-      
-      7. ##### `trendLine(params)`
-         Renders a scatter plot with a trend line.s
-         
-         **Example Usage**
-         ```javascript
-         eo.googleChart.trendLine({
-             containerId: 'trendChart',
-             data: (dataTable) => {
-                 dataTable.addColumn('number', 'X');
-                 dataTable.addColumn('number', 'Y');
-                 dataTable.addRows([ [1, 2], [2, 4], [3, 6], [4, 8] ]);
-                 return dataTable;
-             },
-             options: { trendlines: { 0: {} } }
-         });
-         ```
-   
-   * #### Error Handling
-      * If the `containerId` is invalid, the function will return `false`.
-      * If `data` is missing, an error will be thrown:
-         ```javascript
-         Error: Set the data in table property
-         ```
-      * For geo and map charts, an API key is required. If missing, an error will be thrown
-         ```javascript
-         Error: Maps require a mapsApiKey.
-         ```
+   #### Error Handling
+   * If the `containerId` is invalid, the function will return `false`.
+   * If `data` is missing, an error will be thrown:
+      ```javascript
+      Error: Set the data in table property
+      ```
+   * For geo and map charts, an API key is required. If missing, an error will be thrown
+      ```javascript
+      Error: Maps require a mapsApiKey.
+      ```
 
    ### eo.tomSelect
 
