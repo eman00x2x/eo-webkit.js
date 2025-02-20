@@ -44,7 +44,6 @@
 		return token;
 	})();
 
-
 	/**
 	 * Sanitizes a given string by escaping HTML special characters.
 	 * Uses the browser's built-in option element to convert the string.
