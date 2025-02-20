@@ -1,3 +1,5 @@
+// Copyright (c) [2025] [Emmanuel Olivas]
+
 // eo.js
 
 /* global define */ // For AMD
