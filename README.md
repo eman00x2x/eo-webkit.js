@@ -1482,23 +1482,23 @@ require(['eo'], function(eo) {
    * Customize the form and style as needed to fit your design.
       
    #### Required Setup
-    Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
-    **JavaScript**
-    ```javascript
-    window.addEventListener('load', () => {
-        eo.mortgageCalculator.init();
-    });
-    ```
-    **Html**
-    ```html
-    <div class="mortgage-calculator-form">
-        <input type="text" id="sellingPrice" placeholder="Enter Selling Price"> /* you can change the type to hidden */
-        <div id="dpSelection"></div>
-        <div id="interestSelection"></div>
-        <div id="yearSelection"></div>
-        <div id="result"></div>
-    </div>
-    ```
+   Ensure to call the `eo.mortgageCalculator.init()` method to create the necessary selection elements and calculate the initial mortgage payment.
+   **JavaScript**
+   ```javascript
+   window.addEventListener('load', () => {
+       eo.mortgageCalculator.init();
+   });
+   ```
+   **Html**
+   ```html
+   <div class="mortgage-calculator-form">
+       <input type="text" id="sellingPrice" placeholder="Enter Selling Price"> /* you can change the type to hidden */
+       <div id="dpSelection"></div>
+       <div id="interestSelection"></div>
+       <div id="yearSelection"></div>
+       <div id="result"></div>
+   </div>
+   ```
 
    ## Third-Party Integrations
    ### eo.tinymce
