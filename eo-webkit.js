@@ -1,22 +1,22 @@
 /*!
- * eo-webkit.js 1.0.0
+ * eo-webkit.js 1.0.1
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
 
-/* global define */ // For AMD
-/* global module */ // For CommonJS
-/* global exports */ // For CommonJS
+/* global define */
+/* global module */
+/* global exports */
 
-// eo-webkit.js
+/* eo-webkit.js */
 
-; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
-	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)
-		define([], factory); // Use AMD define
-	} else if (typeof exports === 'object') { // Check for CommonJS
-		module.exports = factory(); // Use CommonJS module.exports
-	} else { // Otherwise, assume global scope (browser)
-		window.eo = factory(); // Attach the module to the window object
+; (function(factory) {
+	if (typeof define === 'function' && define.amd) {
+		define([], factory);
+	} else if (typeof exports === 'object') {
+		module.exports = factory();
+	} else {
+		window.eo = factory();
 	}
 })(function() {
 
@@ -280,7 +280,7 @@
 	 */
 	const formatCurrency = (amount) => {
 		const num = Math.abs(Number(amount));
-		const suffixes = ['', 'K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'Nn', 'Dc', 'Ud', 'Dd', 'Td', 'Qdd', 'Qnd', 'Sxd', 'Spd', 'Od', 'Nd', 'V']; // Added suffixes for larger numbers up to Googol
+		const suffixes = ['', 'K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'Nn', 'Dc', 'Ud', 'Dd', 'Td', 'Qdd', 'Qnd', 'Sxd', 'Spd', 'Od', 'Nd', 'V'];
 		const factor = [
 			1, 1e3, 1e6, 1e9, 1e12, 1e15, 1e18, 1e21, 1e24, 1e27, 1e30, 1e33,
 			1e36, 1e39, 1e42, 1e45, 1e48, 1e51, 1e54, 1e57, 1e60, 1e63, 1e100
@@ -491,7 +491,7 @@
 			headers,
 			body
 		})
-			.then(async response => { // Make sure the function is async
+			.then(async response => {
 				if (!response.ok) {
 					const errorMessage = await response.text();
 					throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
@@ -839,8 +839,8 @@
 		 * @param {string} [type='success'] - The type of alert, which determines its styling (e.g., 'success', 'danger').
 		 * @param {string} [element='.response'] - The CSS selector of the container where the alert will be displayed.
 		 */
-		const _createAlert = (message, type = 'success', element = '.response') => {  // Combined function
-			const alertClasses = `message alert alert-${type} alert-dismissible show`; // Dynamic class
+		const _createAlert = (message, type = 'success', element = '.response') => {
+			const alertClasses = `message alert alert-${type} alert-dismissible show`;
 			const alertDiv = createElements('div', { class: alertClasses, role: 'alert' }, [
 				createElements('span', {}, [document.createTextNode(message)]),
 				createElements('button', {
@@ -1142,11 +1142,7 @@
 			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
 			
 			if (multiple) {
-				container.innerHTML = `
-					<span class="btn btn-dark btn-eo-uploader-browse">
-						<i class="ti ti-upload me-2"></i> Upload
-					</span>
-				`;
+				container.innerHTML = `<span class="btn btn-dark btn-eo-uploader-browse"><i class="ti ti-upload me-2"></i> Upload</span>`;
 			}
 
 			document.body.prepend(createElements('form', {
