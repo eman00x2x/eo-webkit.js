@@ -1140,6 +1140,7 @@ require(['eo-webkit'], function(eo) {
    
    #### Method
    1. `create({ id, size, callback, status = false, destroyable = true })`
+
    Creates and displays a Bootstrap modal.
 
    **Parameters**
@@ -1166,13 +1167,14 @@ require(['eo-webkit'], function(eo) {
    To use the `eo.alert`, ensure the necessary HTML structure includes a container for displaying alerts.
 
    #### Required HTML Structure
-    ```html
-    <div class="response"></div>
-    ```
-    This will act as the default container for displaying alerts and loaders.
+   ```html
+   <div class="response"></div>
+   ```
+   This will act as the default container for displaying alerts and loaders.
 
    #### Methods
    1. `success(message, element) and error(message, element)`
+
       Displays a success alert.
       | Parameter | Type | Default | Description |
       | --- | --- | --- | --- |
@@ -1186,6 +1188,7 @@ require(['eo-webkit'], function(eo) {
       ```
 
    2. `loader(message, element)`
+
       Displays a processing loader with a message.
       | Parameter | Type | Default | Description |
       | --- | --- | --- | --- |
@@ -1203,6 +1206,7 @@ require(['eo-webkit'], function(eo) {
 
    #### Methods
    1. `disable(selector = '.btn')`
+
       Disables all buttons (or specified elements) by:
       * Changing the cursor to "wait".
       * Disabling pointer events.
@@ -1220,6 +1224,7 @@ require(['eo-webkit'], function(eo) {
       ```
       
    2. `enable(selector = '.btn')`
+
       Re-enables previously disabled buttons (or elements) by:
       * Resetting the cursor to default.
       * Restoring pointer events.
@@ -1247,7 +1252,7 @@ require(['eo-webkit'], function(eo) {
    * Customizable options for upload type, file acceptance, and event callbacks.
    * Automatically handles UI creation and event binding.
 
-   **Dependency**
+   **Dependency**  
    This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
    ```html
    <meta name="csrf-token" content="{{ csrf_token() }}">
