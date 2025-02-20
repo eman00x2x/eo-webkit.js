@@ -250,9 +250,9 @@ require(['eo'], function(eo) {
    `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
    
    **Features**
-   * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.
-   * **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.
-   * **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.
+   **Object Flattening:** Converts a nested object into a flat object with dot notation keys.   
+   **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.   
+   **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.   
 
    * #### Parameters
       | Parameter | Type | Description |
