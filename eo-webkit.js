@@ -1,14 +1,14 @@
 /*!
- * eo.js 1.0.0
+ * eo-webkit.js 1.0.0
  * Copyright (c) 2025 Eman Olivas
- * eo.js may be freely distributed under the MIT license.
+ * eo-webkit.js may be freely distributed under the MIT license.
 */
 
 /* global define */ // For AMD
 /* global module */ // For CommonJS
 /* global exports */ // For CommonJS
 
-// eo.js
+// eo-webkit.js
 
 ; (function(factory) { // The IIFE (Immediately Invoked Function Expression)
 	if (typeof define === 'function' && define.amd) { // Check for AMD (Asynchronous Module Definition)

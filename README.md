@@ -1,6 +1,6 @@
-# eo.js - A Comprehensive JavaScript Utility Library
+# eo-webkit.js - A Comprehensive JavaScript Utility Library
 
-eo.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks, including data manipulation, date/time handling, DOM manipulation, network requests, random data generation, form handling, UI components, third-party integrations, settings management, and calculators.
+eo-webkit.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks, including data manipulation, date/time handling, DOM manipulation, network requests, random data generation, form handling, UI components, third-party integrations, settings management, and calculators.
 
 ## Table of Contents
 
@@ -61,20 +61,20 @@ eo.js is a comprehensive JavaScript utility library designed to streamline web d
 
 
 # Introduction
-eo.js aims to simplify front-end development by providing a single, well-documented library for a variety of everyday tasks.  It's designed to be modular and easy to use, helping developers build web applications more efficiently.
+eo-webkit.js aims to simplify front-end development by providing a single, well-documented library for a variety of everyday tasks.  It's designed to be modular and easy to use, helping developers build web applications more efficiently.
 
 # Installation
 ## Browser
 **1. Include the script:**
-The simplest way to use eo.js in a browser is to include the script directly in your HTML file. Place the following `<script>` tag just before the closing `</body>` tag:
+The simplest way to use eo-webkit.js in a browser is to include the script directly in your HTML file. Place the following `<script>` tag just before the closing `</body>` tag:
 ```html
 <body>
    <!-- your html content here -->
 
-   <script type='text/javascript' src='path/to/eo.js' />
+   <script type='text/javascript' src='path/to/eo-webkit.js' />
 </body>
 ```
-Replace "path/to/eo.js" with the actual path to your eo.js file.  If you're using a CDN, you would use the CDN URL here.
+Replace "path/to/eo-webkit.js" with the actual path to your eo-webkit.js file.  If you're using a CDN, you would use the CDN URL here.
 
 **2. Use the module:**  
 After including the script, you can access the module's functions through the eo global object:
@@ -85,13 +85,13 @@ console.log(eo.trim("  hello  ")); // Example usage
 ## Node.js
 **1. Install the package**
 ```bash
-npm install eo.js
+npm install eo-webkit.js
 ```
 
 **2. Require the module:**  
 In your Node.js code, require the module:
 ```javascript
-const eo = require('eo.js');
+const eo = require('eo-webkit.js');
 
 console.log(eo.trim("  hello  "));
 ```
@@ -107,7 +107,7 @@ Configure the path to your eo.js file in your RequireJS configuration:
 ```javascript
 require.config({
   paths: {
-    'eo': 'path/to/eo' // Path to your eo.js file (without the .js extension)
+    'eo-webkit': 'path/to/eo-webkit' // Path to your eo.js file (without the .js extension)
   }
 });
 ```
@@ -115,7 +115,7 @@ require.config({
 **3. Use the module:**  
 Use require to load and use the module:
 ```javascript
-require(['eo'], function(eo) {
+require(['eo-webkit'], function(eo) {
   console.log(eo.trim("  hello  ")); // Example usage
 });
 ```
