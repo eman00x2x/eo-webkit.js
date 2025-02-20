@@ -1053,6 +1053,7 @@ require(['eo'], function(eo) {
    | `options` | `object` | Configuration options for the `eo.submitForm`. |
 
    | Options | Type | Description |
+   | --- | --- | --- |
    | `rules` | `object` | The validation rules based on the [`eo.validator`](#eovalidator). |
    | `callback` | `function` | A callback function executed on a successful submission. |
    | `onBeforeSend` | `function` | A function executed before sending the form data. |
@@ -1261,17 +1262,17 @@ require(['eo'], function(eo) {
    ```html
    <div class="response"></div>
    ```
-   
+
    Container for the upload button.
    ```html
    <div class="upload-container"></div>
    ```
-   
+
    Container for the preview of uploaded files.
    ```html
    <div class="uploaded-photo"></div>
    ```
-   
+
    Initializes the uploader with specified configuration and attaches necessary event listeners.
    ```javascript
    eo.uploader.create('.upload-container', '/upload-url', {
