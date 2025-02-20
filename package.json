@@ -22,9 +22,9 @@
   "author": "Eman Olivas",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eman00x2x/eo.js/issues"
+    "url": "https://github.com/eman00x2x/eo-webkit.js/issues"
   },
-  "homepage": "https://github.com/eman00x2x/eo.js#readme",
+  "homepage": "https://github.com/eman00x2x/eo-webkit.js#readme",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
