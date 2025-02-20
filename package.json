@@ -1,5 +1,5 @@
 {
-  "name": "eo-webkit.js",
+  "name": "eo-webkit",
   "version": "1.0.0",
   "description": "eo-webkit.js is a comprehensive JavaScript utility library designed to streamline web development. It provides a wide range of functions for common tasks, including data manipulation, date/time handling, DOM manipulation, network requests, random data generation, form handling, UI components, third-party integrations, and calculators.",
   "main": "eo-webkit.js",
@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/eman00x2x/eo.js/issues"
   },
-  "homepage": "https://github.com/eman00x2x/eo.js#readme"
+  "homepage": "https://github.com/eman00x2x/eo.js#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
