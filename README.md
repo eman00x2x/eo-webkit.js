@@ -85,7 +85,7 @@ console.log(eo.trim("  hello  ")); // Example usage
 ## Node.js
 **1. Install the package**
 ```bash
-npm install eo-webkit.js
+npm install eo-webkit
 ```
 
 **2. Require the module:**   
