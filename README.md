@@ -412,7 +412,7 @@ require(['eo'], function(eo) {
    #### Parameter
    | Parameter | Type | Description |
    | --- | --- | --- |
-   | `timestamp` | `number`|`string`|`Date` | The input timestamp to be converted. Can be a number (in seconds or milliseconds), a string representation of a date, or a Date object. |
+   | `timestamp` | `number` or `string` or `Date` | The input timestamp to be converted. Can be a number (in seconds or milliseconds), a string representation of a date, or a Date object. |
 
    #### Returns
    `string` The formatted date `string`.
@@ -440,7 +440,7 @@ require(['eo'], function(eo) {
    | Parameters | Type | Description |
    | --- | --- | --- |
    | `date` | `Date`, `number`, `string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
-   | `otherDate` | `Date`, `number`, `string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+   | `otherDate` | `Date` or `number` or `string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
    
    #### Returns
     `number` The difference in days between the two dates.
