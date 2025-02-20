@@ -312,32 +312,27 @@ require(['eo'], function(eo) {
 
    #### Example Usage
    ```javascript
-   const nestedObj = {
-      user: {
-         name: 'John Doe',
-         address: {
-               city: 'New York',
-               zip: '10001'
-         }
-      }
+   const dotNotatedObj = {
+      'product.id': 123,
+      'product.details.name': 'Laptop',
+      'product.details.specs.cpu': 'Intel i7',
+      'product.details.specs.ram': '16GB'
    };
-   const flatObj = eo.arrayToDotNotation(nestedObj);
-   console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
 
-   const anotherNestedObj = {
-      product: {
-         id: 123,
-         details: {
-               name: 'Laptop',
-               specs: {
-                  cpu: 'Intel i7',
-                  ram: '16GB'
-               }
-         }
-      }
+   const nestedProduct = dotNotationToArray(dotNotatedObj);
+   console.log(nestedProduct); // Outputs: { product: { id: 123, details: { name: 'Laptop', specs: { cpu: 'Intel i7', ram: '16GB' } } } }
+
+   const anotherDotNotatedObj = {
+      'order.number': 456,
+      'order.date': '2023-01-01',
+      'order.items.0.name': 'Book',
+      'order.items.0.price': 19.99,
+      'order.items.1.name': 'Pen',
+      'order.items.1.price': 2.99
    };
-   const anotherFlatObj = eo.arrayToDotNotation(anotherNestedObj);
-   console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product.details.specs.ram': '16GB' }
+   
+   const nestedOrder = dotNotationToArray(anotherDotNotatedObj);
+   console.log(nestedOrder); // Outputs: { order: { number: 456, date: '2023-01-01', items: [ { name: 'Book', price: 19.99 }, { name: 'Pen', price: 2.99 } ] } }
    ```
 
    ### eo.removeFalseArray
