@@ -330,7 +330,7 @@ require(['eo'], function(eo) {
       'order.items.1.name': 'Pen',
       'order.items.1.price': 2.99
    };
-   
+
    const nestedOrder = dotNotationToArray(anotherDotNotatedObj);
    console.log(nestedOrder); // Outputs: { order: { number: 456, date: '2023-01-01', items: [ { name: 'Book', price: 19.99 }, { name: 'Pen', price: 2.99 } ] } }
    ```
@@ -439,8 +439,8 @@ require(['eo'], function(eo) {
    #### Parameters
    | Parameters | Type | Description |
    | --- | --- | --- |
-   | `date` | `Date`|`number`|`string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
-   | `otherDate` | `Date`|`number`|`string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+   | `date` | `Date`, `number`, `string` | The first date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
+   | `otherDate` | `Date`, `number`, `string` | The second date to compare. Can be a Date object, a timestamp in milliseconds, or a string representation of a date. |
    
    #### Returns
     `number` The difference in days between the two dates.
