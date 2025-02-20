@@ -31,12 +31,5 @@
   "bugs": {
     "url": "https://github.com/eman00x2x/eo.js/issues"
   },
-  "homepage": "https://github.com/eman00x2x/eo.js#readme",
-  "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "eslint": "^9.20.1",
-    "globals": "^15.14.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0"
-  }
+  "homepage": "https://github.com/eman00x2x/eo.js#readme"
 }
