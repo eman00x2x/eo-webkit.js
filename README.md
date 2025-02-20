@@ -74,7 +74,7 @@ The simplest way to use eo-webkit.js in a browser is to include the script direc
    <script type='text/javascript' src='path/to/eo-webkit.js' />
 </body>
 ```
-Replace "path/to/eo-webkit.js" with the actual path to your eo-webkit.js file.  If you're using a CDN, you would use the CDN URL here.
+Replace `"path/to/eo-webkit.js"` with the actual path to your `eo-webkit.js` file.  If you're using a CDN, you would use the CDN URL here.
 
 **2. Use the module:**  
 After including the script, you can access the module's functions through the eo global object:
@@ -88,7 +88,7 @@ console.log(eo.trim("  hello  ")); // Example usage
 npm install eo-webkit.js
 ```
 
-**2. Require the module:**  
+**2. Require the module:**   
 In your Node.js code, require the module:
 ```javascript
 const eo = require('eo-webkit.js');
@@ -99,10 +99,10 @@ console.log(eo.trim("  hello  "));
 ## AMD (Asynchronous Module Definition)
 If you're using an AMD module loader like RequireJS, you can load eo.js as an AMD module:
 
-**1. Configure RequireJS:**
+**1. Configure RequireJS:**   
 Make sure RequireJS is configured in your HTML file.
 
-**2. Define the module path:**
+**2. Define the module path:**   
 Configure the path to your eo.js file in your RequireJS configuration:
 ```javascript
 require.config({
@@ -244,8 +244,8 @@ require(['eo-webkit'], function(eo) {
       // { age: 25, country: "USA" }
       ```
 
-   ### eo.arrayToDotNotation
-   `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
+   ### eo.objectToDotNotation
+   `eo.objectToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
    
    **Features**
    * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.   
@@ -273,7 +273,7 @@ require(['eo-webkit'], function(eo) {
       }
    };
 
-   const flatObj = eo.arrayToDotNotation(nestedObj);
+   const flatObj = eo.objectToDotNotation(nestedObj);
    console.log(flatObj); // Outputs: { 'user.name': 'John Doe', 'user.address.city': 'New York', 'user.address.zip': '10001' }
 
    const anotherNestedObj = {
@@ -289,23 +289,22 @@ require(['eo-webkit'], function(eo) {
       }
    };
 
-   const anotherFlatObj = eo.arrayToDotNotation(anotherNestedObj);
+   const anotherFlatObj = eo.objectToDotNotation(anotherNestedObj);
    console.log(anotherFlatObj); // Outputs: { 'product.id': 123, 'product.details.name': 'Laptop', 'product.details.specs.cpu': 'Intel i7', 'product details.specs.ram': '16GB' }
    ```
 
-   ### eo.dotNotationToArray
-   `eo.arrayToDotNotation(obj, prefix = '')` Converts a nested object into a flat object with dot notation keys.
+   ### eo.dotNotationToObject
+   `eo.dotNotationToObject(obj)` Converts a nested object into a flat object with dot notation keys.
 
    **Features**
-   * **Object Flattening:** Converts a nested object into a flat object with dot notation keys.
-   * **Recursive Handling:** Recursively processes nested objects to ensure all nested properties are flattened.
-   * **Custom Prefix:** Allows specifying a prefix for the keys in the resulting flat object.
+   * **Dot Notation to Object Conversion:** Converts an object with dot notation keys into a nested object.
+   * **Recursive Handling:** Recursively processes dot notation keys to create a deeply nested object structure.
+   * **Efficient Processing:** Uses the reduce method for efficient key processing and object construction.
 
    #### Parameters
    | Parameters | Type | Default | Description |
    | --- | --- | --- | --- |
-   | `obj` | `Object` | required | The nested object to be converted. |
-   | `prefix` | `string` | empty `string` | An optional prefix for the keys in the resulting flat object. |
+   | `obj` | `Object` | required | The object with dot notation keys to be converted. |
 
    #### Returns
    `Object` A new flat object with dot notation keys.
@@ -319,7 +318,7 @@ require(['eo-webkit'], function(eo) {
       'product.details.specs.ram': '16GB'
    };
 
-   const nestedProduct = dotNotationToArray(dotNotatedObj);
+   const nestedProduct = eo.dotNotationToObject(dotNotatedObj);
    console.log(nestedProduct); // Outputs: { product: { id: 123, details: { name: 'Laptop', specs: { cpu: 'Intel i7', ram: '16GB' } } } }
 
    const anotherDotNotatedObj = {
@@ -331,7 +330,7 @@ require(['eo-webkit'], function(eo) {
       'order.items.1.price': 2.99
    };
 
-   const nestedOrder = dotNotationToArray(anotherDotNotatedObj);
+   const nestedOrder = eo.dotNotationToObject(anotherDotNotatedObj);
    console.log(nestedOrder); // Outputs: { order: { number: 456, date: '2023-01-01', items: [ { name: 'Book', price: 19.99 }, { name: 'Pen', price: 2.99 } ] } }
    ```
 

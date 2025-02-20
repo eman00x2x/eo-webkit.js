@@ -1664,11 +1664,11 @@
 	 * @param {string} [prefix=''] - An optional prefix for the keys in the resulting flat object.
 	 * @returns {Object} A new flat object with dot notation keys.
 	 */
-	const arrayToDotNotation = (obj, prefix = '') =>
+	const objectToDotNotation = (obj, prefix = '') =>
 		Object.keys(obj).reduce((res, key) => {
 			const prop = prefix ? `${prefix}.${key}` : key;
 			if (typeof obj[key] === 'object' && obj[key] !== null) {
-				Object.assign(res, arrayToDotNotation(obj[key], prop));
+				Object.assign(res, objectToDotNotation(obj[key], prop));
 			} else {
 				res[prop] = obj[key];
 			}
@@ -1681,7 +1681,7 @@
 	 * @param {Object} obj - The flat object to be converted.
 	 * @returns {Object} A new nested object.
 	 */
-	const dotNotationToArray = (obj) => {
+	const dotNotationToObject = (obj) => {
 		let result = {};
 		Object.keys(obj).forEach(key => {
 			key.split('.').reduce((res, part, index, arr) =>
@@ -1728,8 +1728,8 @@
 		post,
 		get,
 		redirect,
-		arrayToDotNotation,
-		dotNotationToArray,
+		objectToDotNotation,
+		dotNotationToObject,
 		diffDays,
 		removeFalseArray,
 		removeDuplicatesArray,
