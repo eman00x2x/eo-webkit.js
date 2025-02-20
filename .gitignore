@@ -1,5 +1,5 @@
-node_modules/
 __tests__/
+node_modules/
 package-lock.json
 eslint.config.mjs
 jest.config.js
