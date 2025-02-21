@@ -461,18 +461,18 @@
 
 		if (onBeforeSend) onBeforeSend();
 
-		const headers = {
+		let headers = {
 			'X-Requested-With': 'XMLHttpRequest'
 		};
 
 		let body = data;
 
 		if ((data instanceof FormData || Array.isArray(data) || (typeof data === 'object' && data !== null))) {
-			body = serializeFormData(data);
-
 			if (contentType.includes('application/json')) {
-				body = JSON.stringify(body);
+				body = JSON.stringify(serializeFormData(data));
 				headers['Content-Type'] = contentType;
+			} else if (contentType.includes('multipart/form-data')) {
+				headers = {};
 			} else {
 				headers['Content-Type'] = contentType;
 				body = Object.keys(body).map(key => {
@@ -501,7 +501,7 @@
 						const jsonData = JSON.parse(text);
 						return { data: jsonData, type: 'json' };
 					} catch (jsonError) {
-						console.log(jsonError);
+						console.log('content loaded');
 						return { data: text, type: 'html' };
 					}
 				});
@@ -883,11 +883,16 @@
 			_createAlert(message, type, element);
 		};
 
+		const destroy = (element) => { 
+			document.querySelector(element).innerHTML = '';
+		}
+
 		return {
 			success,
 			error,
 			loader,
-			message
+			message,
+			destroy
 		};
 	}();
 
@@ -961,9 +966,7 @@
 				try {
 					const response = typeof responseData === 'object' ? responseData : JSON.parse(responseData);
 					alert.message(response.message);
-					if (response.status === 1) {
-						callback?.(serializeFormData(formData), response);
-					}
+					callback?.(serializeFormData(formData), response);
 				} catch (e) {
 					alert.message('');
 					callback?.(serializeFormData(formData), responseData);
@@ -1123,9 +1126,10 @@
 
 			defaultUploadType = uploadType;
 			const inputId = 'a' + getRandomChar(6);
+			let newInputName = inputName ==='eoFileUpload' ? inputName + '_' + inputId : inputName;
 
-			_createUI(uploadSelector, previewSelector, inputName, inputId, accept, multiple);
-			_handleEvents(previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
+			_createUI(uploadSelector, previewSelector, newInputName, inputId, accept, multiple);
+			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
 		};
 
 		/**
@@ -1142,7 +1146,7 @@
 			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
 			
 			if (multiple) {
-				container.innerHTML = `<span class="btn btn-dark btn-eo-uploader-browse"><i class="ti ti-upload me-2"></i> Upload</span>`;
+				container.innerHTML = `<span class="btn btn-dark btn-eo-uploader-browse_${inputId}"><i class="ti ti-upload me-2"></i> Upload</span>`;
 			}
 
 			document.body.prepend(createElements('form', {
@@ -1184,60 +1188,50 @@
 		const _createPreviewUI = (previewSelector, multiple, files) => {
 			const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
 			if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
-
+			
 			files.forEach((file) => {
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					const id = getRandomChar(11);
-					const bg = defaultUploadType == 'image' ? e.target.result : defaultDocumentIcon;
-					let container;
+				const id = getRandomChar(11);
+				const bg = defaultUploadType == 'image' ? file.temp_url : defaultDocumentIcon;
+				
+				let container;
 
-					if (multiple) {
-						container = createElements('div', {
-							class: 'file-container position-relative',
-							id,
-							style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg});`
-						}, [
-							createElements('span', {
-								class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2',
-								'data-id': id
-							}, ['X']),
-							createElements('span', {
-								class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
-							}, [file.name])
-						]);
-					} else {
+				if (multiple) {
+					container = createElements('div', {
+						class: 'file-container position-relative',
+						id,
+						style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg});`
+					}, [
+						createElements('span', {
+							class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2',
+							'data-id': id
+						}, ['X']),
+						createElements('span', {
+							class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
+						}, [id])
+					]);
+				} else {
+					previewContainer.style.backgroundImage = `url(${bg})`;
+					container = previewContainer;
+					container.innerHTML = '';
 
-						previewContainer.style.backgroundImage = `url(${bg})`;
-						container = previewContainer;
-						container.innerHTML = '';
+					previewContainer.appendChild(
+						createElements('div', {
+							class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
+						}, [id])
+					);
+				}
 
-						previewContainer.appendChild(
-							createElements('div', {
-								class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
-							}, [file.name])
-						);
+				const hiddenInputsContainer = multiple ? container : previewContainer;
+				hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][size]`, file.size.toString()));
+
+				for (const key in file) {
+					if (file.hasOwnProperty(key)) {
+						hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][${key}]`, file[key].toString()));
 					}
+				}
 
-					const hiddenInputsContainer = multiple ? container : previewContainer;
-					hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][id]`, id.toString()));
-
-					if (defaultUploadType === 'image') {
-						const img = new Image();
-						img.src = e.target.result;
-						img.onload = () => {
-							hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][width]`, img.width.toString()));
-							hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][height]`, img.height.toString()));
-						};
-					}
-
-					['name', 'size', 'type', 'lastModified'].forEach((prop) => {
-						hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][${prop}]`, file[prop].toString()));
-					});
-
-					if (multiple) previewContainer.appendChild(container);
-				};
-				reader.readAsDataURL(file);
+				if (multiple) previewContainer.appendChild(container);
+				
 			});
 		};
 
@@ -1255,26 +1249,30 @@
 		 * @param {function} onError - A callback function which is called when the request fails.
 		 * @param {boolean} disablePreview - Whether to disable the preview UI.
 		 */
-		const _handleEvents = (previewSelector, multiple, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
+		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
 			document.addEventListener('click', (e) => {
-				if (e.target.closest('.btn-eo-uploader-browse')) document.getElementById(inputId).click();
+				if (e.target.closest(`.btn-eo-uploader-browse_${inputId}`)) document.getElementById(inputId).click();
+				
 			});
 
 			document.addEventListener('change', (e) => {
 				if (!e.target.matches(`#${inputId}`)) return;
+				
+				const form = document.getElementById(`uploadForm_${inputId}`);
 
-				const files = [...e.target.files];
-				const formData = new FormData();
-				files.forEach((file) => formData.append(inputId, file));
+				defaultUploadType = uploadType;
+				let files = [...e.target.files];
+				const formData = new FormData(form);
 				formData.append('csrf_token', _CSRFToken);
 
 				post(url, formData, {
+					contentType: 'multipart/form-data',
 					beforeSend: () => {
 						alert.loader('Uploading...');
 						if (onBeforeSend?.() === false) return false;
 					},
 					onSuccess: (response) => {
-						onSuccess?.(response, files);
+						files = onSuccess?.(response, files);
 						if (!disablePreview) _createPreviewUI(previewSelector, multiple, files);
 					},
 					onError
@@ -1405,7 +1403,7 @@
 		 * @return {boolean} True if the chart is created successfully, false otherwise.
 		 * @throws {Error} If the container element is not found, or data is not set, or the chart type is not supported.
 		 */
-		const _createChart = ({ containerId, data, options = {}, packageType, chartType, apiKey }) => {
+		const _createChart = ({ containerId, data, options = {}, packageType, chartTypeLoader, apiKey }) => {
 			const container = document.getElementById(containerId);
 			if (!container) return false;
 
@@ -1414,34 +1412,43 @@
 				if (!data) throw new Error('Set the data in table property');
 
 				const dataTable = data(new google.visualization.DataTable());
-				const chart = new chartType(container);
-				chart.draw(dataTable, options);
+
+				const ChartClass = chartTypeLoader();
+				if (!ChartClass) throw new Error('Invalid chart type.');
+				
+				const finalOptions = typeof ChartClass.convertOptions === 'function'
+				? ChartClass.convertOptions(options)
+				: options;
+
+				const chart = new ChartClass(container);
+				
+				chart.draw(dataTable, finalOptions);
 			});
 
 			return true;
 		};
 
 		return {
-			bar: (params) => _createChart({ ...params, packageType: 'bar', chartType: google.charts.Bar, options: google.charts.Bar.convertOptions(params.options) }),
-			calendar: (params) => _createChart({ ...params, packageType: 'calendar', chartType: google.visualization.Calendar }),
+			bar: (params) => _createChart({ ...params, packageType: 'bar', chartTypeLoader: () => google.charts.Bar }),
+			calendar: (params) => _createChart({ ...params, packageType: 'calendar', chartTypeLoader: google.visualization.Calendar }),
 			geo: (params) => {
 				if (params.options?.displayMode === 'markers' && !params.apiKey) {
 					throw new Error('Markers require geocoding, you\'ll need an ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
 				}
-				return _createChart({ ...params, packageType: 'corechart', chartType: google.visualization.GeoChart });
+				return _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.GeoChart });
 			},
-			pie: (params) => _createChart({ ...params, packageType: 'corechart', chartType: google.visualization.PieChart }),
-			line: (params) => _createChart({ ...params, packageType: 'line', chartType: google.charts.Line, options: google.charts.Line.convertOptions(params.options) }),
+			pie: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.PieChart }),
+			line: (params) => _createChart({ ...params, packageType: 'line', chartTypeLoader: () => google.charts.Line }),
 			map: (params) => {
 				if (!params.apiKey) {
 					throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
 				}
-				return _createChart({ ...params, packageType: 'map', chartType: google.visualization.Map });
+				return _createChart({ ...params, packageType: 'map', chartTypeLoader: () => google.visualization.Map });
 			},
 			trendLine: (params) => _createChart({
 				...params,
 				packageType: 'corechart',
-				chartType: google.visualization.ScatterChart,
+				chartTypeLoader: () => google.visualization.ScatterChart,
 				options: { trendlines: { 0: {} }, ...params.options }
 			})
 		};
