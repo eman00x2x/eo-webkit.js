@@ -1291,6 +1291,7 @@ require(['eo-webkit'], function(eo) {
               file.url = response[index].url; // Assuming response contains URLs for each file
               console.log(`File ${index + 1} URL: ${file.url}`);
           });
+		  return files;
       },
       onError: (error) => { console.error('Upload failed!', error); }
    });
@@ -1323,6 +1324,7 @@ require(['eo-webkit'], function(eo) {
            // Manipulate hidden input value
           file.url = response[index].url; // Assuming response contains URLs for each file
        });
+	   return files;
    }
    ```
 
@@ -1334,6 +1336,7 @@ require(['eo-webkit'], function(eo) {
       * Inside the loop, a new property `url` is added to each file object.
       * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
       * This URL can be dynamically assigned based on your requirements.
+	  * Do not forget to return the files object.
   
    **Hidden Input Creation**
    The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
@@ -1374,6 +1377,7 @@ require(['eo-webkit'], function(eo) {
                  // Manipulate hidden input value
                 file.url = response[index].url; // Assuming response contains URLs for each file
              });
+			 return files;
          },
          onError: (error) => { console.error('Upload failed!', error); }
       });
@@ -1420,6 +1424,7 @@ require(['eo-webkit'], function(eo) {
             file.name = response[index].name; // Assuming response contains Name for each file
             file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
          });
+		 return files;
       }
       ```
 
