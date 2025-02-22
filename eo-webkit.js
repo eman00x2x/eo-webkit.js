@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.1
+ * eo-webkit.js 1.1.2
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -1292,7 +1292,7 @@
 		 * @param {function} onError - A callback function which is called when the request fails.
 		 * @param {boolean} disablePreview - Whether to disable the preview UI.
 		 */
-		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
+		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove) => {
 			document.addEventListener('click', (e) => {
 				if (e.target.closest(`.btn-eo-uploader-browse_${inputId}`)) document.getElementById(inputId).click();
 			});
