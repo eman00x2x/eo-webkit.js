@@ -49,7 +49,6 @@ eo-webkit.js is a comprehensive JavaScript utility library designed to streamlin
         *   [`eo.modal`](#eomodal) - Manages a modal dialog.
         *   [`eo.alert`](#eoalert) - Displays an alert message.
         *   [`eo.button`](#eobutton) - Provides an interface for interacting with buttons.
-        *   [`eo.slider`](#eoslider) - Manages a slider component.
         *   [`eo.uploader`](#eouploader) - Manages a file uploader.
         *   [`eo.video`](#eovideo) - Provides an interface for interacting with video elements.
         *   [`eo.mortgageCalculator`](#eomortgagecalculator) - Provides a mortgage calculator component.
