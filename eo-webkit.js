@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.0.1
+ * eo-webkit.js 1.1.1
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -459,7 +459,7 @@
 		contentType = 'application/x-www-form-urlencoded; charset=UTF-8'
 	} = {}) => {
 
-		if (onBeforeSend) onBeforeSend();
+		if (onBeforeSend?.() === false) return;
 
 		let headers = {
 			'X-Requested-With': 'XMLHttpRequest'
@@ -473,8 +473,10 @@
 				headers['Content-Type'] = contentType;
 			} else if (contentType.includes('multipart/form-data')) {
 				headers = {};
+				body = data;
 			} else {
 				headers['Content-Type'] = contentType;
+				body = serializeFormData(data);
 				body = Object.keys(body).map(key => {
 					const value = body[key];
 					if (Array.isArray(value)) {
@@ -493,9 +495,15 @@
 		})
 			.then(async response => {
 				if (!response.ok) {
-					const errorMessage = await response.text();
-					throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
+					return response.json().then(error => {
+						try {
+							throw new Error(`${error.message}`);
+						} catch (error) {
+							throw new Error(`${error}`);
+						}
+					});
 				}
+
 				return response.text().then(text => {
 					try {
 						const jsonData = JSON.parse(text);
@@ -510,8 +518,8 @@
 				(result.type === 'json' ? onSuccess : onSuccess)?.(result.data);
 			})
 			.catch(error => {
-				onError?.(null, 'error', error);
-				console.error('Fetch Error:', error);
+				onError?.(error);
+				console.log('Fetch Error:' + error.message);
 			})
 			.finally(onComplete);
 	};
@@ -958,9 +966,10 @@
 					const validation = validator.validate(serializeFormData(formData), rules);
 					if (! validation) {
 						alert.error(validator.getErrors().join('<br /> '));
+						button.enable();
+						return false;
 					}
 				}
-
 			},
 			onSuccess: (responseData) => {
 				try {
@@ -977,7 +986,6 @@
 					alert.loader('Redirecting...');
 					setTimeout(() => redirect(redirectUrl), 10);
 				}
-				
 			},
 			onComplete: button.enable
 		});
@@ -1049,7 +1057,7 @@
 			document.addEventListener('click', (event) => {
 				const _modal = event.target.closest('.modal');
 				if (event.target.classList.contains('btn-close') && _modal) {
-					bootstrap.Modal.getInstance(modal)?.hide();
+					bootstrap.Modal.getInstance(_modal)?.hide();
 				}
 			});
 		};
@@ -1078,7 +1086,7 @@
 			 * the document to listen for the click event of the close button for the
 			 * modal.
 			 */
-			_initAfterLoad: () => {
+			_initBeforeLoad: () => {
 				_destroyModalOnClose();
 				_handleModalClose();
 			},
@@ -1086,54 +1094,54 @@
 		};
 	})();
 
-	const uploader = function () {
-
+	const uploader = function() {
 		let defaultUploadType = 'image';
-		const defaultImageSingleUploadIcon = 'https://static.vecteezy.com/system/resources/previews/020/213/738/non_2x/add-profile-picture-icon-upload-photo-of-social-media-user-vector.jpg';
-		const defaultDocumentSingleUploadIcon = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiqCCMGSzWTOHM5Cs4eQXx6nPL_fWBuPprhw&s';
-		const defaultDocumentIcon = 'https://cdn-icons-png.flaticon.com/512/4726/4726010.png';
+		const defaultIcons = {
+			image: 'https://static.vecteezy.com/system/resources/previews/020/213/738/non_2x/add-profile-picture-icon-upload-photo-of-social-media-user-vector.jpg',
+			document: 'https://cdn-icons-png.flaticon.com/512/4208/4208479.png',
+			docPreview: 'https://cdn-icons-png.flaticon.com/512/4208/4208479.png'
+		};
 
 		/**
-		 * Creates a new file uploader.
-		 * @param {string} [uploadSelector] - The CSS selector of the container element to create the uploader in.
-		 * @param {string} url - The URL to send the upload to.
-		 * @param {Object} [options] - Options to configure the uploader.
-		 * @param {string} [options.inputName] - The input name. Default is "eoFileUpload".
-		 * @param {string} [options.previewSelector] - The CSS selector of the preview container element. Default is ".uploaded-photo".
-		 * @param {boolean} [options.disablePreview] - Whether to disable the preview functionality. Default is false.
-		 * @param {string} [options.uploadType] - The type of upload. Either "image" or "document". Default is "image".
-		 * @param {string} [options.accept] - The MIME type of the file to accept. Default is "image/*" for images and "application/pdf" for documents.
-		 * @param {boolean} [options.multiple] - Whether to allow multiple files to be uploaded. Default is true.
-		 * @param {function} [options.onBeforeSend] - A callback to call before sending the upload request.
-		 * @param {function} [options.onSuccess] - A callback to call when the upload is successful.
-		 * @param {function} [options.onError] - A callback to call when the upload fails.
-		 * @returns {void}
+		 * Creates a new file uploader instance.
+		 * 
+		 * @param {string} [uploadSelector='.upload-container'] - The CSS selector of the container element where the uploader will be created.
+		 * @param {string} url - The URL to which the files will be uploaded.
+		 * @param {Object} [options={}] - Additional configuration options for the uploader.
+		 * @param {string} [options.inputName='eoFileUpload'] - The name attribute for the file input.
+		 * @param {string} [options.previewSelector='.uploaded-photo'] - The CSS selector for the preview container.
+		 * @param {boolean} [options.disablePreview=false] - Whether to disable the preview functionality.
+		 * @param {string} [options.uploadType='image'] - The type of upload, either "image" or "document".
+		 * @param {string} [options.accept] - The MIME type of files to accept. Defaults to "image/*" or "application/pdf" based on the uploadType.
+		 * @param {boolean} [options.multiple=true] - Whether to allow multiple file uploads.
+		 * @param {Function} [options.onBeforeSend] - Callback function to be called before the upload request is sent.
+		 * @param {Function} [options.onSuccess] - Callback function to be called when the upload is successful.
+		 * @param {Function} [options.onError] - Callback function to be called when the upload fails.
+		 * @param {Function} [options.onFileRemove] - Callback function to be called when a file is removed.
+		 * 
+		 * @throws {Error} Throws an error if an invalid upload type is provided.
 		 */
 		const create = (uploadSelector = '.upload-container', url, options = {}) => {
 			const {
-				inputName = 'eoFileUpload',
-				previewSelector = '.uploaded-photo',
-				disablePreview = false,
-				uploadType = 'image',
+				inputName = 'eoFileUpload', previewSelector = '.uploaded-photo',
+				disablePreview = false, uploadType = 'image',
 				accept = uploadType === 'document' ? 'application/pdf' : 'image/*',
-				multiple = true,
-				onBeforeSend,
-				onSuccess,
-				onError
+				multiple = true, onBeforeSend, onSuccess, onError, onFileRemove
 			} = options;
 
 			if (!['image', 'document'].includes(uploadType)) throw new Error('Invalid upload type.');
 
 			defaultUploadType = uploadType;
 			const inputId = 'a' + getRandomChar(6);
-			let newInputName = inputName ==='eoFileUpload' ? inputName + '_' + inputId : inputName;
+			const newInputName = inputName === 'eoFileUpload' ? `${inputName}_${inputId}` : inputName;
 
 			_createUI(uploadSelector, previewSelector, newInputName, inputId, accept, multiple);
-			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview);
+			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove);
 		};
 
 		/**
 		 * Creates the UI elements for the file uploader.
+		 * 
 		 * @param {string} selector - The CSS selector of the container element to create the uploader in.
 		 * @param {string} previewSelector - The CSS selector of the preview container element.
 		 * @param {string} inputName - The input name.
@@ -1144,103 +1152,138 @@
 		 */
 		const _createUI = (selector, previewSelector, inputName, inputId, accept, multiple) => {
 			const container = document.querySelector(selector) || document.body.prepend(createElements('div', { class: 'upload-container' }));
-			
-			if (multiple) {
-				container.innerHTML = `<span class="btn btn-dark btn-eo-uploader-browse_${inputId}"><i class="ti ti-upload me-2"></i> Upload</span>`;
-			}
+			if (multiple) container.innerHTML = `<span class="btn btn-dark btn-eo-uploader-browse_${inputId}"><i class="ti ti-upload me-2"></i> Upload</span>`;
 
 			document.body.prepend(createElements('form', {
-				id: `uploadForm_${inputId}`,
-				class: 'd-none',
-				enctype: 'multipart/form-data'
-			}, [
-				createElements('input', {
-					type: 'file',
-					id: inputId,
-					accept,
-					name: multiple ? `${inputName}[]` : inputName,
-					...(multiple ? { multiple: true } : {})
-				})
-			]));
+				id: `uploadForm_${inputId}`, class: 'd-none', enctype: 'multipart/form-data'
+			}, [createElements('input', { type: 'file', id: inputId, accept, name: multiple ? `${inputName}[]` : inputName, ...(multiple ? { multiple: true } : {}) })]));
 
-			const bg = defaultUploadType == 'image' ? defaultImageSingleUploadIcon : defaultDocumentSingleUploadIcon;
-			const previewElement = document.querySelector(previewSelector);
-			previewElement.innerHTML = multiple
+			document.querySelector(previewSelector).innerHTML = multiple
 				? '<div class="multiple-preview d-flex flex-wrap gap-2"></div>'
-				: '<div class="photo-preview position-relative" style="width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(' + bg + ');"></div>';
-			
-			if (!multiple) document.querySelector('.photo-preview').classList.add('btn-eo-uploader-browse');
+				: `<div id="photo-preview" class="photo-preview position-relative btn-eo-uploader-browse_${inputId}" style="width: 150px; height: 150px; background-image: url(${defaultIcons[defaultUploadType]});"></div>`;
 		};
 
 		/**
-		 * Renders a preview UI for uploaded files, handling both single and multiple file previews.
+		 * Creates a preview UI for a given file, rendering it as an image or document icon.
 		 * 
-		 * @param {string} previewSelector - The CSS selector for the preview container.
-		 * @param {boolean} multiple - Indicates whether multiple files can be uploaded.
-		 * @param {File[]} files - Array of files to be previewed.
+		 * @param {boolean} multiple - Indicates if multiple file previews are supported.
+		 * @param {File} file - The file object to be previewed.
+		 * @returns {HTMLElement|string} - Returns a div element containing the file preview UI
+		 *                                 if multiple is true, otherwise sets the background
+		 *                                 image of an existing photo preview.
 		 * 
-		 * The function creates a preview of the uploaded files, displaying them in a specified container.
-		 * It uses FileReader to load file data and dynamically creates HTML elements to represent each file.
-		 * For images, it sets their data URLs as background images. It also generates hidden inputs to store
-		 * file metadata such as name, size, type, and dimensions for images. If the specified preview container
-		 * is not found, it logs an error to the console.
+		 * The function dynamically generates an HTML element to display a preview of the file. 
+		 * For images, it creates a data URL using the File object and uses it as a background 
+		 * image. For documents, it uses a default document icon. The preview UI includes a 
+		 * remove button and a loading spinner. For single file previews, it directly sets the 
+		 * background image of an existing photo preview element.
 		 */
-		const _createPreviewUI = (previewSelector, multiple, files) => {
-			const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
-			if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
-			
-			files.forEach((file) => {
-				const id = getRandomChar(11);
-				const bg = defaultUploadType == 'image' ? file.temp_url : defaultDocumentIcon;
-				
-				let container;
+		const _createPreviewUI = (multiple, file) => {
+			const bg = defaultUploadType === 'image' ? URL.createObjectURL(file) : defaultIcons.docPreview;
+			return multiple ? createElements('div', {
+				class: 'file-container position-relative', id: file.id,
+				style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg}); opacity: 0.5; transition: opacity 0.3s ease-in-out;`
+			}, [
+				createElements('span', { class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2', 'data-id': file.id }, ['X']),
+				(defaultUploadType === 'document' ? createElements('span', { class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small' }, [file.name.toString()]) : ''),
+				createElements('div', { class: 'spinner-container d-flex justify-content-center align-items-center w-100 h-100' }, [
+					createElements('div', { class: 'spinner-border text-white', style: 'width:50px; height:50px; --tblr-spinner-border-width: 5px !important;' })
+				])
+			]) : (document.querySelector('.photo-preview').style.backgroundImage = `url(${bg})`);
+		};
 
-				if (multiple) {
-					container = createElements('div', {
-						class: 'file-container position-relative',
-						id,
-						style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg});`
-					}, [
-						createElements('span', {
-							class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2',
-							'data-id': id
-						}, ['X']),
-						createElements('span', {
-							class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
-						}, [id])
-					]);
-				} else {
-					previewContainer.style.backgroundImage = `url(${bg})`;
-					container = previewContainer;
-					container.innerHTML = '';
+		/**
+		 * Creates hidden inputs for each file property to be submitted along with the form.
+		 * 
+		 * @param {boolean} multiple - Indicates if multiple file previews are supported.
+		 * @param {HTMLElement} fileContainer - The container element for the file preview UI.
+		 * @param {HTMLElement} previewContainer - The container element for the photo preview UI.
+		 * @param {number} id - The unique identifier for the file.
+		 * @param {File} file - The file object to create hidden inputs for.
+		 * 
+		 * The function dynamically creates hidden input fields for each file property. It appends
+		 * the hidden inputs to the file container element if multiple file previews are supported,
+		 * otherwise it appends to the photo preview container element.
+		 */
+		const _createUploadHiddenInput = (multiple, fileContainer, previewContainer, id, file) => {
+			const container = multiple ? fileContainer : previewContainer;
+			container.appendChild(createHiddenInput(`upload[${id}][size]`, file.size.toString()));
+			for (const key in file) if (file.hasOwnProperty(key)) container.appendChild(createHiddenInput(`upload[${id}][${key}]`, file[key]?.toString() || ''));
+			if (multiple) previewContainer.appendChild(container);
+		};
 
-					previewContainer.appendChild(
-						createElements('div', {
-							class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small'
-						}, [id])
-					);
-				}
+		/**
+		 * Uploads an array of files sequentially. It loops through the array, awaiting the result of each upload attempt before moving on to the next.
+		 * 
+		 * @param {File[]} files - The array of files to be uploaded sequentially.
+		 * @param {HTMLElement} previewContainer - The container element for the photo preview UI.
+		 * @param {string} url - The URL to send the POST request to.
+		 * @param {string} inputName - The input name.
+		 * @param {boolean} multiple - Indicates if multiple file previews are supported.
+		 * @param {Function} [onBeforeSend] - Callback function to be called before the upload request is sent.
+		 * @param {Function} [onSuccess] - Callback function to be called when the upload is successful.
+		 * @param {Function} [onError] - Callback function to be called when the upload fails.
+		 * @param {boolean} [disablePreview=false] - Whether to disable preview.
+		 * @returns {Promise<void>} - A promise that resolves when all the files have been uploaded.
+		 */
+		const _uploadFilesSequentially = async (files, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview) => {
+			for (let file of files) await uploadFile(file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview);
+		};
 
-				const hiddenInputsContainer = multiple ? container : previewContainer;
-				hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][size]`, file.size.toString()));
+		/**
+		 * Uploads a single file to the given URL.
+		 * 
+		 * @param {File} file - The file to be uploaded.
+		 * @param {HTMLElement} previewContainer - The container element for the photo preview UI.
+		 * @param {string} url - The URL to send the POST request to.
+		 * @param {string} inputName - The input name.
+		 * @param {boolean} multiple - Indicates if multiple file previews are supported.
+		 * @param {Function} [onBeforeSend] - Callback function to be called before the upload request is sent.
+		 * @param {Function} [onSuccess] - Callback function to be called when the upload is successful.
+		 * @param {Function} [onError] - Callback function to be called when the upload fails.
+		 * @param {boolean} [disablePreview=false] - Whether to disable preview.
+		 * @returns {Promise<void>} - A promise that resolves when the upload is complete.
+		 */
+		const uploadFile = (file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview) => {
+			return new Promise((resolve) => {
+				const fileContainer = document.getElementById(multiple ? file.id : 'photo-preview');
+				const formData = new FormData();
+				formData.append(multiple ? `${inputName}[]` : inputName, file);
+				formData.append('csrf_token', _CSRFToken);
 
-				for (const key in file) {
-					if (file.hasOwnProperty(key)) {
-						hiddenInputsContainer.appendChild(createHiddenInput(`upload[${id}][${key}]`, file[key].toString()));
+				post(url, formData, {
+					contentType: 'multipart/form-data',
+					beforeSend: () => onBeforeSend?.() === false ? false : null,
+					onSuccess: (response) => {
+						fileContainer.style.opacity = '1';
+						document.querySelector(`#${CSS.escape(file.id)} .spinner-container`)?.remove();
+						onSuccess?.(response, file, fileContainer);
+						_createUploadHiddenInput(multiple, fileContainer, previewContainer, file.id, file);
+						resolve();
+					},
+					onError: (error) => {
+						onError?.(error, fileContainer);
+						Object.assign(fileContainer.style, { opacity: '1', backgroundImage: '' });
+						document.querySelector(`#${CSS.escape(file.id)} .spinner-container`)?.remove();
+
+						fileContainer.appendChild(
+							createElements('div', { }, [
+								createElements('p', { class: 'p-2 text-danger' }, [error.message.toString()])
+							])
+						);
+						resolve();
 					}
-				}
-
-				if (multiple) previewContainer.appendChild(container);
-				
+				});
 			});
 		};
 
 		/**
 		 * Handles events for the uploader.
-		 *
-		 * @param {string} selector - The selector for the container which contains the browse button.
-		 * @param {string} previewSelector - The selector for the container which contains the preview.
+		 * 
+		 * @param {string} previewSelector - The CSS selector for the container which contains the preview.
+		 * @param {string} uploadType - The type of upload, either "image" or "document".
 		 * @param {boolean} multiple - Whether multiple files can be uploaded.
+		 * @param {string} newInputName - The new input name.
 		 * @param {string} inputId - The id of the file input.
 		 * @param {string} url - The url to post the file to.
 		 * @param {function} onBeforeSend - A callback function which is called before sending the request.
@@ -1252,45 +1295,34 @@
 		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview) => {
 			document.addEventListener('click', (e) => {
 				if (e.target.closest(`.btn-eo-uploader-browse_${inputId}`)) document.getElementById(inputId).click();
-				
 			});
 
 			document.addEventListener('change', (e) => {
 				if (!e.target.matches(`#${inputId}`)) return;
+				const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
+				if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
 				
-				const form = document.getElementById(`uploadForm_${inputId}`);
-
+				button.disable();
 				defaultUploadType = uploadType;
 				let files = [...e.target.files];
-				const formData = new FormData(form);
-				formData.append('csrf_token', _CSRFToken);
 
-				post(url, formData, {
-					contentType: 'multipart/form-data',
-					beforeSend: () => {
-						alert.loader('Uploading...');
-						if (onBeforeSend?.() === false) return false;
-					},
-					onSuccess: (response) => {
-						files = onSuccess?.(response, files);
-						if (!disablePreview) _createPreviewUI(previewSelector, multiple, files);
-					},
-					onError
+				files.forEach(file => {
+					file.id = getRandomChar(11);
+					multiple ? previewContainer.appendChild(_createPreviewUI(multiple, file)) : _createPreviewUI(multiple, file);
 				});
 
+				_uploadFilesSequentially(files, previewContainer, url, newInputName, multiple, onBeforeSend, onSuccess, onError, disablePreview).then(() => button.enable());
 				e.target.value = '';
 			});
 
 			document.addEventListener('click', (e) => {
 				const removeBtn = e.target.closest(`${previewSelector} .remove-btn`);
+				onFileRemove?.();
 				if (removeBtn) document.getElementById(removeBtn.getAttribute('data-id')).remove();
 			});
 		};
 
-		return {
-			create
-		};
-
+		return { create };
 	}();
 
 	const tinymce = function() {
@@ -1637,8 +1669,8 @@
 
 		const _validators = {
 			required: (value, param) => param && (value !== null && value !== undefined && value !== ''),
-			length: (value, { min, max }) => typeof value === 'string' && value.length >= min && value.length <= max,
-			number: (value, { min, max }) => {
+			length: (value, { min, max = 120 }) => typeof value === 'string' && value.length >= min && value.length <= max,
+			number: (value, { min, max = 9999 }) => {
 				if (isNaN(value)) return false;
 				const num = parseFloat(value);
 				return (min === undefined || num > min) && (max === undefined || num < max);
@@ -1697,10 +1729,10 @@
 		initBeforeLoad: function() {
 			video._initBeforeLoad();
 			mortgageCalculator._initBeforeLoad();
+			modal._initBeforeLoad();
 		},
 
 		initAfterLoad: () => {
-			modal._initAfterLoad();
 
 			let resizeTO;
 
