@@ -1316,6 +1316,7 @@ require(['eo-webkit'], function(eo) {
    | `onBeforeSend` | `Function` | `optional` | Callback function before the upload request is sent. |
    | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
    | `onError` | `Function` | `optional` | Callback function on upload error. |
+   | `onFileRemove` | `Function` | `optional` | Callback function when file was removed. |
    
    **onSuccess Example:**
    ```javascript
@@ -1336,7 +1337,6 @@ require(['eo-webkit'], function(eo) {
       * Inside the loop, a new property `url` is added to each file object.
       * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
       * This URL can be dynamically assigned based on your requirements.
-	  * Do not forget to return the files object.
   
    **Hidden Input Creation**
    The uploader module automatically creates hidden inputs for each file property (`name`, `size`, `type`, `lastModified`, etc.).
