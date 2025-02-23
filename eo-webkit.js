@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.2
+ * eo-webkit.js 1.0.1
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -10,7 +10,7 @@
 
 /* eo-webkit.js */
 
-; (function(factory) {
+; (function (factory) {
 	if (typeof define === 'function' && define.amd) {
 		define([], factory);
 	} else if (typeof exports === 'object') {
@@ -18,7 +18,7 @@
 	} else {
 		window.eo = factory();
 	}
-})(function() {
+})(function () {
 
 	'use strict';
 
@@ -130,10 +130,10 @@
 	 * @returns {string} A formatted date string.
 	 */
 	const readableDate = (timestamp) => {
-		const date = 
-        typeof timestamp === 'number' ? new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp) :
-        typeof timestamp === 'string' || timestamp instanceof Date ? new Date(timestamp) :
-        (() => { throw new Error('Invalid timestamp type. Expected number, string, or Date object.'); })();
+		const date =
+			typeof timestamp === 'number' ? new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp) :
+				typeof timestamp === 'string' || timestamp instanceof Date ? new Date(timestamp) :
+					(() => { throw new Error('Invalid timestamp type. Expected number, string, or Date object.'); })();
 
 		const now = new Date();
 		const [isToday, isYesterday, isSameYear] = [
@@ -154,10 +154,10 @@
 	};
 
 	/**
-     * Redirects the browser to a given URL.
-     *
-     * @param {string} url - The URL to redirect to
-     */
+	 * Redirects the browser to a given URL.
+	 *
+	 * @param {string} url - The URL to redirect to
+	 */
 	const redirect = (url) => window.location = url;
 
 	/**
@@ -187,8 +187,8 @@
 	 * @param {number} maximumLength - The maximum allowed length of the string
 	 * @returns {string} The trimmed string
 	 */
-	const trim = (stringValue, maxLength) => 
-    	stringValue.length > maxLength ? `${stringValue.slice(0, maxLength - 3)}...` : stringValue;
+	const trim = (stringValue, maxLength) =>
+		stringValue.length > maxLength ? `${stringValue.slice(0, maxLength - 3)}...` : stringValue;
 
 	/**
 	 * Converts a given number of bytes to a human-readable string,
@@ -259,7 +259,7 @@
 	 * @returns {number} A randomly generated number between start and end
 	 */
 	const getRandomNum = (start, end) => {
-    if (start > end) throw new Error('Start must be ≤ End');
+		if (start > end) throw new Error('Start must be ≤ End');
 		return start + Math.floor(Math.random() * (end - start + 1));
 	};
 
@@ -288,7 +288,7 @@
 
 		for (let i = factor.length - 1; i >= 0; i--) {
 			if (num >= factor[i]) {
-			return (num / factor[i]).toFixed(num % factor[i] === 0 ? 0 : 2) + suffixes[i];
+				return (num / factor[i]).toFixed(num % factor[i] === 0 ? 0 : 2) + suffixes[i];
 			}
 		}
 
@@ -494,32 +494,24 @@
 			body
 		})
 			.then(async response => {
-				if (!response.ok) {
-					return response.json().then(error => {
-						try {
-							throw new Error(`${error.message}`);
-						} catch (error) {
-							throw new Error(`${error}`);
-						}
-					});
-				}
-
 				return response.text().then(text => {
 					try {
-						const jsonData = JSON.parse(text);
-						return { data: jsonData, type: 'json' };
-					} catch (jsonError) {
-						console.log('content loaded');
-						return { data: text, type: 'html' };
+						return { data: JSON.parse(text), response };
+					} catch  {
+						return { data: text, response };
 					}
 				});
 			})
-			.then(result => {
-				(result.type === 'json' ? onSuccess : onSuccess)?.(result.data);
+			.then(({ data, response }) => {
+				if (!response.ok) {
+					throw new Error(data?.message || data || `HTTP ${response.status}`);
+				}
+				onSuccess?.(data);
 			})
 			.catch(error => {
-				onError?.(error);
-				console.log('Fetch Error:' + error.message);
+				const errorMessage = error.message.replace(/^Error:\s*/, ''); // Remove "Error: "
+    			console.error(error);
+				onError?.(errorMessage);
 			})
 			.finally(onComplete);
 	};
@@ -545,7 +537,7 @@
 		try {
 			const response = await fetch(url);
 			const contentType = response.headers.get('Content-Type');
-			const responseData = contentType?.includes('application/json') 
+			const responseData = contentType?.includes('application/json')
 				? await response.json()
 				: await response.text();
 
@@ -614,7 +606,7 @@
 				'Firefox': 'Mozilla Firefox'
 			};
 
-			clientInfo.browser = Object.entries(browsers).find(([key]) => 
+			clientInfo.browser = Object.entries(browsers).find(([key]) =>
 				new RegExp(key).test(navigator.userAgent)
 			)?.[1] || 'Unknown Browser';
 		};
@@ -822,7 +814,7 @@
 		};
 	})();
 
-	const alert = function() {
+	const alert = function () {
 		/**
 		 * Displays a message in the specified container element on the webpage.
 		 *
@@ -873,7 +865,7 @@
 			const loaderDiv = createElements('div', { class: 'bg-white p-3 mt-3 rounded border' }, [
 				createElements('div', { class: 'd-flex gap-3 align-items-center' }, [
 					createElements('div', { class: 'loader' }),
-					createElements('p', { class: 'mb-0' }, [ document.createTextNode(message) ])
+					createElements('p', { class: 'mb-0' }, [document.createTextNode(message)])
 				])
 			]);
 
@@ -891,7 +883,7 @@
 			_createAlert(message, type, element);
 		};
 
-		const destroy = (element) => { 
+		const destroy = (element) => {
 			document.querySelector(element).innerHTML = '';
 		}
 
@@ -964,8 +956,8 @@
 
 				if (typeof rules === 'object') {
 					const validation = validator.validate(serializeFormData(formData), rules);
-					if (! validation) {
-						alert.error(validator.getErrors().join('<br /> '));
+					if (!validation) {
+						alert.error(validator.getErrors().join(', '));
 						button.enable();
 						return false;
 					}
@@ -986,6 +978,9 @@
 					alert.loader('Redirecting...');
 					setTimeout(() => redirect(redirectUrl), 10);
 				}
+			},
+			onError: (error) => {
+				alert.error(error);
 			},
 			onComplete: button.enable
 		});
@@ -1094,7 +1089,7 @@
 		};
 	})();
 
-	const uploader = function() {
+	const uploader = function () {
 		let defaultUploadType = 'image';
 		const defaultIcons = {
 			image: 'https://static.vecteezy.com/system/resources/previews/020/213/738/non_2x/add-profile-picture-icon-upload-photo-of-social-media-user-vector.jpg',
@@ -1122,7 +1117,7 @@
 		 * @throws {Error} Throws an error if an invalid upload type is provided.
 		 */
 		const create = (uploadSelector = '.upload-container', url, options = {}) => {
-			const {
+			let {
 				inputName = 'eoFileUpload', previewSelector = '.uploaded-photo',
 				disablePreview = false, uploadType = 'image',
 				accept = uploadType === 'document' ? 'application/pdf' : 'image/*',
@@ -1132,8 +1127,13 @@
 			if (!['image', 'document'].includes(uploadType)) throw new Error('Invalid upload type.');
 
 			defaultUploadType = uploadType;
-			const inputId = 'a' + getRandomChar(6);
+			const inputId = '_' + getRandomChar(11);
 			const newInputName = inputName === 'eoFileUpload' ? `${inputName}_${inputId}` : inputName;
+
+			if (!multiple) { 
+				previewSelector = previewSelector == '.uploaded-photo' ? uploadSelector : previewSelector;
+				defaultIcons.image = document.querySelector(previewSelector).getAttribute('data-image') || defaultIcons.image;
+			}
 
 			_createUI(uploadSelector, previewSelector, newInputName, inputId, accept, multiple);
 			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove);
@@ -1158,9 +1158,14 @@
 				id: `uploadForm_${inputId}`, class: 'd-none', enctype: 'multipart/form-data'
 			}, [createElements('input', { type: 'file', id: inputId, accept, name: multiple ? `${inputName}[]` : inputName, ...(multiple ? { multiple: true } : {}) })]));
 
-			document.querySelector(previewSelector).innerHTML = multiple
-				? '<div class="multiple-preview d-flex flex-wrap gap-2"></div>'
-				: `<div id="photo-preview" class="photo-preview position-relative btn-eo-uploader-browse_${inputId}" style="width: 150px; height: 150px; background-image: url(${defaultIcons[defaultUploadType]});"></div>`;
+			const appendUI = multiple
+				? createElements('div', { class: 'multiple-preview d-flex flex-wrap gap-2' })
+				: createElements('div', {
+					id: 'photo-preview', class: `photo-preview position-relative btn-eo-uploader-browse_${inputId}`,
+					style: `width: 13rem; height: 13rem; background-image: url(${defaultIcons[defaultUploadType]});`
+				});
+			
+			document.querySelector(previewSelector).prepend(appendUI);
 		};
 
 		/**
@@ -1180,11 +1185,13 @@
 		 */
 		const _createPreviewUI = (multiple, file) => {
 			const bg = defaultUploadType === 'image' ? URL.createObjectURL(file) : defaultIcons.docPreview;
+			const ext = (file.name.split('.')[1]).toLowerCase();
+
 			return multiple ? createElements('div', {
-				class: 'file-container position-relative', id: file.id,
-				style: `width: 150px; height: 150px; background-size: cover; background-position: center; background-image: url(${bg}); opacity: 0.5; transition: opacity 0.3s ease-in-out;`
+				class: `file-container position-relative rounded border ${file.id}`, id: file.id,
+				style: `width: 13rem; height: 13rem; background-size: cover; background-position: center; background-image: url(${bg}); opacity: 0.5; transition: opacity 0.3s ease-in-out;`,
 			}, [
-				createElements('span', { class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2', 'data-id': file.id }, ['X']),
+				createElements('span', { class: 'btn btn-danger btn-sm remove-btn position-absolute top-0 end-0 m-2', 'data-id': file.id, 'data-name': `${CSS.escape(file.id)}.${CSS.escape(ext)}`, 'data-container': `.${file.id}` }, ['X']),
 				(defaultUploadType === 'document' ? createElements('span', { class: 'text-white position-absolute bottom-0 overflow-auto w-100 px-2 py-1 bg-dark text-nowrap small' }, [file.name.toString()]) : ''),
 				createElements('div', { class: 'spinner-container d-flex justify-content-center align-items-center w-100 h-100' }, [
 					createElements('div', { class: 'spinner-border text-white', style: 'width:50px; height:50px; --tblr-spinner-border-width: 5px !important;' })
@@ -1193,22 +1200,34 @@
 		};
 
 		/**
-		 * Creates hidden inputs for each file property to be submitted along with the form.
-		 * 
+		 * Creates hidden input fields for each property of a file and appends them to the appropriate container.
+		 *
 		 * @param {boolean} multiple - Indicates if multiple file previews are supported.
-		 * @param {HTMLElement} fileContainer - The container element for the file preview UI.
-		 * @param {HTMLElement} previewContainer - The container element for the photo preview UI.
+		 * @param {HTMLElement} fileContainer - The container element for file previews when multiple is true.
+		 * @param {HTMLElement} previewContainer - The container element for single file preview or appending multiple file containers.
 		 * @param {number} id - The unique identifier for the file.
-		 * @param {File} file - The file object to create hidden inputs for.
-		 * 
-		 * The function dynamically creates hidden input fields for each file property. It appends
-		 * the hidden inputs to the file container element if multiple file previews are supported,
-		 * otherwise it appends to the photo preview container element.
+		 * @param {File} file - The file object for which the hidden inputs are created.
+		 *
+		 * This function dynamically creates hidden input elements for each property of the file, including its size.
+		 * It appends these inputs to the file container if multiple files are allowed; otherwise, to the preview container.
+		 * The function also updates the remove button's dataset attributes and the container's id.
 		 */
 		const _createUploadHiddenInput = (multiple, fileContainer, previewContainer, id, file) => {
 			const container = multiple ? fileContainer : previewContainer;
-			container.appendChild(createHiddenInput(`upload[${id}][size]`, file.size.toString()));
-			for (const key in file) if (file.hasOwnProperty(key)) container.appendChild(createHiddenInput(`upload[${id}][${key}]`, file[key]?.toString() || ''));
+			const hiddenInputName = defaultUploadType === 'document' ? 'documents' : 'images';
+			container.appendChild(createHiddenInput(`${hiddenInputName}[${id}][size]`, file.size.toString()));
+			const ext = (file.name.split('.')[1]).toLowerCase();
+
+			if (multiple) {
+				const removeBtn = document.querySelector(`.${container.id} .remove-btn`);
+				if (removeBtn) removeBtn.dataset.id = file.id; removeBtn.dataset.name = `${file.id}.${ext}`;
+			}
+			
+			container.id = file.id;
+			
+			Object.entries(file).forEach(([key, value]) => {
+				container.appendChild(createHiddenInput(`${hiddenInputName}[${id}][${key}]`, value?.toString() || ''));
+			});
 			if (multiple) previewContainer.appendChild(container);
 		};
 
@@ -1223,11 +1242,10 @@
 		 * @param {Function} [onBeforeSend] - Callback function to be called before the upload request is sent.
 		 * @param {Function} [onSuccess] - Callback function to be called when the upload is successful.
 		 * @param {Function} [onError] - Callback function to be called when the upload fails.
-		 * @param {boolean} [disablePreview=false] - Whether to disable preview.
 		 * @returns {Promise<void>} - A promise that resolves when all the files have been uploaded.
 		 */
-		const _uploadFilesSequentially = async (files, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview) => {
-			for (let file of files) await uploadFile(file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview);
+		const _uploadFilesSequentially = async (files, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError) => {
+			for (let file of files) await uploadFile(file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError);
 		};
 
 		/**
@@ -1241,12 +1259,11 @@
 		 * @param {Function} [onBeforeSend] - Callback function to be called before the upload request is sent.
 		 * @param {Function} [onSuccess] - Callback function to be called when the upload is successful.
 		 * @param {Function} [onError] - Callback function to be called when the upload fails.
-		 * @param {boolean} [disablePreview=false] - Whether to disable preview.
 		 * @returns {Promise<void>} - A promise that resolves when the upload is complete.
 		 */
-		const uploadFile = (file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError, disablePreview) => {
+		const uploadFile = (file, previewContainer, url, inputName, multiple, onBeforeSend, onSuccess, onError) => {
 			return new Promise((resolve) => {
-				const fileContainer = document.getElementById(multiple ? file.id : 'photo-preview');
+				const fileContainer = document.querySelector(multiple ? `.${CSS.escape(file.id)}` : '.photo-preview');
 				const formData = new FormData();
 				formData.append(multiple ? `${inputName}[]` : inputName, file);
 				formData.append('csrf_token', _CSRFToken);
@@ -1307,25 +1324,30 @@
 				let files = [...e.target.files];
 
 				files.forEach(file => {
-					file.id = getRandomChar(11);
-					multiple ? previewContainer.appendChild(_createPreviewUI(multiple, file)) : _createPreviewUI(multiple, file);
+					file.id = '_' + getRandomChar(11);
+					disablePreview ? null :	multiple ? previewContainer.prepend(_createPreviewUI(multiple, file)) : _createPreviewUI(multiple, file);
 				});
 
-				_uploadFilesSequentially(files, previewContainer, url, newInputName, multiple, onBeforeSend, onSuccess, onError, disablePreview).then(() => button.enable());
+				_uploadFilesSequentially(files, previewContainer, url, newInputName, multiple, onBeforeSend, onSuccess, onError).then(() => button.enable());
 				e.target.value = '';
 			});
 
 			document.addEventListener('click', (e) => {
 				const removeBtn = e.target.closest(`${previewSelector} .remove-btn`);
-				onFileRemove?.();
-				if (removeBtn) document.getElementById(removeBtn.getAttribute('data-id')).remove();
+				if (!removeBtn) return;
+
+				const fileId = removeBtn.getAttribute('data-id');
+				const fileElement = document.getElementById(fileId);
+				
+				onFileRemove?.(removeBtn);
+				if (fileElement) fileElement.remove();
 			});
 		};
 
 		return { create };
 	}();
 
-	const tinymce = function() {
+	const tinyMCE = function() {
 		/**
 		 * Initializes a TinyMCE editor in a given container.
 		 * 
@@ -1339,7 +1361,7 @@
 			const textarea = document.querySelector(containerId);
 			if (!textarea) return;
 
-			if (typeof tinyMCE !== 'object') {
+			if (typeof tinymce !== 'object') {
 				throw new Error('TinyMCE script is not inlcuded in head.');
 			}
 
@@ -1359,8 +1381,8 @@
 
 			const mergedOptions = { ...defaultOptions, ...options };
 
-			tinyMCE.remove();
-			tinyMCE.init(mergedOptions);
+			tinymce.remove();
+			tinymce.init(mergedOptions);
 		};
 
 		return { init };
@@ -1675,10 +1697,22 @@
 				const num = parseFloat(value);
 				return (min === undefined || num > min) && (max === undefined || num < max);
 			},
-			url: (value) => typeof value === 'string' && /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value),
-			email: (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-			date: (value) => !isNaN(Date.parse(value)),
-			datetime: (value) => !isNaN(new Date(value).getTime()),
+			url: (value, param) => {
+				if (param.format?.pattern) return param.format.pattern.test(value);
+				return typeof value === 'string' && /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(value)
+			},
+			email: (value, param) => {
+				if (param.format?.pattern) return param.format.pattern.test(value);
+				return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+			},
+			date: (value, param) => {
+				if (param.format?.pattern) return param.format.pattern.test(value);
+				return !isNaN(Date.parse(value))
+			},
+			datetime: (value, param) => {
+				if (param.format?.pattern) return param.format.pattern.test(value);
+				return !isNaN(new Date(value).getTime())
+			},
 			equality: (value, param) => value === param,
 			type: (value, param) => typeof value === param
 		};
@@ -1776,7 +1810,7 @@
 		modal,
 		alert,
 		button,
-		tinymce,
+		tinyMCE,
 		googleChart,
 		tomSelect,
 
