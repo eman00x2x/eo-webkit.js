@@ -12,7 +12,7 @@ eo-webkit.js is a comprehensive JavaScript utility library designed to streamlin
     *   [AMD](#amd)
 *   [API Reference](#api-reference)
     *   [Data Manipulation](#data-manipulation)
-        *   [`eo.trim`](#eotrim) - Removes leading and trailing whitespace from a string.
+        *   [`eo.trim`](#eotrim) - Trims a given string to a maximum length, appending an ellipsis (...) if the string is longer than the maximum length.
         *   [`eo.formatFileSize`](#eoformatfilesize) - Formats a file size into a human-readable string (e.g., "10KB", "2MB").
         *   [`eo.uuidv4`](#eouuidv4) - Generates a UUID (Universally Unique Identifier) v4.
         *   [`eo.formatCurrency`](#eoformatcurrency) - formats large numbers into a more readable currency notation
@@ -684,47 +684,40 @@ require(['eo-webkit'], function(eo) {
    ```
 
    ### eo.get
-   The `eo.get` function **performs an HTTP GET request** to fetch data from a given `url`. It supports **callbacks for request lifecycle events**,    including `beforeRequest`, `onSuccess`, and `onError`. The function **automatically detects and processes JSON responses** while handling errors    gracefully.
-   
-   #### Syntax
-   ```javascript
-   eo.get(url, { beforeRequest, onSuccess, onError });
-   ```
+   The `eo.get` function is an asynchronous utility to make HTTP GET requests using the Fetch API. It allows for optional query parameters, customizable data type handling, and optional success callbacks.
    
    #### Parameters
    | Parameter | Type | Description |
    | --- | --- | --- |
    | `url` | `string` | The API endpoint from which data is fetched. |
-   | `options` | `object` | (Optional) An object containing callback functions (see below). |
+   | `data` | `Object` / `Function` *Optional* | An object containing query parameters or a `callback function`. |
+   | `success` | `Function` *Optional* | A `callback function` to handle the response data. |
+   | `dataType` | `String` *Optional* | The expected data type of the response (e.g., '`json`'). |
 
-   **Options Object**
-   | Option | Type | Description |
-   | --- | --- | --- |
-   | `beforeRequest` | `function` | **Callback function** executed before the request is made. If it returns `false`, the request is canceled. |
-   | `onSuccess` | `function` | **Callback function** executed when the request is successful. Receives the response data as an argument. |
-   | `onError` | `function` | **Callback function** executed when the request fails. Receives (`null`, `'error'`, `error`) as arguments. |
-   
    #### Returns
    `Promise<any>` A promise that resolves with the response data or logs an error.
    
    #### Example Usage
-   **Basic GET Request**
    ```javascript
-   eo.get('/api/user', {
-       onSuccess: (data) => console.log('User Data:', data),
-       onError: (xhr, status, error) => console.error('Error:', status, error)
-   });
+   // Making a GET request with query parameters and handling JSON response
+   const data = await get('/api/data');
+
+   // GET with query params
+   const userData = await get('/api/user', { id: 123 });
+
+   // With success callback
+   get('/api/data', { id: 123 }, (data) => console.log(data));
+
+   // Explicit JSON response handling
+   const jsonData = await get('/api/data', { id: 123 }, null, 'json');
    ```
 
-   **Cancel Request with** `beforeRequest`
+   #### Error Handling
+   Any fetch error is logged to the console and re-thrown for further handling.
    ```javascript
-   eo.get('/api/config', {
-       beforeRequest: () => {
-           console.log('Checking before request...');
-           return false; // Request will be canceled
-       },
-       onSuccess: (data) => console.log('Config Loaded:', data),
-   });
+   get('/api/user', { id: 456 })
+      .then((data) => console.log('User Data:', data))
+      .catch((error) => console.error('Error:', error));
    ```
 
    ### eo.redirect
@@ -990,24 +983,20 @@ require(['eo-webkit'], function(eo) {
    ```javascript
    const rules = {
     first_name: {
-      required: { 
-         param: true, 
-         message: 'cannot be empty.' 
+      required: {
+         format: {
+            message: 'cannot be empty.' 
+         }
       },
-      length: { 
-         min: 2, 
-         max: 50, 
-         message: 'should have 2 to 50 characters.' 
-      }
+      length: { min: 2, max: 50 },
     },
     email: {
-      required: { 
-         param: true, 
-         message: 'is needed for account creation.' 
-      },
-      email: { 
-         param: true, 
-         message: 'must be a valid email format.' 
+      required: true,
+      email: {
+         format: {
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: 'must be a valid email format.'
+         }
       }
     }
    };
@@ -1249,6 +1238,8 @@ require(['eo-webkit'], function(eo) {
    * Supports single and multiple file uploads.
    * Customizable options for upload type, file acceptance, and event callbacks.
    * Automatically handles UI creation and event binding.
+   * Sequential upload 
+   * File removal support
 
    **Dependency**  
    This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
@@ -1268,29 +1259,17 @@ require(['eo-webkit'], function(eo) {
    <div class="upload-container"></div>
    ```
 
-   Container for the preview of uploaded files.
-   ```html
-   <div class="uploaded-photo"></div>
-   ```
-
    Initializes the uploader with specified configuration and attaches necessary event listeners.
    ```javascript
    eo.uploader.create('.upload-container', '/upload-url', {
       inputName: 'eoFileUpload',
       previewSelector: '.uploaded-photo',
-      disablePreview: false,
-      uploadType: 'image',
-      accept: 'image/*',
       multiple: true,
       onBeforeSend: () => { console.log('Before sending the request'); },
       onSuccess: (response, files) => {
           console.log('Upload successful!', response, files);
-          files.forEach((file, index) => {
-              // Manipulate hidden input value, e.g., add a URL property
-              file.url = response[index].url; // Assuming response contains URLs for each file
-              console.log(`File ${index + 1} URL: ${file.url}`);
-          });
-		  return files;
+          // Manipulate hidden input value, e.g., add a URL property
+          file.url = response.url; // Assuming response contains URLs for each file
       },
       onError: (error) => { console.error('Upload failed!', error); }
    });
@@ -1318,21 +1297,42 @@ require(['eo-webkit'], function(eo) {
    | `onFileRemove` | `Function` | `optional` | Callback function when file was removed. |
    
    **onSuccess Example:**
+   Executed when the upload is successful.
    ```javascript
    onSuccess: (response, files) => {
-       files.forEach((file, index) => {
-           // Manipulate hidden input value
-          file.url = response[index].url; // Assuming response contains URLs for each file
-       });
-	   return files;
+       // Manipulate hidden input value
+      file.url = response.url; // Assuming response contains URLs for each file
+   }
+   ```
+
+   **onBeforeSend Example**
+   Triggered before the file upload starts. Returning false cancels the upload.
+   ```javascript
+   onBeforeSend: () => {
+      console.log('Preparing file for upload');
+      return true;
+   }
+   ```
+
+   **onError Example**
+   Executed when the upload fails.
+   ```javascript
+   onError: (error) => {
+      console.error('Upload failed:', error);
+   }
+   ```
+
+   **onFileRemove Example**
+   Executed when a file is removed.
+   ```javascript
+   onFileRemove: (removeBtn) => {
+      const filename = btn.getAttribute('data-name');
+      console.log(`File ${filename} removed`);
    }
    ```
 
    1. `onSuccess` **Callback**: This function is called when the upload is successful.
-   2. **Iterating through Files**
-      * The `files` array contains the uploaded file objects.
-      * The `forEach` method is used to iterate through each file.
-   3. **Updating File Properties**
+   2. **Updating File Properties**
       * Inside the loop, a new property `url` is added to each file object.
       * The `url` property is assigned a value (e.g., `'https://your-assigned-url-from-server-response.com'`).
       * This URL can be dynamically assigned based on your requirements.
@@ -1356,7 +1356,6 @@ require(['eo-webkit'], function(eo) {
       <form id="uploadForm" action="/submit-form-url" method="post">
           <div class="response"></div>
           <div class="upload-container"></div>
-          <div class="uploaded-photo"></div>
           <button type="submit">Submit</button>
       </form>
       ```
@@ -1365,10 +1364,6 @@ require(['eo-webkit'], function(eo) {
       ```javascript
       eo.uploader.create('.upload-container', '/upload-file-url', {
          inputName: 'eoFileUpload',
-         previewSelector: '.uploaded-photo',
-         disablePreview: false,
-         uploadType: 'image',
-         accept: 'image/*',
          multiple: true,
          onBeforeSend: () => { console.log('Before sending the request'); },
          onSuccess: (response, files) => {
@@ -1378,7 +1373,26 @@ require(['eo-webkit'], function(eo) {
              });
 			 return files;
          },
-         onError: (error) => { console.error('Upload failed!', error); }
+         onError: (error) => { console.error('Upload failed!', error); },
+         onFileRemove: function (btn) {
+				const filename = btn.getAttribute('data-name');
+				const container = document.querySelector(btn.getAttribute('data-container'));
+				const url = `${DOMAIN}/images/${filename}/delete`;
+				
+            // find if an error has occured
+            // the p element is the container of the error message
+				if (!container.querySelector('p')) { 
+					eo.post(url, {
+						filename: filename,
+						'csrf_token': eo._CSRFToken
+					}, {
+						onSuccess: function (response) {
+							console.log(response);
+							eo.alert.success(response.message);
+						}
+					});
+				}
+			}
       });
       ```
    3. **Uploader Creates a Form:** The uploader will create a form inside the `<body>` tag and handle file selection and submission.
@@ -1415,15 +1429,12 @@ require(['eo-webkit'], function(eo) {
       ```javascript
       onSuccess: (response, files) => {
          console.log('Upload successful!', response, files);
-         files.forEach((file, index) => {
-            // Access and manipulate the hidden input values based on the response
-            // Example: add URL property
-            file.url = response[index].url; // Assuming response contains URLs for each file
-            // Example: update NAME property
-            file.name = response[index].name; // Assuming response contains Name for each file
-            file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
-         });
-		 return files;
+         // Access and manipulate the hidden input values based on the response
+         // Example: add URL property
+         file.url = response.url; // Assuming response contains URLs for each file
+         // Example: update NAME property
+         file.name = response.name; // Assuming response contains Name for each file
+         file.lastModifiedDate = eo.epochToTimeString((file.lastModified / 1000)); // Assuming response contains Name for each file
       }
       ```
 
@@ -1473,19 +1484,14 @@ require(['eo-webkit'], function(eo) {
       ```html
       <div class="response"></div>
       <div class="upload-container"></div>
-      <div class="uploaded-photo"></div>
       ```
 
    2. **Initialize the Uploader:**
       ```javascript
       eo.uploader.create('.upload-container', '/upload-file-url', {
          inputName: 'eoFileUpload', // give the input file a name
-         previewSelector: '.uploaded-photo',
-         disablePreview: false,
-         uploadType: 'image',
-         accept: 'image/*',
          multiple: true,
-         onBeforeSend: () => { console.log('Before sending the request'); }
+         onBeforeSend: () => { console.log('Before sending the request'); },
          onError: (error) => { console.error('Upload failed!', error); }
       });
       ```
@@ -1623,12 +1629,12 @@ require(['eo-webkit'], function(eo) {
    #### Example Usage
    **Basic Initialization**
    ```javascript
-   eo.tinymce.init('#editor');
+   eo.tinyMCE.init('#editor');
    ```
 
    **Custom Configuration**
    ```javascript
-   eo.tinymce.init('#editor', {
+   eo.tinyMCE.init('#editor', {
       height: 300,
       plugins: ['lists', 'table', 'code'],
       toolbar: 'bold italic | alignleft aligncenter alignright'
