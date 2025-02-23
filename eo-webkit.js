@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.3
+ * eo-webkit.js 1.1.4
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -259,7 +259,7 @@
 	 * @returns {number} A randomly generated number between start and end
 	 */
 	const getRandomNum = (start, end) => {
-		if (start > end) throw new Error('Start must be ≤ End');
+		if (start > end) throw new Error('Start must be = End');
 		return start + Math.floor(Math.random() * (end - start + 1));
 	};
 
@@ -517,43 +517,43 @@
 	};
 
 	/**
-	 * Send a GET request to the given URL.
+	 * Sends an asynchronous GET request to the specified URL with optional data.
 	 *
-	 * This function returns a promise object that resolves to the response from the server.
+	 * If `data` is a function, it is treated as the `success` callback, and `dataType` is optional.
+	 * If `data` is an object, it is converted to URL search parameters and appended to the URL.
 	 *
-	 * The function takes an optional object with the following properties as its last argument:
+	 * The function attempts to parse JSON responses if the `dataType` is 'json' or the response
+	 * Content-Type includes 'application/json'. Otherwise, it returns the response text.
 	 *
-	 * - `beforeRequest`: a function called before the request is sent.
-	 * - `onSuccess`: a function called when the request is successful.
-	 * - `onError`: a function called when the request fails.
+	 * The `success` callback is invoked with the parsed result when the request is successful.
 	 *
-	 * @param {string} url - The URL to send the request to
-	 * @param {object} [options] - The options object
-	 * @returns {Promise} The promise object
+	 * If the request fails, the error is logged to the console and re-thrown.
+	 *
+	 * @param {string} url - The URL to send the GET request to.
+	 * @param {object|function} data - Optional data to be sent as query parameters, or the success callback function.
+	 * @param {function} success - The callback function invoked with the response data on success.
+	 * @param {string} dataType - The type of data expected in the response ('json' or others).
+	 * @throws Will log an error to the console and re-throw if the request fails.
 	 */
-	const get = async (url, { beforeRequest, onSuccess, onError } = {}) => {
-		if (beforeRequest?.() === false) return;
+	const get = async (url, data, success, dataType) => {
+		if (typeof data === 'function') [success, dataType, data] = [data, success, undefined];
+
+		if (data && typeof data === 'object') url += '?' + new URLSearchParams(data);
 
 		try {
 			const response = await fetch(url);
-			const contentType = response.headers.get('Content-Type');
-			const responseData = contentType?.includes('application/json')
-				? await response.json()
-				: await response.text();
+			if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}, Message: ${responseData}`);
-			}
+			const contentType = response.headers.get('Content-Type') || '';
+			const isJson = dataType === 'json' || contentType.includes('application/json');
+			const result = isJson ? await response.json() : await response.text();
 
-			onSuccess?.(responseData);
-			button.enable();
-			return responseData;
+			success?.(result);
+			return result;
 
 		} catch (error) {
-			onError?.(null, 'error', error);
-			alert.error(error);
 			console.error('Fetch Error:', error);
-			button.enable();
+			throw error;
 		}
 	};
 
@@ -969,7 +969,7 @@
 					alert.message(response.message);
 					callback?.(serializeFormData(formData), response);
 				} catch (e) {
-					alert.message('');
+					alert.destroy('.response');
 					callback?.(serializeFormData(formData), responseData);
 					if (isInDevelopment()) console.log(e);
 				}
@@ -1758,7 +1758,7 @@
 		});
 		return result;
 	};
-
+	
 	const eo = {
 		initBeforeLoad: function() {
 			video._initBeforeLoad();
@@ -1767,14 +1767,11 @@
 		},
 
 		initAfterLoad: () => {
-
 			let resizeTO;
 
-			window.addEventListener('resize', function() {
-				if (resizeTO) {
-					clearTimeout(resizeTO);
-				}
-				resizeTO = setTimeout(function() {
+			window.addEventListener('resize', () => {
+				clearTimeout(resizeTO);
+				resizeTO = setTimeout(() => {
 					window.dispatchEvent(new Event('resizeEnd'));
 				}, 500);
 			});
