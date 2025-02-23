@@ -1649,7 +1649,7 @@
 				const value = _getValue(data, field);
 				Object.entries(ruleset).forEach(([rule, param]) => {
 					if (_validators[rule] && !_validators[rule](value, param)) {
-						const customMessage = param.message || _errorMessages[rule](param);
+						const customMessage = param.format?.message || _errorMessages[rule](param);
 						_errors.push(`${_formatField(field)} ${customMessage}`);
 					}
 				});
