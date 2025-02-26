@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.5
+ * eo-webkit.js 1.2.0
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
