@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.4
+ * eo-webkit.js 1.1.5
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -33,12 +33,14 @@
 	 */
 	const isInDevelopment = () => document.querySelector('meta[name="inDevelopment"]')?.content === '1';
 
-	const _CSRFToken = (() => {
+	const CSRFToken = (() => {
 		const token = document.querySelector('meta[name="csrf-token"]')?.content;
+		
 		if (!token) {
-			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
-			console.error(message);
+			console.error('CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">');
+			return false;
 		}
+
 		return token;
 	})();
 
@@ -653,7 +655,7 @@
 		 * added.
 		 * @private
 		 */
-		const _handleVideoAdd = () => {
+		const _handleVideoAdd = (onSuccess) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-add-video');
 				if (!btn) return;
@@ -665,42 +667,45 @@
 				const btnText = btn.querySelector('.btn-text');
 				const videoUrl = input.value.trim();
 				
-				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
-				
-				const videoData = getYoutubeVideoData(videoUrl);
-				
 				btnSpinner.classList.remove('d-none');
 				btnText.classList.add('d-none');
 				input.disabled = true;
+
+				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
+				
+				const videoData = getYoutubeVideoData(videoUrl);
 				
 				if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
 				if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
 				
 				const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
-					...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
 					createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
 					createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
 					createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
+					...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
 					createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
-					createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
-						createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': videoData.id }, [
-							createElements('i', { class: 'ti ti-trash' })
-						])
-					]),
 					createElements('div', {
-						class: 'avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white',
-						'data-id': videoData.id,
-						'data-url': videoData.url,
-						'data-embed': videoData.embed,
-						style: `background-image: url(${videoData.thumbnail?.sd || ''}); height: 120px;`
+						class: 'position-relative p-2 cursor-pointer text-white',
+						style: `width: 15rem; height: 9.5rem; background-size: cover; background-position: center; background-image: url(${videoData.thumbnail?.sd || ''});`
 					}, [
-						createElements('i', { class: 'ti ti-brand-youtube fs-32' })
+						createElements('div', { class: 'position-absolute top-0 end-0 btn-delete-container p-2' }, [
+							createElements('span', { class: 'btn btn-danger btn-sm btn-remove-video', 'data-id': videoData.id }, [ document.createTextNode('X') ])
+						]),
+						createElements('div', {
+							class: 'btn-playback position-absolute top-50 start-50 translate-middle text-center',
+							'data-id': videoData.id,
+							'data-url': videoData.url,
+							'data-embed': videoData.embed,
+						}, [
+							createElements('i', { class: 'ti ti-brand-youtube fs-48' })
+						])
 					])
 				]);
 
 				document.querySelector('.video-list-container')?.prepend(videoContainer);
 				input.value = '';
 				input.classList.remove('is-invalid');
+				onSuccess?.(videoData);
 				_resetForm(input, btnSpinner, btnText);
 			});
 		};
@@ -712,7 +717,7 @@
 		 * @private
 		 * @function
 		 */
-		const _handleVideoPlayback = () => {
+		const _handleVideoPlayback = (onPlayBack) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-playback');
 				if (!btn) return;
@@ -741,6 +746,11 @@
 				});
 
 				document.getElementById(btn.dataset.id).querySelector('.modal-content').style.backgroundColor = 'rgba(0, 0, 0, 1)';
+				onPlayBack?.({
+					id: btn.dataset.id,
+					url: btn.dataset.url,
+					embed: btn.dataset.embed
+				});
 			});
 		};
 
@@ -753,10 +763,11 @@
 		 * 
 		 * @private
 		 */
-		const _handleVideoDeletion = () => {
+		const _handleVideoDeletion = (onRemove) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-remove-video');
 				if (btn) document.querySelector(`.${CSS.escape(btn.dataset.id)}`)?.remove();
+				if (btn) onRemove?.(btn.dataset.id);
 			});
 		};
 
@@ -792,24 +803,17 @@
 		};
 
 		return {
-			/**
-			 * Initializes the video module before the page finishes loading.
-			 * This is needed to add the event listeners to the video buttons.
-			 * @private
-			 * @function
-			 */
-			_initBeforeLoad: () => {
-				_handleVideoAdd();
-				_handleVideoDeletion();
-				_handleVideoPlayback();
-			},
+			
 			/**
 			 * Initializes the video module by creating the form elements for inputting
 			 * YouTube URLs and adding them to the page.
 			 * @function
 			 */
-			init: () => {
+			init: ({ onSuccess, onRemove, onPlayback } = {}) => {
 				_createVideoForm();
+				_handleVideoAdd(onSuccess);
+				_handleVideoPlayback(onPlayback);
+				_handleVideoDeletion(onRemove);
 			}
 		};
 	})();
@@ -945,7 +949,7 @@
 		});
 
 		const formData = new FormData(form);
-		formData.append('csrf_token', _CSRFToken);
+		CSRFToken ? formData.append('csrf_token', CSRFToken) : null;
 
 		onBeforeSend?.(formData);
 
@@ -1266,7 +1270,7 @@
 				const fileContainer = document.querySelector(multiple ? `.${CSS.escape(file.id)}` : '.photo-preview');
 				const formData = new FormData();
 				formData.append(multiple ? `${inputName}[]` : inputName, file);
-				formData.append('csrf_token', _CSRFToken);
+				CSRFToken ? formData.append('csrf_token', CSRFToken) : null;
 
 				post(url, formData, {
 					contentType: 'multipart/form-data',
@@ -1778,7 +1782,7 @@
 		},
 
 		userClient,
-		_CSRFToken,
+		CSRFToken,
 		moveHtmlElement,
 		createElements,
 		createHiddenInput,
