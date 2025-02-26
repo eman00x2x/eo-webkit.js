@@ -35,7 +35,7 @@ eo-webkit.js is a comprehensive JavaScript utility library designed to streamlin
         *   [`eo.get`](#eoget) - Makes a GET request.
         *   [`eo.redirect`](#eoredirect) - Redirects the browser to a new URL.
         *   [`eo.userClient`](#eouserclient) - Manages user client interactions.
-        *   [`eo._CSRFToken`](#eocsrftoken) - Retrieves the CSRF token.
+        *   [`eo.CSRFToken`](#eocsrftoken) - Retrieves the CSRF token.
     *   [Random Data Generation](#random-data-generation)
         *   [`eo.getRandomChar`](#eogetrandomchar) - Generates a random character.
         *   [`eo.getRandomNum`](#eogetrandomnum) - Generates a random number within a range.
@@ -683,6 +683,12 @@ require(['eo-webkit'], function(eo) {
    });
    ```
 
+   **Note**
+   You can integrate the CSRFToken (Optional) [Please read CSRFToken Implementation](#eocsrftoken)
+   ```html
+   <meta name="csrf-token" content="{{ csrf_token() }}">
+   ```
+
    ### eo.get
    The `eo.get` function is an asynchronous utility to make HTTP GET requests using the Fetch API. It allows for optional query parameters, customizable data type handling, and optional success callbacks.
    
@@ -772,8 +778,8 @@ require(['eo-webkit'], function(eo) {
    * Geo Fetch Failure: Logs an error (Error getting geo info:).
    * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
 
-   ### eo._CSRFToken
-   `eo._CSRFToken` Automatically retrieves the CSRF token from the meta tags.
+   ### eo.CSRFToken
+   `eo.CSRFToken` Automatically retrieves the CSRF token from the meta tags.
    
    **Features**
    * **Automatic CSRF Token Retrieval:** Automatically retrieves the CSRF token from the meta tags.
@@ -816,9 +822,9 @@ require(['eo-webkit'], function(eo) {
    #### Example Usage
    ```javascript
    document.addEventListener('DOMContentLoaded', () => {
-      if (_CSRFToken) {
-         console.log('CSRF Token:', _CSRFToken);
-         // You can use _CSRFToken in your AJAX requests or forms
+      if (CSRFToken) {
+         console.log('CSRF Token:', CSRFToken);
+         // You can use CSRFToken in your AJAX requests or forms
       } else {
          console.error('CSRF Token is missing!');
       }
@@ -1018,7 +1024,7 @@ require(['eo-webkit'], function(eo) {
    * [`eo.post`](#eopost)
    * [`eo.alert`](#eoalert)
    * [`eo.button`](#eobutton)
-   * csrf-token in meta tag
+   * csrf-token in meta tag  (optional) [Please read CSRFToken](#eocsrftoken)
       ```html
       <meta name="csrf-token" content="{{ csrf_token() }}">
       ```
@@ -1241,8 +1247,9 @@ require(['eo-webkit'], function(eo) {
    * Sequential upload 
    * File removal support
 
-   **Dependency**  
-   This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
+   **Note**  
+   You can use a csrf-token in meta tag. please read [`eo.CSRFToken`](#eocsrftoken)
+   once implemented it will automatically added in FormData.
    ```html
    <meta name="csrf-token" content="{{ csrf_token() }}">
    ```
@@ -1384,7 +1391,7 @@ require(['eo-webkit'], function(eo) {
 				if (!container.querySelector('p')) { 
 					eo.post(url, {
 						filename: filename,
-						'csrf_token': eo._CSRFToken
+						'csrf_token': eo.CSRFToken
 					}, {
 						onSuccess: function (response) {
 							console.log(response);
@@ -1533,12 +1540,23 @@ require(['eo-webkit'], function(eo) {
    * Remove added videos.
    * Create a hidden input dynamically.
       * `id`, `url`, `embed`, `thumbnail`, and `created_at`
-      
+
+   #### Parameters
+   | Parameters | Type | Description |
+   | --- | --- | --- |
+   | `onSuccess` | `Function` | `Callback function` executed when the video is added successfully. |
+   | `onPlayback` | `Function` | `Callback function` executed after the video displayed |
+   | `onRemove` | `Function` | `Callback function` executed after the video remove |
+
    #### Usage
    Call `eo.video.init()` before the page loads.
    ```javascript
    window.addEventListener('load', () => {
-      eo.video.init();
+      eo.video.init({
+         onSuccess: (data) => console.log(data),
+         onPlayback: (data) => console.log(data),
+         onRemove: (id) => console.log(id)
+      });
    });
    ```
 
