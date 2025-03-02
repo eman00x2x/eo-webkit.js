@@ -1027,9 +1027,11 @@ require(['eo-webkit'], function(eo) {
    };
 
    const rules = {
-      password: { required: true },
-      equality: {
-         confirm_password: data.password
+      password: {
+		required: true,
+		equality: {
+			confirm_password: data.password
+		}
       }
    };
    ```
