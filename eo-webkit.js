@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.2.0
+ * eo-webkit.js 1.2.1
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -544,18 +544,21 @@
 
 		try {
 			const response = await fetch(url);
-			if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
 			const contentType = response.headers.get('Content-Type') || '';
 			const isJson = dataType === 'json' || contentType.includes('application/json');
 			const result = isJson ? await response.json() : await response.text();
-
-			success?.(result);
-			return result;
-
+			
+			if (!response.ok) {
+				success?.(result, response);
+           		return { success: false, status: response.status, data: result };
+			}
+			
+			success?.(result, response);
+			return { success: true, status: response.status, data: result };
+			
 		} catch (error) {
 			console.error('Fetch Error:', error);
-			throw error;
+			return { success: false, status: 0, data: null, error };
 		}
 	};
 
@@ -655,8 +658,9 @@
 		 * added.
 		 * @private
 		 */
-		const _handleVideoAdd = (onSuccess) => {
+		const _handleVideoAdd = (onBeforeSend, onSuccess) => {
 			document.addEventListener('click', (event) => {
+
 				const btn = event.target.closest('.btn-add-video');
 				if (!btn) return;
 				
@@ -674,39 +678,66 @@
 				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
 				
 				const videoData = getYoutubeVideoData(videoUrl);
-				
-				if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
-				if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
-				
-				const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
-					createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
-					createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
-					createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
-					...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
-					createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
-					createElements('div', {
-						class: 'position-relative p-2 cursor-pointer text-white',
-						style: `width: 15rem; height: 9.5rem; background-size: cover; background-position: center; background-image: url(${videoData.thumbnail?.sd || ''});`
-					}, [
-						createElements('div', { class: 'position-absolute top-0 end-0 btn-delete-container p-2' }, [
-							createElements('span', { class: 'btn btn-danger btn-sm btn-remove-video', 'data-id': videoData.id }, [ document.createTextNode('X') ])
-						]),
-						createElements('div', {
-							class: 'btn-playback position-absolute top-50 start-50 translate-middle text-center',
-							'data-id': videoData.id,
-							'data-url': videoData.url,
-							'data-embed': videoData.embed,
-						}, [
-							createElements('i', { class: 'ti ti-brand-youtube fs-48' })
-						])
-					])
-				]);
 
-				document.querySelector('.video-list-container')?.prepend(videoContainer);
-				input.value = '';
-				input.classList.remove('is-invalid');
-				onSuccess?.(videoData);
-				_resetForm(input, btnSpinner, btnText);
+				const _handleBeforeSend = async () => {
+					if (typeof onBeforeSend === "function") {
+						const result = await onBeforeSend(videoData);
+						if (result instanceof Promise) {
+							return result.then((resolvedResult) => {
+								if (resolvedResult === false) {
+									_resetForm(input, btnSpinner, btnText);
+									return false;
+								}
+								return true;
+							});
+						} else {
+							// Handle synchronous return
+							if (result === false) {
+								_resetForm(input, btnSpinner, btnText);
+								return false;
+							}
+						}
+					}
+					return true;
+				};
+
+				_handleBeforeSend().then((shouldProceed) => {
+					if (!shouldProceed) return;
+					
+					if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
+					if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
+					
+					const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
+						createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
+						createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
+						createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
+						...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
+						createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
+						createElements('div', {
+							class: 'position-relative p-2 cursor-pointer text-white',
+							style: `width: 15rem; height: 9.5rem; background-size: cover; background-position: center; background-image: url(${videoData.thumbnail?.sd || ''});`
+						}, [
+							createElements('div', { class: 'position-absolute top-0 end-0 btn-delete-container p-2' }, [
+								createElements('span', { class: 'btn btn-danger btn-sm btn-remove-video', 'data-id': videoData.id }, [ document.createTextNode('X') ])
+							]),
+							createElements('div', {
+								class: 'btn-playback position-absolute top-50 start-50 translate-middle text-center',
+								'data-id': videoData.id,
+								'data-url': videoData.url,
+								'data-embed': videoData.embed,
+							}, [
+								createElements('i', { class: 'ti ti-brand-youtube fs-48' })
+							])
+						])
+					]);
+
+					document.querySelector('.video-list-container')?.prepend(videoContainer);
+					input.value = '';
+					input.classList.remove('is-invalid');
+					onSuccess?.(videoData);
+					_resetForm(input, btnSpinner, btnText);
+				});
+
 			});
 		};
 
@@ -809,9 +840,9 @@
 			 * YouTube URLs and adding them to the page.
 			 * @function
 			 */
-			init: ({ onSuccess, onRemove, onPlayback } = {}) => {
+			init: ({ onBeforeSend, onSuccess, onRemove, onPlayback } = {}) => {
 				_createVideoForm();
-				_handleVideoAdd(onSuccess);
+				_handleVideoAdd(onBeforeSend, onSuccess);
 				_handleVideoPlayback(onPlayback);
 				_handleVideoDeletion(onRemove);
 			}
@@ -1535,9 +1566,10 @@
 		};
 
 		const _createSelectElement = (id, options, selectedValue) => {
+			const appendtext  = id === 'mortgageYear' ? ' years' : ' %';
 			return createElements('select', { id, class: 'form-select' }, 
 				options.map(option =>
-					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}%`)])
+					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}${appendtext}`)])
 				)
 			);
 		};
