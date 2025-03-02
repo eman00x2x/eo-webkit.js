@@ -722,7 +722,7 @@ require(['eo-webkit'], function(eo) {
    Any fetch error is logged to the console and re-thrown for further handling.
    ```javascript
    get('/api/user', { id: 456 })
-      .then((data) => console.log('User Data:', data))
+      .then((response) => console.log('User Data:', response.data))
       .catch((error) => console.error('Error:', error));
    ```
 
@@ -956,17 +956,29 @@ require(['eo-webkit'], function(eo) {
    #### Validation Rules
    The validator supports various rules that can be applied to fields.
 
-   | Rule | Parrameter Type | Description |
+   | Rule | Parameter Type | Description |
    | --- | --- | --- |
    | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
    | `length` | `{ min, max }` | Enforces string length constraints. |
    | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
-   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
-   | `email` | `Boolean` | Ensures a valid email format. |
-   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
-   | `datetime` | `Boolean` | Ensures a valid datetime format. |
+   | `url` | `Boolean` / `Array` `{ format }` | Ensures a valid URL format (http:// or https://). |
+   | `email` | `Boolean` / `Array` `{ format }` | Ensures a valid email format. |
+   | `date` | `Boolean` / `Array` `{ format }` | Ensures a valid date format (`YYYY-MM-DD`). |
+   | `datetime` | `Boolean` / `Array` `{ format }` | Ensures a valid datetime format. |
    | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
    | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+
+   **Rules Parameter**
+   `format` parameter can be added to `url`, `email`, `date` and `datetime` rules.
+   | Rule | Parameter Type | Possible Value | Description |
+   | --- | --- | --- | --- |
+   | `format` | `Array` | `{ pattern: regex, message: string }` | |
+
+   **format Parameters**
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `pattern` | `Regex` | regex value e.g. `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` |
+   | `message` | `String` | The error message when the validation fails, will replace the original error message |
 
    **Example Rule Definition:**
    ```javascript
@@ -989,11 +1001,7 @@ require(['eo-webkit'], function(eo) {
    ```javascript
    const rules = {
     first_name: {
-      required: {
-         format: {
-            message: 'cannot be empty.' 
-         }
-      },
+      required: true,
       length: { min: 2, max: 50 },
     },
     email: {
@@ -1005,6 +1013,24 @@ require(['eo-webkit'], function(eo) {
          }
       }
     }
+   };
+   ```
+
+   **Equality Rule Example**
+   The equality rule should use the value of the compared field and the key must be the comparing field.
+
+   In this validation rule structure, the `equality` rule uses the `confirm_password` field as the key, indicating the field to be compared. The value associated with this key (`data.password`) represents the value of the password field, which the `confirm_password` field must match.
+   ```javascript
+   const data = {
+      password: 'myPasswordThatNeverFails',
+      confirm_password: 'myPasswordThatNeverFails'
+   };
+
+   const rules = {
+      password: { required: true },
+      equality: {
+         confirm_password: data.password
+      }
    };
    ```
 
@@ -1544,6 +1570,7 @@ require(['eo-webkit'], function(eo) {
    #### Parameters
    | Parameters | Type | Description |
    | --- | --- | --- |
+   | `onBeforeSend` | `Function` | Callback function executed before processing the URL. It can return `false` to stop the process or a `Promise` that resolves to `true` (to proceed) or `false` (to stop).  |
    | `onSuccess` | `Function` | `Callback function` executed when the video is added successfully. |
    | `onPlayback` | `Function` | `Callback function` executed after the video displayed |
    | `onRemove` | `Function` | `Callback function` executed after the video remove |
@@ -1553,6 +1580,7 @@ require(['eo-webkit'], function(eo) {
    ```javascript
    window.addEventListener('load', () => {
       eo.video.init({
+         onBeforeSend: (data) => console.log(data),
          onSuccess: (data) => console.log(data),
          onPlayback: (data) => console.log(data),
          onRemove: (id) => console.log(id)
