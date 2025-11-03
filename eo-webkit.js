@@ -33,6 +33,7 @@
 			return false;
 		}
 
+
 		return token;
 	})();
 
@@ -611,6 +612,7 @@
 		} catch (error) {
 			console.error('Fetch Error:', error);
 			return { success: false, status: 0, data: null, error };
+			return { success: false, status: 0, data: null, error };
 		}
 	};
 
@@ -713,7 +715,9 @@
 		 * @private
 		 */
 		const _handleVideoAdd = (onBeforeSend, onSuccess) => {
+		const _handleVideoAdd = (onBeforeSend, onSuccess) => {
 			document.addEventListener('click', (event) => {
+
 
 				const btn = event.target.closest('.btn-add-video');
 				if (!btn) return;
@@ -724,6 +728,11 @@
 				const btnSpinner = btn.querySelector('.spinner-border');
 				const btnText = btn.querySelector('.btn-text');
 				const videoUrl = input.value.trim();
+				
+				btnSpinner.classList.remove('d-none');
+				btnText.classList.add('d-none');
+				input.disabled = true;
+
 				
 				btnSpinner.classList.remove('d-none');
 				btnText.classList.add('d-none');
@@ -785,6 +794,65 @@
 						])
 					]);
 
+				const _handleBeforeSend = async () => {
+					if (typeof onBeforeSend === "function") {
+						const result = await onBeforeSend(videoData);
+						if (result instanceof Promise) {
+							return result.then((resolvedResult) => {
+								if (resolvedResult === false) {
+									_resetForm(input, btnSpinner, btnText);
+									return false;
+								}
+								return true;
+							});
+						} else {
+							// Handle synchronous return
+							if (result === false) {
+								_resetForm(input, btnSpinner, btnText);
+								return false;
+							}
+						}
+					}
+					return true;
+				};
+
+				_handleBeforeSend().then((shouldProceed) => {
+					if (!shouldProceed) return;
+					
+					if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
+					if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
+					
+					const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
+						createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
+						createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
+						createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
+						...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
+						createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
+						createElements('div', {
+							class: 'position-relative p-2 cursor-pointer text-white',
+							style: `width: 15rem; height: 9.5rem; background-size: cover; background-position: center; background-image: url(${videoData.thumbnail?.sd || ''});`
+						}, [
+							createElements('div', { class: 'position-absolute top-0 end-0 btn-delete-container p-2' }, [
+								createElements('span', { class: 'btn btn-danger btn-sm btn-remove-video', 'data-id': videoData.id }, [ document.createTextNode('X') ])
+							]),
+							createElements('div', {
+								class: 'btn-playback position-absolute top-50 start-50 translate-middle text-center',
+								'data-id': videoData.id,
+								'data-url': videoData.url,
+								'data-embed': videoData.embed,
+							}, [
+								createElements('i', { class: 'ti ti-brand-youtube fs-48' })
+							])
+						])
+					]);
+
+					document.querySelector('.video-list-container')?.prepend(videoContainer);
+					input.value = '';
+					input.classList.remove('is-invalid');
+					onSuccess?.(videoData);
+					_resetForm(input, btnSpinner, btnText);
+				});
+
 					document.querySelector('.video-list-container')?.prepend(videoContainer);
 					input.value = '';
 					input.classList.remove('is-invalid');
@@ -802,6 +870,7 @@
 		 * @private
 		 * @function
 		 */
+		const _handleVideoPlayback = (onPlayBack) => {
 		const _handleVideoPlayback = (onPlayBack) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-playback');
@@ -836,6 +905,11 @@
 					url: btn.dataset.url,
 					embed: btn.dataset.embed
 				});
+				onPlayBack?.({
+					id: btn.dataset.id,
+					url: btn.dataset.url,
+					embed: btn.dataset.embed
+				});
 			});
 		};
 
@@ -849,9 +923,11 @@
 		 * @private
 		 */
 		const _handleVideoDeletion = (onRemove) => {
+		const _handleVideoDeletion = (onRemove) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-remove-video');
 				if (btn) document.querySelector(`.${CSS.escape(btn.dataset.id)}`)?.remove();
+				if (btn) onRemove?.(btn.dataset.id);
 				if (btn) onRemove?.(btn.dataset.id);
 			});
 		};
@@ -889,13 +965,18 @@
 
 		return {
 			
+			
 			/**
 			 * Initializes the video module by creating the form elements for inputting
 			 * YouTube URLs and adding them to the page.
 			 * @function
 			 */
 			init: ({ onBeforeSend, onSuccess, onRemove, onPlayback } = {}) => {
+			init: ({ onBeforeSend, onSuccess, onRemove, onPlayback } = {}) => {
 				_createVideoForm();
+				_handleVideoAdd(onBeforeSend, onSuccess);
+				_handleVideoPlayback(onPlayback);
+				_handleVideoDeletion(onRemove);
 				_handleVideoAdd(onBeforeSend, onSuccess);
 				_handleVideoPlayback(onPlayback);
 				_handleVideoDeletion(onRemove);
@@ -1041,6 +1122,7 @@
 		});
 
 		const formData = new FormData(form);
+		CSRFToken ? formData.append('csrf_token', CSRFToken) : null;
 		CSRFToken ? formData.append('csrf_token', CSRFToken) : null;
 
 		onBeforeSend?.(formData);
@@ -1891,8 +1973,10 @@
 
 		const _createSelectElement = (id, options, selectedValue) => {
 			const appendtext  = id === 'mortgageYear' ? ' years' : ' %';
+			const appendtext  = id === 'mortgageYear' ? ' years' : ' %';
 			return createElements('select', { id, class: 'form-select' }, 
 				options.map(option =>
+					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}${appendtext}`)])
 					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}${appendtext}`)])
 				)
 			);
@@ -2304,6 +2388,7 @@
 		getVersion: () => version,
 
 		userClient,
+		CSRFToken,
 		CSRFToken,
 		moveHtmlElement,
 		createElements,

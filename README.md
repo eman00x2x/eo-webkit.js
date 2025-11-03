@@ -684,6 +684,12 @@ require(['eo-webkit'], function(eo) {
    });
    ```
 
+   **Note**
+   You can integrate the CSRFToken (Optional) [Please read CSRFToken Implementation](#eocsrftoken)
+   ```html
+   <meta name="csrf-token" content="{{ csrf_token() }}">
+   ```
+
    ### eo.get
    The `eo.get` function is an asynchronous utility to make HTTP GET requests using the Fetch API. It allows for optional query parameters, customizable data type handling, and optional success callbacks.
    
@@ -717,7 +723,7 @@ require(['eo-webkit'], function(eo) {
    Any fetch error is logged to the console and re-thrown for further handling.
    ```javascript
    get('/api/user', { id: 456 })
-      .then((data) => console.log('User Data:', data))
+      .then((response) => console.log('User Data:', response.data))
       .catch((error) => console.error('Error:', error));
    ```
 
@@ -848,9 +854,9 @@ require(['eo-webkit'], function(eo) {
    #### Example Usage
    ```javascript
    document.addEventListener('DOMContentLoaded', () => {
-      if (_CSRFToken) {
-         console.log('CSRF Token:', _CSRFToken);
-         // You can use _CSRFToken in your AJAX requests or forms
+      if (CSRFToken) {
+         console.log('CSRF Token:', CSRFToken);
+         // You can use CSRFToken in your AJAX requests or forms
       } else {
          console.error('CSRF Token is missing!');
       }
@@ -1003,17 +1009,29 @@ require(['eo-webkit'], function(eo) {
    #### Validation Rules
    The validator supports various rules that can be applied to fields.
 
-   | Rule | Parrameter Type | Description |
+   | Rule | Parameter Type | Description |
    | --- | --- | --- |
    | `required` | `Boolean` | Ensures a value is present (not `null`, `undefined`, or empty). |
    | `length` | `{ min, max }` | Enforces string length constraints. |
    | `number` | `{ min, max }` | Ensures a value is a number and optionally within a range. |
-   | `url` | `Boolean` | Ensures a valid URL format (http:// or https://). |
-   | `email` | `Boolean` | Ensures a valid email format. |
-   | `date` | `Boolean` | Ensures a valid date format (`YYYY-MM-DD`). |
-   | `datetime` | `Boolean` | Ensures a valid datetime format. |
+   | `url` | `Boolean` / `Array` `{ format }` | Ensures a valid URL format (http:// or https://). |
+   | `email` | `Boolean` / `Array` `{ format }` | Ensures a valid email format. |
+   | `date` | `Boolean` / `Array` `{ format }` | Ensures a valid date format (`YYYY-MM-DD`). |
+   | `datetime` | `Boolean` / `Array` `{ format }` | Ensures a valid datetime format. |
    | `equality` | `Any` | Ensures the value matches the given parameter exactly. |
    | `type` | `String` | Ensures the value is of the specified JavaScript type (`string`, `number`, etc.). |
+
+   **Rules Parameter**
+   `format` parameter can be added to `url`, `email`, `date` and `datetime` rules.
+   | Rule | Parameter Type | Possible Value | Description |
+   | --- | --- | --- | --- |
+   | `format` | `Array` | `{ pattern: regex, message: string }` | |
+
+   **format Parameters**
+   | Parameter | Type | Description |
+   | --- | --- | --- |
+   | `pattern` | `Regex` | regex value e.g. `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` |
+   | `message` | `String` | The error message when the validation fails, will replace the original error message |
 
    **Example Rule Definition:**
    ```javascript
@@ -1036,11 +1054,7 @@ require(['eo-webkit'], function(eo) {
    ```javascript
    const rules = {
     first_name: {
-      required: {
-         format: {
-            message: 'cannot be empty.' 
-         }
-      },
+      required: true,
       length: { min: 2, max: 50 },
     },
     email: {
@@ -1052,6 +1066,26 @@ require(['eo-webkit'], function(eo) {
          }
       }
     }
+   };
+   ```
+
+   **Equality Rule Example**
+   The equality rule should use the value of the compared field and the key must be the comparing field.
+
+   In this validation rule structure, the `equality` rule uses the `confirm_password` field as the key, indicating the field to be compared. The value associated with this key (`data.password`) represents the value of the password field, which the `confirm_password` field must match.
+   ```javascript
+   const data = {
+      password: 'myPasswordThatNeverFails',
+      confirm_password: 'myPasswordThatNeverFails'
+   };
+
+   const rules = {
+      password: {
+		required: true,
+		equality: {
+			confirm_password: data.password
+		}
+      }
    };
    ```
 
@@ -1077,7 +1111,7 @@ require(['eo-webkit'], function(eo) {
    * [`eo.post`](#eopost)
    * [`eo.alert`](#eoalert)
    * [`eo.button`](#eobutton)
-   * csrf-token in meta tag
+   * csrf-token in meta tag  (optional) [Please read CSRFToken](#eocsrftoken)
       ```html
       <meta name="csrf-token" content="{{ csrf_token() }}">
       ```
@@ -1317,8 +1351,9 @@ require(['eo-webkit'], function(eo) {
    * File removal support
    * Supports image compression since version 2.0.0
 
-   **Dependency**  
-   This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
+   **Note**  
+   You can use a csrf-token in meta tag. please read [`eo.CSRFToken`](#eocsrftoken)
+   once implemented it will automatically added in FormData.
    ```html
    <meta name="csrf-token" content="{{ csrf_token() }}">
    ```
@@ -1464,7 +1499,7 @@ require(['eo-webkit'], function(eo) {
 				if (!container.querySelector('p')) { 
 					eo.post(url, {
 						filename: filename,
-						'csrf_token': eo._CSRFToken
+						'csrf_token': eo.CSRFToken
 					}, {
 						onSuccess: function (response) {
 							console.log(response);
@@ -1648,12 +1683,25 @@ require(['eo-webkit'], function(eo) {
    * Remove added videos.
    * Create a hidden input dynamically.
       * `id`, `url`, `embed`, `thumbnail`, and `created_at`
-      
+
+   #### Parameters
+   | Parameters | Type | Description |
+   | --- | --- | --- |
+   | `onBeforeSend` | `Function` | Callback function executed before processing the URL. It can return `false` to stop the process or a `Promise` that resolves to `true` (to proceed) or `false` (to stop).  |
+   | `onSuccess` | `Function` | `Callback function` executed when the video is added successfully. |
+   | `onPlayback` | `Function` | `Callback function` executed after the video displayed |
+   | `onRemove` | `Function` | `Callback function` executed after the video remove |
+
    #### Usage
    Call `eo.video.init()` before the page loads.
    ```javascript
    window.addEventListener('load', () => {
-      eo.video.init();
+      eo.video.init({
+         onBeforeSend: (data) => console.log(data),
+         onSuccess: (data) => console.log(data),
+         onPlayback: (data) => console.log(data),
+         onRemove: (id) => console.log(id)
+      });
    });
    ```
 
