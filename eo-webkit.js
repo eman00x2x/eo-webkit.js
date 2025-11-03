@@ -1,5 +1,5 @@
 /*!
- * eo-webkit.js 1.1.4
+ * eo-webkit.js 2.0.0
  * Copyright (c) 2025 Eman Olivas
  * eo-webkit.js may be freely distributed under the MIT license.
 */
@@ -22,23 +22,17 @@
 
 	'use strict';
 
-	/**
-	 * Checks if the application is in development mode by examining a meta tag.
-	 *
-	 * This function looks for a meta tag with the name "inDevelopment" in the document.
-	 * If the content of this meta tag is "1", the function returns true, indicating
-	 * that the application is in development mode. Otherwise, it returns false.
-	 *
-	 * @returns {boolean} True if the application is in development mode, false otherwise.
-	 */
-	const isInDevelopment = () => document.querySelector('meta[name="inDevelopment"]')?.content === '1';
+	let document = window.document;
+	const version = 'v2.0.0';
 
-	const _CSRFToken = (() => {
-		const token = document.querySelector('meta[name="csrf-token"]')?.content;
+	const CSRFToken = (() => {
+		const token = document.querySelector('meta[name="csrf_token"]')?.content;
+		
 		if (!token) {
-			const message = 'CSRF Token not found in meta tags! <meta name="csrf-token" content="{{ csrf_token() }}">';
-			console.error(message);
+			console.error('CSRF Token not found in meta tags! <meta name="csrf_token" content="{{ csrf_token() }}">');
+			return false;
 		}
+
 		return token;
 	})();
 
@@ -158,7 +152,10 @@
 	 *
 	 * @param {string} url - The URL to redirect to
 	 */
-	const redirect = (url) => window.location = url;
+	const redirect = (url) => {
+		alert.loader('Redirecting...');
+		window.location = url;
+	};
 
 	/**
 	 * Converts an epoch time (in seconds/milliseconds) to a localized string in the format:
@@ -259,7 +256,7 @@
 	 * @returns {number} A randomly generated number between start and end
 	 */
 	const getRandomNum = (start, end) => {
-		if (start > end) throw new Error('Start must be = End');
+		if (start > end) throw new Error('Start must be ≤ End');
 		return start + Math.floor(Math.random() * (end - start + 1));
 	};
 
@@ -293,6 +290,28 @@
 		}
 
 		return num.toString();
+	};
+
+	const retry = async function (fn, options = {}) {
+		const {
+			maxAttempts = 3,
+			delay = 500,
+			backoff = true,
+			onRetry = () => {}
+		} = options;
+
+		let attempt = 0;
+		while (attempt < maxAttempts) {
+			try {
+				return await fn();
+			} catch (err) {
+				attempt++;
+				if (attempt >= maxAttempts) throw err;
+
+				onRetry(err, attempt);
+				await new Promise(res => setTimeout(res, backoff ? delay * attempt : delay));
+			}
+		}
 	};
 
 	/**
@@ -399,14 +418,15 @@
 		return element;
 	};
 
-	const createHiddenInput = (name, value) => {
+	const createHiddenInput = (name, value, id = null) => {
 		if (typeof name !== 'string' || !name.trim()) throw new Error('Invalid name');
 		if (typeof value !== 'string') throw new Error('Invalid value');
 
 		return createElements('input', {
 			type: 'hidden',
 			name: _sanitize(name),
-			value: _sanitize(value)
+			value: _sanitize(value),
+			id: id ? _sanitize(id) : null,
 		});
 	};
 
@@ -421,7 +441,7 @@
 		const toElement = document.querySelector(_sanitize(toSelector));
 
 		if (!fromElement || !toElement) {
-			if (isInDevelopment()) console.log('Element not found');
+			console.error('Element not found');
 			return;
 		}
 
@@ -462,36 +482,36 @@
 		if (onBeforeSend?.() === false) return;
 
 		let headers = {
-			'X-Requested-With': 'XMLHttpRequest'
+			'X-Requested-With': 'XMLHttpRequest',
+			'X-CSRF-TOKEN': CSRFToken
 		};
 
 		let body = data;
 
-		if ((data instanceof FormData || Array.isArray(data) || (typeof data === 'object' && data !== null))) {
-			if (contentType.includes('application/json')) {
-				body = JSON.stringify(serializeFormData(data));
-				headers['Content-Type'] = contentType;
-			} else if (contentType.includes('multipart/form-data')) {
-				headers = {};
-				body = data;
-			} else {
-				headers['Content-Type'] = contentType;
-				body = serializeFormData(data);
-				body = Object.keys(body).map(key => {
-					const value = body[key];
-					if (Array.isArray(value)) {
-						return value.map(item => `${encodeURIComponent(key + '[]')}=${encodeURIComponent(item)}`).join('&');
-					} else {
-						return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-					}
-				}).join('&');
-			}
+		if (data instanceof FormData) {
+			body = data;
+		} else if (contentType.includes('application/json')) {
+			body = JSON.stringify(serializeFormData(data));
+			headers['Content-Type'] = contentType;
+		} else {
+			headers['Content-Type'] = contentType;
+			body = serializeFormData(data);
+			body = Object.keys(body).map(key => {
+				const value = body[key];
+				if (Array.isArray(value)) {
+					return value.map(item => `${encodeURIComponent(key + '[]')}=${encodeURIComponent(item)}`).join('&');
+				} else {
+					return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+				}
+			}).join('&');
 		}
+		
 
 		fetch(url, {
 			method: 'POST',
 			headers,
-			body
+			body,
+			credentials: 'same-origin',
 		})
 			.then(async response => {
 				return response.text().then(text => {
@@ -504,14 +524,22 @@
 			})
 			.then(({ data, response }) => {
 				if (!response.ok) {
-					throw new Error(data?.message || data || `HTTP ${response.status}`);
+					const status = response.status;
+					const message = data?.message || `Request failed with status ${status}`;
+					const errors = data?.errors || data;
+
+					onError?.(message, errors, status);
+					return;
 				}
+				
+				// Validate the content for potential fatal errors
+				if (typeof data === 'string' && (data.includes('Fatal error') || data.includes('ErrorException'))) {
+					throw new Error('Server encountered a fatal error: ' + data);
+				}
+
 				onSuccess?.(data);
 			})
 			.catch(error => {
-				const errorMessage = error.message.replace(/^Error:\s*/, ''); // Remove "Error: "
-    			console.error(error);
-				onError?.(errorMessage);
 			})
 			.finally(onComplete);
 	};
@@ -535,25 +563,54 @@
 	 * @param {string} dataType - The type of data expected in the response ('json' or others).
 	 * @throws Will log an error to the console and re-throw if the request fails.
 	 */
-	const get = async (url, data, success, dataType) => {
-		if (typeof data === 'function') [success, dataType, data] = [data, success, undefined];
+	const get = async (url, data, success, dataType, options = {}) => {
+		if (typeof data === 'function') [success, dataType, options, data] = [data, success, options, undefined];
 
-		if (data && typeof data === 'object') url += '?' + new URLSearchParams(data);
+		if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+			const params = new URLSearchParams(data).toString();
+			if (params) url += (url.includes('?') ? '&' : '?') + params;
+		}
+
+		const defaultHeaders = {
+			'Accept': dataType === 'json' ? 'application/json' :
+				dataType === 'blob' ? 'image/png' : 'text/html',
+			'X-Requested-With': 'XMLHttpRequest'
+		};
 
 		try {
-			const response = await fetch(url);
-			if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: { ...defaultHeaders, ...(options.headers || {}) }
+			});
+			
 			const contentType = response.headers.get('Content-Type') || '';
 			const isJson = dataType === 'json' || contentType.includes('application/json');
-			const result = isJson ? await response.json() : await response.text();
-
-			success?.(result);
-			return result;
-
+			const isBlob = dataType === 'blob' || contentType.includes('image/') || contentType.includes('application/octet-stream');
+			
+			let result;
+			if (response.status === 204) {
+				// No Content
+				result = null;
+			} else if (isBlob) {
+            	result = await response.blob();
+        	} else if (isJson) {
+				const text = await response.text();
+				result = text ? JSON.parse(text) : null;
+			} else {
+				result = await response.text();
+			}
+			
+			if (!response.ok) {
+				success?.(result, response);
+           		return { success: false, status: response.status, data: result };
+			}
+			
+			success?.(result, response);
+			return { success: true, status: response.status, data: result };
+			
 		} catch (error) {
 			console.error('Fetch Error:', error);
-			throw error;
+			return { success: false, status: 0, data: null, error };
 		}
 	};
 
@@ -580,7 +637,9 @@
 		 */
 		const _getGeoInfo = async () => {
 			try {
-				clientInfo.geo = await get('https://ipinfo.io/json');
+				const geo = await get('https://ipinfo.io/json');
+				clientInfo.geo = geo.data;
+				
 				localStorage.setItem('EOclient', JSON.stringify(clientInfo));
 			} catch (error) {
 				console.error('Error getting geo info:', error);
@@ -653,8 +712,9 @@
 		 * added.
 		 * @private
 		 */
-		const _handleVideoAdd = () => {
+		const _handleVideoAdd = (onBeforeSend, onSuccess) => {
 			document.addEventListener('click', (event) => {
+
 				const btn = event.target.closest('.btn-add-video');
 				if (!btn) return;
 				
@@ -665,43 +725,73 @@
 				const btnText = btn.querySelector('.btn-text');
 				const videoUrl = input.value.trim();
 				
-				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
-				
-				const videoData = getYoutubeVideoData(videoUrl);
-				
 				btnSpinner.classList.remove('d-none');
 				btnText.classList.add('d-none');
 				input.disabled = true;
-				
-				if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
-				if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
-				
-				const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
-					...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
-					createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
-					createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
-					createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
-					createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
-					createElements('div', { class: 'btn-delete-container w-100 text-end p-1' }, [
-						createElements('span', { class: 'btn btn-danger btn-remove-video', 'data-id': videoData.id }, [
-							createElements('i', { class: 'ti ti-trash' })
-						])
-					]),
-					createElements('div', {
-						class: 'avatar avatar-xxxl p-2 btn-playback cursor-pointer text-white',
-						'data-id': videoData.id,
-						'data-url': videoData.url,
-						'data-embed': videoData.embed,
-						style: `background-image: url(${videoData.thumbnail?.sd || ''}); height: 120px;`
-					}, [
-						createElements('i', { class: 'ti ti-brand-youtube fs-32' })
-					])
-				]);
 
-				document.querySelector('.video-list-container')?.prepend(videoContainer);
-				input.value = '';
-				input.classList.remove('is-invalid');
-				_resetForm(input, btnSpinner, btnText);
+				if (!videoUrl) return _invalidResponse(input, btnSpinner, btnText, 'YouTube URL is required!');
+				
+				const videoData = getYoutubeVideoData(videoUrl);
+
+				const _handleBeforeSend = async () => {
+					if (typeof onBeforeSend === "function") {
+						const result = await onBeforeSend(videoData);
+						if (result instanceof Promise) {
+							return result.then((resolvedResult) => {
+								if (resolvedResult === false) {
+									_resetForm(input, btnSpinner, btnText);
+									return false;
+								}
+								return true;
+							});
+						} else {
+							// Handle synchronous return
+							if (result === false) {
+								_resetForm(input, btnSpinner, btnText);
+								return false;
+							}
+						}
+					}
+					return true;
+				};
+
+				_handleBeforeSend().then((shouldProceed) => {
+					if (!shouldProceed) return;
+					
+					if (!videoData || !videoData.id) return _invalidResponse(input, btnSpinner, btnText, videoData?.message || 'Invalid YouTube URL!');
+					if (document.querySelector(`.${CSS.escape(videoData.id)}`)) return _invalidResponse(input, btnSpinner, btnText, 'Video already added!');
+					
+					const videoContainer = createElements('div', { class: videoData.id, 'data-id': videoData.id }, [
+						createHiddenInput(`videos[${videoData.id}][id]`, videoData.id),
+						createHiddenInput(`videos[${videoData.id}][url]`, videoData.url),
+						createHiddenInput(`videos[${videoData.id}][embed]`, videoData.embed),
+						...Object.entries(videoData.thumbnail || {}).map(([key, value]) => createHiddenInput(`videos[${videoData.id}][thumbnail][${key}]`, value)),
+						createHiddenInput(`videos[${videoData.id}][created_at]`, Date.now().toString()),
+						createElements('div', {
+							class: 'position-relative p-2 cursor-pointer text-white',
+							style: `width: 15rem; height: 9.5rem; background-size: cover; background-position: center; background-image: url(${videoData.thumbnail?.sd || ''});`
+						}, [
+							createElements('div', { class: 'position-absolute top-0 end-0 btn-delete-container p-2' }, [
+								createElements('span', { class: 'btn btn-danger btn-sm btn-remove-video', 'data-id': videoData.id }, [ document.createTextNode('X') ])
+							]),
+							createElements('div', {
+								class: 'btn-playback position-absolute top-50 start-50 translate-middle text-center',
+								'data-id': videoData.id,
+								'data-url': videoData.url,
+								'data-embed': videoData.embed,
+							}, [
+								createElements('i', { class: 'ti ti-brand-youtube fs-48' })
+							])
+						])
+					]);
+
+					document.querySelector('.video-list-container')?.prepend(videoContainer);
+					input.value = '';
+					input.classList.remove('is-invalid');
+					onSuccess?.(videoData);
+					_resetForm(input, btnSpinner, btnText);
+				});
+
 			});
 		};
 
@@ -712,7 +802,7 @@
 		 * @private
 		 * @function
 		 */
-		const _handleVideoPlayback = () => {
+		const _handleVideoPlayback = (onPlayBack) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-playback');
 				if (!btn) return;
@@ -741,6 +831,11 @@
 				});
 
 				document.getElementById(btn.dataset.id).querySelector('.modal-content').style.backgroundColor = 'rgba(0, 0, 0, 1)';
+				onPlayBack?.({
+					id: btn.dataset.id,
+					url: btn.dataset.url,
+					embed: btn.dataset.embed
+				});
 			});
 		};
 
@@ -753,10 +848,11 @@
 		 * 
 		 * @private
 		 */
-		const _handleVideoDeletion = () => {
+		const _handleVideoDeletion = (onRemove) => {
 			document.addEventListener('click', (event) => {
 				const btn = event.target.closest('.btn-remove-video');
 				if (btn) document.querySelector(`.${CSS.escape(btn.dataset.id)}`)?.remove();
+				if (btn) onRemove?.(btn.dataset.id);
 			});
 		};
 
@@ -792,24 +888,17 @@
 		};
 
 		return {
-			/**
-			 * Initializes the video module before the page finishes loading.
-			 * This is needed to add the event listeners to the video buttons.
-			 * @private
-			 * @function
-			 */
-			_initBeforeLoad: () => {
-				_handleVideoAdd();
-				_handleVideoDeletion();
-				_handleVideoPlayback();
-			},
+			
 			/**
 			 * Initializes the video module by creating the form elements for inputting
 			 * YouTube URLs and adding them to the page.
 			 * @function
 			 */
-			init: () => {
+			init: ({ onBeforeSend, onSuccess, onRemove, onPlayback } = {}) => {
 				_createVideoForm();
+				_handleVideoAdd(onBeforeSend, onSuccess);
+				_handleVideoPlayback(onPlayback);
+				_handleVideoDeletion(onRemove);
 			}
 		};
 	})();
@@ -840,9 +929,16 @@
 		 * @param {string} [element='.response'] - The CSS selector of the container where the alert will be displayed.
 		 */
 		const _createAlert = (message, type = 'success', element = '.response') => {
+			const alertIcons = {
+				success: createElements('i', { class: 'ti ti-check' }),
+				info: createElements('i', { class: 'ti ti-info-circle' }),
+				warning: createElements('i', { class: 'ti ti-alert-triangle' }),
+				danger: createElements('i', { class: 'ti ti-x' })
+			};
 			const alertClasses = `message alert alert-${type} alert-dismissible show`;
 			const alertDiv = createElements('div', { class: alertClasses, role: 'alert' }, [
-				createElements('span', {}, [document.createTextNode(message)]),
+				createElements('div', { class: 'alert-icon float-start w-1', style: 'margin-top: 1px' }, [ alertIcons[type] ]),
+				createElements('span', { class: `alert-description text-${type}` }, [document.createTextNode(message)]),
 				createElements('button', {
 					type: 'button', class: 'btn-close',
 					'data-bs-dismiss': 'alert', 'aria-label': 'Close'
@@ -931,7 +1027,7 @@
 	 * @param {String} [options.redirectUrl] - the url to redirect to on success
 	 * @returns {JQueryPromise} - the promise returned by $.post
 	 */
-	const submitForm = (formId, { rules, callback, onBeforeSend, redirectUrl } = {}) => {
+	const submitForm = (formId, { rules, callback, onBeforeSend, redirectUrl, onError, onComplete, redirectTimeout = 3000, alertContainerType = 'modal' } = {}) => {
 		formId = formId.replace('#', '');
 		const form = document.getElementById(formId);
 
@@ -945,19 +1041,39 @@
 		});
 
 		const formData = new FormData(form);
-		formData.append('csrf_token', _CSRFToken);
+		CSRFToken ? formData.append('csrf_token', CSRFToken) : null;
 
 		onBeforeSend?.(formData);
 
+		const isAlert = alertContainerType === 'alert';
+
 		return post(form.getAttribute('action'), formData, {
 			onBeforeSend: () => {
-				alert.loader();
+				isAlert ? alert.loader() : modal.alert.loader();
 				button.disable();
 
 				if (typeof rules === 'object') {
 					const validation = validator.validate(serializeFormData(formData), rules);
 					if (!validation) {
-						alert.error(validator.getErrors().join(', '));
+
+						modal.alert.close();
+						isAlert
+							? alert.error(validator.getErrors().join(', '))
+							: (() => {
+								modal.alert.error('');
+
+								const modalElement = document.querySelector('.response-modal .message-container');
+								if (!modalElement) return;
+
+								const list = createElements('ul', { class: '' }, 
+									validator.getErrors().map(msg => createElements('li', {}, [msg]))
+								);
+
+								const container = createElements('div', { class: 'error-container' }, [list]);
+
+								modalElement.appendChild(container);
+							})(); 
+						
 						button.enable();
 						return false;
 					}
@@ -966,23 +1082,36 @@
 			onSuccess: (responseData) => {
 				try {
 					const response = typeof responseData === 'object' ? responseData : JSON.parse(responseData);
-					alert.message(response.message);
+					isAlert
+						? alert.message(response.message)
+						: modal.alert.message(response.message);
+					
 					callback?.(serializeFormData(formData), response);
 				} catch (e) {
 					alert.destroy('.response');
-					callback?.(serializeFormData(formData), responseData);
-					if (isInDevelopment()) console.log(e);
+					callback?.(serializeFormData(formData), responseData, e);
 				}
 
-				if (redirectUrl) {
-					alert.loader('Redirecting...');
-					setTimeout(() => redirect(redirectUrl), 10);
+				if (redirectUrl || (responseData && responseData.redirect)) {
+					setTimeout(() => redirect(redirectUrl ?? responseData.redirect), redirectTimeout);
 				}
 			},
-			onError: (error) => {
-				alert.error(error);
+			onError: (message, rawResponse) => {
+				if ((rawResponse && rawResponse.redirect)) {
+					setTimeout(() => redirect(rawResponse.redirect), redirectTimeout);
+				}
+
+				isAlert
+					? alert.error(message)
+					: modal.alert.error(message);
+
+				onError?.(message, rawResponse);
 			},
-			onComplete: button.enable
+			onComplete: () => {
+				modal.alert.close();
+				button.enable();
+				onComplete?.();
+			}
 		});
 	};
 
@@ -995,14 +1124,14 @@
 		 * @param {boolean} [status=false] - Whether to add a modal status element to the modal element.
 		 * @param {boolean} [destroyable=true] - Whether to add a modal destroyable class to the modal element.
 		 */
-		const create = ({ id, size, callback, status = false, destroyable = true } = {}) => {
+		const create = ({ id, size, callback, status = false, destroyable = true, centered = false } = {}) => {
 			const _modal = createElements('div', {
 				class: `modal ${destroyable ? 'modal-destroyable' : ''}`,
 				id,
 				'aria-labelledby': 'modal',
 				'aria-hidden': 'true'
 			}, [
-				createElements('div', { class: `modal-dialog modal-${size}` }, [
+				createElements('div', { class: `modal-dialog modal-${size} ${centered ? 'modal-dialog-centered' : ''}` }, [
 					createElements('div', { class: 'modal-content' }, [
 						...(status ? [createElements('div', { class: `modal-status bg-${status}` })] : []),
 						createElements('div', { class: 'modal-body' }, [
@@ -1070,6 +1199,65 @@
 			});
 		};
 
+		const alert = (() => {
+			const _create = (element, status = 'info') => {
+				create({
+					id: 'modalAlertMessage',
+					size: 'sm',
+					status,
+					centered: true,
+					callback: () => element.outerHTML
+				});
+			};
+
+			const success = (message) => {
+				_create(createElements('div', { class: 'text-center py-2' }, [
+					createElements('i', { class: 'ti ti-circle-check text-success', style: 'font-size: 80px' }, []),
+					createElements('h3', { class: 'mt-2 mb-0' }, []),
+					createElements('div', { class: 'message-container text-start' }, [message]),
+				]), 'success');
+			};
+
+			const error = (message) => {
+				_create(createElements('div', { class: 'text-center py-2' }, [
+					createElements('i', { class: 'ti ti-alert-triangle text-danger', style: 'font-size: 50px' }, []),
+					createElements('h3', { class: 'mt-2 mb-2' }, [document.createTextNode('Correct the following error(s):')]),
+					createElements('div', { class: 'message-container text-start' }, [message]),
+				]), 'danger');
+			};
+
+			const message = (message) => {
+				_create(createElements('div', { class: 'text-center py-2' }, [
+					createElements('i', { class: 'ti ti-alert-square-rounded text-info', style: 'font-size: 50px' }, []),
+					createElements('h3', { class: 'mt-2 mb-0' }, [document.createTextNode('Information')]),
+					createElements('div', { class: 'message-container text-start' }, [message]),
+				]), 'info');
+			};
+
+			const loader = (message = 'Processing, Please wait...') => {
+				_create(createElements('div', { class: 'p-3 mt-3 ' }, [
+					createElements('div', { class: 'd-flex gap-3 align-items-center' }, [
+						createElements('div', { class: 'loader' }),
+						createElements('p', { class: 'mb-0' }, [message])
+					])
+				]), 'info');
+			};
+
+			const close = () => {
+				const element = document.getElementById('modalAlertMessage');
+				const modalInstance = bootstrap.Modal.getInstance(element);
+				modalInstance?.hide();
+			};
+
+			return {
+				loader,
+				success,
+				error,
+				close,
+				message
+			};
+		})();
+
 		return {
 			/**
 			 * Initializes the modal after the page has finished loading.
@@ -1085,9 +1273,68 @@
 				_destroyModalOnClose();
 				_handleModalClose();
 			},
-			create
+			create,
+			alert
 		};
 	})();
+
+	const toast = (message, options = {}) => {
+		const {
+			type = 'info', // 'success', 'error', 'warning', 'info'
+			duration = 3000,
+			class: customClass = ''
+		} = options;
+
+		// Bootstrap contextual classes
+		const _typeClass = {
+			success: 'bg-success text-white',
+			error: 'bg-danger text-white',
+			warning: 'bg-warning text-dark',
+			info: 'bg-primary text-white'
+		}[type] || 'bg-secondary text-white';
+
+		const _toastElement = createElements('div', {
+			class: `toast align-items-center ${_typeClass} ${customClass}`,
+			role: 'alert',
+			'aria-live': 'assertive',
+			'aria-atomic': 'true'
+		}, [
+			createElements('div', {
+				class: 'd-flex'
+			}, [
+				createElements('div', {
+					class: 'toast-body'
+				}, [message]),
+				createElements('button', {
+					type: 'button',
+					class: 'btn-close btn-close-white me-2 m-auto',
+					'data-bs-dismiss': 'toast',
+					'aria-label': 'Close'
+				}, [])
+			])
+		]);
+
+		// Create container if needed
+		let _container = document.querySelector('.toast-container');
+		if (!_container) {
+			_container = createElements('div', {
+				class: 'toast-container position-fixed bottom-0 end-0 p-3',
+				style: 'z-index: 1080'
+			}, []);
+			document.body.appendChild(_container);
+		}
+		_container.appendChild(_toastElement);
+
+		// Initialize and show toast
+		const _bootstrapToast = new bootstrap.Toast(_toastElement, { delay: duration });
+		_bootstrapToast.show();
+
+		// Cleanup after duration
+		setTimeout(() => {
+			_toastElement.remove();
+			if (_container.children.length === 0) _container.remove();
+		}, duration + 200); // buffer for animation
+	};
 
 	const uploader = function () {
 		let defaultUploadType = 'image';
@@ -1095,6 +1342,12 @@
 			image: 'https://static.vecteezy.com/system/resources/previews/020/213/738/non_2x/add-profile-picture-icon-upload-photo-of-social-media-user-vector.jpg',
 			document: 'https://cdn-icons-png.flaticon.com/512/4208/4208479.png',
 			docPreview: 'https://cdn-icons-png.flaticon.com/512/4208/4208479.png'
+		};
+
+		const setDefaultIcon = (type, value) => {
+			if (type in defaultIcons) {
+				defaultIcons[type] = value;
+			}
 		};
 
 		/**
@@ -1113,6 +1366,8 @@
 		 * @param {Function} [options.onSuccess] - Callback function to be called when the upload is successful.
 		 * @param {Function} [options.onError] - Callback function to be called when the upload fails.
 		 * @param {Function} [options.onFileRemove] - Callback function to be called when a file is removed.
+		 * @param {Function} [options.compressFile] - bolean to enable/disable file compression.
+		 * @param {Function} [options.compression] - compression options { maxWidth: 1024, maxHeight: 1024, quality: 0.7 }.
 		 * 
 		 * @throws {Error} Throws an error if an invalid upload type is provided.
 		 */
@@ -1121,7 +1376,7 @@
 				inputName = 'eoFileUpload', previewSelector = '.uploaded-photo',
 				disablePreview = false, uploadType = 'image',
 				accept = uploadType === 'document' ? 'application/pdf' : 'image/*',
-				multiple = true, onBeforeSend, onSuccess, onError, onFileRemove
+				multiple = true, onBeforeSend, onSuccess, onError, onFileRemove, compressFile = false, compression = {}
 			} = options;
 
 			if (!['image', 'document'].includes(uploadType)) throw new Error('Invalid upload type.');
@@ -1136,7 +1391,7 @@
 			}
 
 			_createUI(uploadSelector, previewSelector, newInputName, inputId, accept, multiple);
-			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove);
+			_handleEvents(previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove, compressFile, compression);
 		};
 
 		/**
@@ -1266,10 +1521,10 @@
 				const fileContainer = document.querySelector(multiple ? `.${CSS.escape(file.id)}` : '.photo-preview');
 				const formData = new FormData();
 				formData.append(multiple ? `${inputName}[]` : inputName, file);
-				formData.append('csrf_token', _CSRFToken);
+				if (CSRFToken) formData.append('csrf_token', CSRFToken);
 
 				post(url, formData, {
-					contentType: 'multipart/form-data',
+					contentType: null,
 					beforeSend: () => onBeforeSend?.() === false ? false : null,
 					onSuccess: (response) => {
 						fileContainer.style.opacity = '1';
@@ -1285,7 +1540,7 @@
 
 						fileContainer.appendChild(
 							createElements('div', { }, [
-								createElements('p', { class: 'p-2 text-danger' }, [error.message.toString()])
+								createElements('p', { class: 'p-2 text-danger' }, [error.toString()])
 							])
 						);
 						resolve();
@@ -1308,13 +1563,14 @@
 		 * @param {function} onSuccess - A callback function which is called when the request is successful.
 		 * @param {function} onError - A callback function which is called when the request fails.
 		 * @param {boolean} disablePreview - Whether to disable the preview UI.
+		 * @param {boolean} compressFile - enable or disable the file compression.
 		 */
-		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove) => {
+		const _handleEvents = (previewSelector, uploadType, multiple, newInputName, inputId, url, onBeforeSend, onSuccess, onError, disablePreview, onFileRemove, compressFile = false, compression = {}) => {
 			document.addEventListener('click', (e) => {
 				if (e.target.closest(`.btn-eo-uploader-browse_${inputId}`)) document.getElementById(inputId).click();
 			});
 
-			document.addEventListener('change', (e) => {
+			document.addEventListener('change', async (e) => {
 				if (!e.target.matches(`#${inputId}`)) return;
 				const previewContainer = document.querySelector(multiple ? `${previewSelector} .multiple-preview` : `${previewSelector} .photo-preview`);
 				if (!previewContainer) return console.error(`Element '${previewSelector}' not found.`);
@@ -1323,12 +1579,29 @@
 				defaultUploadType = uploadType;
 				let files = [...e.target.files];
 
-				files.forEach(file => {
+				const compressedFiles = await Promise.all(files.map(async (file) => {
 					file.id = '_' + getRandomChar(11);
-					disablePreview ? null :	multiple ? previewContainer.prepend(_createPreviewUI(multiple, file)) : _createPreviewUI(multiple, file);
+					if (compressFile && uploadType === 'image') {
+						try {
+							const compressed = await compressImage(file, compression);
+							compressed.id = file.id;
+							return compressed;
+						} catch (err) {
+							console.warn('Compression failed:', err);
+							return file;
+						}
+					}
+
+					return file;
+				}));
+
+				compressedFiles.forEach(file => {
+					disablePreview
+						? null : multiple
+							? previewContainer.prepend(_createPreviewUI(multiple, file)) : _createPreviewUI(multiple, file);
 				});
 
-				_uploadFilesSequentially(files, previewContainer, url, newInputName, multiple, onBeforeSend, onSuccess, onError).then(() => button.enable());
+				_uploadFilesSequentially(compressedFiles, previewContainer, url, newInputName, multiple, onBeforeSend, onSuccess, onError).then(() => button.enable());
 				e.target.value = '';
 			});
 
@@ -1344,8 +1617,41 @@
 			});
 		};
 
-		return { create };
+		return { create, setDefaultIcon };
 	}();
+
+	const compressImage = async (file, options = {}) => {
+		if (!(file instanceof File) || !file.type.startsWith('image/')) throw new Error('Invalid image file');
+
+		const {
+			maxWidth = 1024,
+			maxHeight = 1024,
+			quality = 0.7,
+			type = 'image/jpeg'
+		} = options;
+
+		const img = await new Promise((resolve, reject) => {
+			const image = new Image();
+			image.onload = () => resolve(image);
+			image.onerror = reject;
+			image.src = URL.createObjectURL(file);
+		});
+
+		const canvas = document.createElement('canvas');
+		const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+		canvas.width = img.width * ratio;
+		canvas.height = img.height * ratio;
+
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+		return new Promise((resolve) => {
+			canvas.toBlob((blob) => {
+				resolve(new File([blob], file.name, { type }));
+			}, type, quality);
+		});
+	};
+
 
 	const tinyMCE = function() {
 		/**
@@ -1469,10 +1775,24 @@
 
 				const ChartClass = chartTypeLoader();
 				if (!ChartClass) throw new Error('Invalid chart type.');
+
+				const customOptions = {
+					hAxis: {
+						format: 'MM d',
+					},
+					tooltip: {
+						trigger: 'focus'
+					},
+					focusTarget: 'datum',
+					crosshair: {
+						trigger: 'both',
+						orientation: 'vertical'
+					},
+				};
 				
 				const finalOptions = typeof ChartClass.convertOptions === 'function'
-				? ChartClass.convertOptions(options)
-				: options;
+				? ChartClass.convertOptions({ ...customOptions, ...options })
+				: { ...customOptions, ...options };
 
 				const chart = new ChartClass(container);
 				
@@ -1482,30 +1802,69 @@
 			return true;
 		};
 
-		return {
-			bar: (params) => _createChart({ ...params, packageType: 'bar', chartTypeLoader: () => google.charts.Bar }),
-			calendar: (params) => _createChart({ ...params, packageType: 'calendar', chartTypeLoader: google.visualization.Calendar }),
-			geo: (params) => {
-				if (params.options?.displayMode === 'markers' && !params.apiKey) {
-					throw new Error('Markers require geocoding, you\'ll need an ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
+		const material = (() => { 
+			return {
+				line: (params) => _createChart({ ...params, packageType: 'line', chartTypeLoader: () => google.charts.Line }),
+				bar: (params) => _createChart({ ...params, packageType: 'bar', chartTypeLoader: () => google.charts.Bar })
+			};
+		})();
+
+		const classic = (() => { 
+			return {
+				combo: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.ComboChart }),
+				bar: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.BarChart }),
+				calendar: (params) => _createChart({ ...params, packageType: 'calendar', chartTypeLoader: () => google.visualization.Calendar }),
+				geo: (params) => {
+					if (params.options?.displayMode === 'markers' && !params.apiKey) {
+						throw new Error('Markers require geocoding, you\'ll need an ApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
+					}
+					return _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.GeoChart });
+				},
+				pie: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.PieChart }),
+				line: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.LineChart }),
+				map: (params) => {
+					if (!params.apiKey) {
+						throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
+					}
+					return _createChart({ ...params, packageType: 'map', chartTypeLoader: () => google.visualization.Map });
+				},
+				trendLine: (params) => _createChart({
+					...params,
+					packageType: 'corechart',
+					chartTypeLoader: () => google.visualization.ScatterChart,
+					options: { trendlines: { 0: {} }, ...params.options }
+				})
+			};
+		})();
+
+		return new Proxy({ material, classic }, {
+			get(target, prop) {
+				// Direct access (material/classic)
+				if (prop in target) return target[prop];
+
+				// Legacy chart type redirection
+				const legacyMap = {
+					line: 'classic',
+					pie: 'classic',
+					bar: 'material',
+					combo: 'classic',
+					calendar: 'classic',
+					geo: 'classic',
+					map: 'classic',
+					trendLine: 'classic'
+				};
+
+				const style = legacyMap[prop];
+				if (style && target[style] && typeof target[style][prop] === 'function') {
+					console.warn(`[googleChart] Deprecated access: use googleChart.${style}.${prop} instead.`);
+					return target[style][prop];
 				}
-				return _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.GeoChart });
-			},
-			pie: (params) => _createChart({ ...params, packageType: 'corechart', chartTypeLoader: () => google.visualization.PieChart }),
-			line: (params) => _createChart({ ...params, packageType: 'line', chartTypeLoader: () => google.charts.Line }),
-			map: (params) => {
-				if (!params.apiKey) {
-					throw new Error('Maps require a mapsApiKey. See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings');
-				}
-				return _createChart({ ...params, packageType: 'map', chartTypeLoader: () => google.visualization.Map });
-			},
-			trendLine: (params) => _createChart({
-				...params,
-				packageType: 'corechart',
-				chartTypeLoader: () => google.visualization.ScatterChart,
-				options: { trendlines: { 0: {} }, ...params.options }
-			})
-		};
+
+				console.warn(`[googleChart] Unknown chart type: ${prop}`);
+				return undefined;
+			}
+		});
+
 	})();
 
 	const mortgageCalculator = (() => {
@@ -1531,9 +1890,10 @@
 		};
 
 		const _createSelectElement = (id, options, selectedValue) => {
+			const appendtext  = id === 'mortgageYear' ? ' years' : ' %';
 			return createElements('select', { id, class: 'form-select' }, 
 				options.map(option =>
-					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}%`)])
+					createElements('option', { value: option, ...(option === selectedValue ? { selected: true } : {}) }, [document.createTextNode(`${option}${appendtext}`)])
 				)
 			);
 		};
@@ -1641,19 +2001,35 @@
 		 * @param {Object} [rules] The validation rules. If omitted, previously set _constraints are used.
 		 * @returns {Boolean} true if validation passes, false if validation fails (_errors can be retrieved using getErrors()).
 		 */
-		const validate = (data, rules = _constraints) => {
+		const validate = async (data, rules = _constraints, isAsync = false) => {
 			if (typeof rules !== 'object') throw new Error('rules must be an object.');
 			if (typeof data !== 'object' || data instanceof FormData) throw new Error('data must be an object. Use eo.serializeFormData(data) instead.');
 			_errors = [];
-			Object.entries(rules).forEach(([field, ruleset]) => {
-				const value = _getValue(data, field);
-				Object.entries(ruleset).forEach(([rule, param]) => {
-					if (_validators[rule] && !_validators[rule](value, param)) {
-						const customMessage = param.format?.message || _errorMessages[rule](param);
-						_errors.push(`${_formatField(field)} ${customMessage}`);
+
+			for (const [field, ruleset] of Object.entries(rules)) {
+				const domField = _dotToBracket(field);
+				const value = _getValue(data, domField);
+				
+				for (const [rule, param] of Object.entries(ruleset)) {
+					const validatorFn = _validators[rule];
+					if (!validatorFn) continue;
+
+					const ruleParam = typeof param === 'object' && param.required !== undefined ? param.required : param;
+					const formatMessage = param?.format?.message;
+					const input = document.getElementById(_lastDotSegment(field));
+					if (input) input.classList.remove('is-invalid');
+
+					const isValid = isAsync ? await validatorFn(value, ruleParam) : validatorFn(value, ruleParam);
+					if (!isValid) {
+						if (input) input.classList.add('is-invalid');
+						const message = formatMessage || `${_formatField(field)} ${_errorMessages[rule](ruleParam)}`;
+
+						_showFieldError(_lastDotSegment(field), message);
+						_errors.push(_escapeHTML(message));
 					}
-				});
-			});
+				};
+			};
+
 			return _errors.length === 0;
 		};
 
@@ -1666,6 +2042,17 @@
 		const _getValue = (data, field) =>
 			field.split('.').reduce((obj, key) => obj?.[key], data);
 
+		const _dotToBracket = (field) =>
+  			field.replace(/\.(\w+)/g, '[$1]'); // names.firstname → names[firstname]
+
+		/**
+		 * Retrieves the last segment of a dot-separated field name.
+		 * @param {string} field The dot-separated field name.
+		 * @returns {string} The last segment of the field name.
+		 */
+		const _lastDotSegment = (field) =>
+			field.split('.').pop();
+
 		/**
 		 * Formats a field name by replacing underscores with spaces and capitalizing the first letter of each word.
 		 * @param {String} name The field name to format.
@@ -1677,9 +2064,36 @@
 			return fieldName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 		};
 
+		const _showFieldError = (fieldId, message) => {
+			const el = document.getElementById(fieldId);
+			if (!el) return;
+
+			// Remove existing feedback
+			const existing = el.parentNode.querySelector('.invalid-feedback');
+			if (existing) existing.remove();
+
+			// Create feedback element using eo.createElements
+			const feedback = createElements('div', {
+				class: 'invalid-feedback',
+				role: 'alert',
+				'aria-live': 'polite'
+			}, [message]);
+
+			// Insert after input
+			el.parentNode.insertBefore(feedback, el.nextSibling);
+		};
+
+		const _escapeHTML = (str) =>
+			String(str)
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;');
+
 		const _errorMessages = {
 			required: () => 'is required.',
-			length: ({ min, max }) => `must be between ${min} and ${max} characters.`,
+			length: ({ min, max }) => `must be ${min ? `at least ${min} ` : ''} ${max ? `and at most ${max} ` : ''} characters.`,
 			number: ({ min, max }) => `must be a number${min ? ` greater than ${min}` : ''}${max ? ` and less than ${max}` : ''}.`,
 			url: () => 'is not a valid URL.',
 			email: () => 'is not a valid email address.',
@@ -1721,7 +2135,16 @@
 			validate,
 			getErrors: () => _errors,
 			setConstraints: (rules) => (_constraints = rules),
-			resetConstraints: () => (_constraints = {})
+			resetConstraints: () => (_constraints = {}),
+			registerRule: (name, fn) => {
+				if (typeof name !== 'string' || typeof fn !== 'function') {
+					throw new Error('Invalid rule registration: name must be a string and fn must be a function.');
+				}
+				_validators[name] = fn;
+			},
+			unregisterRule: (name) => {
+				if (_validators[name]) delete _validators[name];
+			}
 		};
 
 	}();
@@ -1758,10 +2181,112 @@
 		});
 		return result;
 	};
-	
-	const eo = {
+
+	const history = function () {
+		let history = [];
+
+		function pushState(state) {
+			history.push(state);
+			localStorage.setItem('history', JSON.stringify(history));
+		}
+
+		function replaceState(state) {
+			history[history.length - 1] = state;
+			localStorage.setItem('history', JSON.stringify(history));
+		}
+
+		function goBack() {
+			if (history.length > 1) { // Prevent going back from the initial state
+				history.pop(); // Remove current state
+				const previousState = history[history.length - 1]; // Get the previous state
+				localStorage.setItem('history', JSON.stringify(history));
+				retraceState(previousState);
+				changeHash(previousState.hash);
+			}
+		}
+
+		function loadHistory() {
+			const storedHistory = localStorage.getItem('history');
+			if (storedHistory) {
+				history = JSON.parse(storedHistory);
+			}
+		}
+
+		function retraceState(state) {
+			if (!state) return;
+
+			// Restore scroll position (example)
+			if (state.scrollPosition) {
+				window.scrollTo(state.scrollPosition.x, state.scrollPosition.y);
+				console.log(state.scrollPosition);
+			}
+
+			// Restore element visibility (example)
+			if (state.elementVisibility) {
+				for (const selector in state.elementVisibility) {
+					const elements = document.querySelectorAll(selector);
+					elements.forEach(el => {
+						el.style.display = state.elementVisibility[selector] || ''; // Handle undefined
+					});
+				}
+			}
+
+			// ... restore other aspects of your application state ...
+			if (state.elementContent) {
+				for (const selector in state.elementContent) {
+					const elements = document.querySelectorAll(selector);
+					elements.forEach(el => {
+						el.textContent = state.elementContent[selector];
+					});
+				}
+			}
+
+			if (state.elementClasses) {
+				for (const selector in state.elementClasses) {
+					const elements = document.querySelectorAll(selector);
+					elements.forEach(el => {
+						el.className = state.elementClasses[selector];
+					});
+				}
+			}
+		}
+
+		function changeHash(hash) {
+			if (hash) {
+				window.location.hash = hash;
+			}
+		}
+
+		window.addEventListener('popstate', () => {
+			goBack();
+		});
+
+		return {
+			pushState: pushState,
+			replaceState: replaceState,
+			goBack: goBack,
+			load: loadHistory
+		};
+	}();
+
+	const listener = (() => {
+		let socket;
+
+		const create = (url, onMessage, onError) => {
+			socket = new WebSocket(url);
+			socket.onmessage = (e) => onMessage(JSON.parse(e.data));
+			socket.onerror = onError || ((err) => console.error('Listener error:', err));
+		};
+
+		const send = (data) => socket?.send(JSON.stringify(data));
+		const close = () => socket?.close();
+
+		return { create, send, close };
+	})();
+
+
+	return {
 		initBeforeLoad: function() {
-			video._initBeforeLoad();
 			mortgageCalculator._initBeforeLoad();
 			modal._initBeforeLoad();
 		},
@@ -1776,12 +2301,12 @@
 				}, 500);
 			});
 		},
+		getVersion: () => version,
 
 		userClient,
-		_CSRFToken,
+		CSRFToken,
 		moveHtmlElement,
 		createElements,
-		createHiddenInput,
 		epochToTimeString,
 		trim,
 		formatFileSize,
@@ -1810,15 +2335,15 @@
 		tinyMCE,
 		googleChart,
 		tomSelect,
+		history,
+		compressImage,
+		toast,
+		listener,
 
 		submitForm,
 		uploader,
-		mortgageCalculator,
-
+		mortgageCalculator
 	};
-
-	return eo;
-
 });
 
 document.addEventListener('DOMContentLoaded', function() {

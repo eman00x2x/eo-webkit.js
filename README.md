@@ -28,14 +28,14 @@ eo-webkit.js is a comprehensive JavaScript utility library designed to streamlin
     *   [DOM Manipulation](#dom-manipulation)
         *   [`eo.moveHtmlElement`](#eomovehtmlelement) - Moves an HTML element to a new target element.
         *   [`eo.createElements`](#eocreateelements) - Creates one or more HTML elements.
-        *   [`eo.createHiddenInput`](#eocreatehiddeninput) - Creates a hidden input field.
         *   [`eo.getYoutubeVideoData`](#eogetyoutubevideodata) - Retrieves data about a YouTube video.
     *   [Network Requests](#network-requests)
         *   [`eo.post`](#eopost) - Makes a POST request.
         *   [`eo.get`](#eoget) - Makes a GET request.
         *   [`eo.redirect`](#eoredirect) - Redirects the browser to a new URL.
         *   [`eo.userClient`](#eouserclient) - Manages user client interactions.
-        *   [`eo._CSRFToken`](#eocsrftoken) - Retrieves the CSRF token.
+        *   [`eo.listener`](#eolistener) - Websocket listener.
+        *   [`eo._CSRFToken`](#eo_csrftoken) - Retrieves the CSRF token.
     *   [Random Data Generation](#random-data-generation)
         *   [`eo.getRandomChar`](#eogetrandomchar) - Generates a random character.
         *   [`eo.getRandomNum`](#eogetrandomnum) - Generates a random number within a range.
@@ -50,6 +50,7 @@ eo-webkit.js is a comprehensive JavaScript utility library designed to streamlin
         *   [`eo.alert`](#eoalert) - Displays an alert message.
         *   [`eo.button`](#eobutton) - Provides an interface for interacting with buttons.
         *   [`eo.uploader`](#eouploader) - Manages a file uploader.
+        *   [`eo.compressImage`](#eocompressimage) - Manages a file uploader.
         *   [`eo.video`](#eovideo) - Provides an interface for interacting with video elements.
         *   [`eo.mortgageCalculator`](#eomortgagecalculator) - Provides a mortgage calculator component.
     *   [Third-Party Integrations](#third-party-integrations)
@@ -106,7 +107,7 @@ Configure the path to your eo.js file in your RequireJS configuration:
 ```javascript
 require.config({
   paths: {
-    'eo-webkit': 'path/to/eo-webkit' // Path to your eo.js file (without the .js extension)
+    'eo-webkit': 'path/to/eo-webkit' // Path to your eo-webkit.js file (without the .js extension)
   }
 });
 ```
@@ -744,7 +745,7 @@ require(['eo-webkit'], function(eo) {
    
    This information is cached in localStorage to avoid redundant API calls.
    
-   #### Usage Example
+   #### Example Usage
    ```javascript
    console.log(eo.userClient.userAgent); // e.g., "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
    console.log(eo.userClient.geo); // e.g., { country: "US", city: "New York", ... }
@@ -771,6 +772,37 @@ require(['eo-webkit'], function(eo) {
    #### Error Handling
    * Geo Fetch Failure: Logs an error (Error getting geo info:).
    * Unknown Browser: Defaults to "Unknown Browser" if no match is found.
+
+   ### eo.listener
+   `eo.listener` is a modular utility for subscribing to server-sent messages in real time. It supports WebSocket, Server-Sent Events (SSE), or custom dispatch systems, allowing your frontend to react to backend events without polling.
+
+   **Features**
+   * Persistent connection to server via WebSocket or SSE
+   * Automatic message parsing and dispatch
+   * Customizable onMessage and onError hooks
+   * Lightweight and framework-agnostic
+
+   #### Example Usage
+   ```javascript
+   eo.listener.create('wss://your-server.com/ws', {
+      onMessage: (data) => {
+         console.log('Received:', data);
+         eo.toast(data.message, { type: 'info' });
+      },
+      onError: (err) => console.warn('Listener error:', err)
+   });
+   ```
+   
+   #### Methods
+   1. eo.listener.create(url, options)
+   ```javascript
+   eo.listener.create(url, {
+      onMessage: (data) => {},
+      onError: (error) => {}
+   });
+   ```
+   2. eo.listener.send(data) - Send message to server
+   3. eo.listener.close() - Close connection
 
    ### eo._CSRFToken
    `eo._CSRFToken` Automatically retrieves the CSRF token from the meta tags.
@@ -870,17 +902,22 @@ require(['eo-webkit'], function(eo) {
    * Supports nested properties using dot notation.
    * Customizable validation rules.
    * Customizable error messages.
+   * Supports asynchronous evaluation
+   * Supports inline error rendering for form fields
 
    #### Usage Example
    ```javascript
    const rules = {
-     name: { required: true, length: { min: 3, max: 50 } },
+     name: { 
+      required: {
+         required: true,
+         format: { message: "Name is required" }
+      }, 
+      length: { min: 3, max: 50 } },
      email: { required: true, email: true },
      age: { number: { min: 18, max: 99 } },
-     address: { 
-       street: { required: true }, 
-       city: { required: true }
-     }
+     "address.street": { required: true }, 
+     "address.city": { required: true }, 
    };
    
    eo.validator.setConstraints(rules);
@@ -945,6 +982,22 @@ require(['eo-webkit'], function(eo) {
       **Example:**
       ```javascript
       eo.validator.resetConstraints();
+      ```
+
+   5. `registerRule(name, fn)`
+      Define custom validation logic.
+
+      **Example:**
+      ```javascript
+      eo.validator.registerRule(name, fn);
+      ```
+
+   6. `unregisterRule(name)`
+      Remove custom validation logic.
+
+      **Example:**
+      ```javascript
+      eo.validator.unregisterRule(name);
       ```
 
    #### Validation Rules
@@ -1012,6 +1065,12 @@ require(['eo-webkit'], function(eo) {
    * Handles success and error responses.
    * Disables & enables buttons during the request to prevent multiple submissions.
    * Redirects users upon success if `redirectUrl` is provided.
+
+   **Default**
+   * Uses modal.alert by default
+   * Support inline validation error for form fields
+    - must have id and name attributes and should be same value
+    - if the name attributes is array e.g. name[firstname] the id value must be firstname.
    
    **This method used the following:**
    * [`eo.validator`](#eovalidator)
@@ -1119,7 +1178,7 @@ require(['eo-webkit'], function(eo) {
    * Support for modals with status indicators.
    * Automatic destruction of modals when closed (if enabled).
    * Handles modal close events properly.
-   
+
    **Notes**
    * Ensure Bootstrap is loaded for this to function properly.
    * The callback function should return a valid HTML string or a DOM element.
@@ -1148,6 +1207,22 @@ require(['eo-webkit'], function(eo) {
      status: 'success',
      destroyable: true
    });
+   ```
+
+   #### modal.alert
+   Creates and displays a Bootstrap modal.
+   **Parameters**
+   | Parameter | Type | Default | Description |
+   | --- | --- | --- | --- |
+   | `message` | `String` | *required* | The alert message. |
+
+   1. `success(message)`
+   2. `error(message)`
+   3. `message(message)`
+
+   **Example Usage**
+   ```javascript
+   eo.modal.alert.success("Successfully updated!");
    ```
 
    ### eo.alert
@@ -1240,6 +1315,7 @@ require(['eo-webkit'], function(eo) {
    * Automatically handles UI creation and event binding.
    * Sequential upload 
    * File removal support
+   * Supports image compression since version 2.0.0
 
    **Dependency**  
    This eo.uploader requires a csrf-token in meta tag. please read [`eo._CSRFToken`](#eocsrftoken)
@@ -1271,7 +1347,9 @@ require(['eo-webkit'], function(eo) {
           // Manipulate hidden input value, e.g., add a URL property
           file.url = response.url; // Assuming response contains URLs for each file
       },
-      onError: (error) => { console.error('Upload failed!', error); }
+      onError: (error) => { console.error('Upload failed!', error); },
+      compressFile: true,
+      compression: { maxWidth: 1024, maxHeight: 1024, quality: 0.7 }
    });
    ```
 
@@ -1295,6 +1373,8 @@ require(['eo-webkit'], function(eo) {
    | `onSuccess` | `Function` | `optional` | Callback function on successful upload. |
    | `onError` | `Function` | `optional` | Callback function on upload error. |
    | `onFileRemove` | `Function` | `optional` | Callback function when file was removed. |
+   | `compressFile` | `Boolean` | `false` | Weather to allow the compression of image, Pdf's or other files not touch |
+   | `compression` | `Object` | `{ maxWidth: 1024, maxHeight: 1024, quality: 0.7 }` | If compressFile is true, the compression default value will be used, you can customize the option |
    
    **onSuccess Example:**
    Executed when the upload is successful.
@@ -1526,6 +1606,41 @@ require(['eo-webkit'], function(eo) {
       }
       ```
 
+   ### eo.compressImage
+   `eo.compressImage(file, options)` is a lightweight utility for compressing image files before upload. It helps reduce bandwidth usage, improve upload speed, and optimize storage — all without requiring server-side processing.
+   * it was implemented in eo.uploader for automatic optimization
+
+   **Features**
+   * Compresses JPEG, PNG, and WebP formats
+   * Adjustable quality and max dimensions
+   * Preserves EXIF metadata (optional)
+   * Returns a Blob or File ready for upload
+
+   #### Example Usage
+   ```javascript
+   const inputFile = document.querySelector('#image').files[0];
+
+   eo.compressImage(inputFile, {
+      maxWidth: 1024,
+      maxHeight: 768,
+      quality: 0.7
+   }).then(compressed => {
+      console.log('Compressed size:', compressed.size);
+      uploader.send(compressed);
+   });
+   ```
+
+   #### Method
+   ```javascript
+   eo.compressImage(file, {
+      maxWidth?: number,
+      maxHeight?: number,
+      quality?: number,         // 0.0 to 1.0
+      outputType?: 'blob' | 'file',
+      preserveExif?: boolean
+   }) => Promise<Blob | File>
+   ```
+
    ### eo.video
    The Video Component is for managing YouTube videos within a web interface. It provides functionalities to:
    * Add a YouTube video by URL.
@@ -1644,6 +1759,22 @@ require(['eo-webkit'], function(eo) {
    ### eo.googleChart
    This `eo.googleChart` simplifies the integration of Google Charts by providing methods for various chart types.
    
+   * Charts are now grouped under: eo.googleChart.material and eo.googleChart.classic, Legacy access (e.g., eo.googleChart.line) is preserved via dynamic proxy redirection.
+
+   **Supported Groups**
+   * eo.googleChart.material
+      - line
+      - bar
+   * eo.googleChart.classic
+      - line
+      - pie
+      - bar
+      - combo
+      - calendar
+      - geo
+      - map
+      - trendLine (new in version 2.0.0)
+
    #### Required Setup
    Ensure you have included the Google Charts script in your HTML:
    ```html
